@@ -80,24 +80,12 @@ export const TopNav: React.FC<TopNavProps> = ({
     return items;
   }, [isAuthenticated, user, tenant.name, isDedicated]);
 
-  const getRoleLabel = (role?: string) => {
-    switch (role) {
-      case 'customer': return 'Cliente';
-      case 'staff': return 'Colaborador';
-      case 'partner_admin': return 'Gestor';
-      case 'super_admin': return 'Super Admin';
-      default: return 'Conectado';
-    }
+  const getRoleLabel = (_role?: string) => {
+    return 'Conectado';
   };
 
-  const getRoleBadgeColor = (role?: string) => {
-    switch (role) {
-      case 'customer': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-      case 'staff': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
-      case 'partner_admin': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
-      case 'super_admin': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
-      default: return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
-    }
+  const getRoleBadgeColor = (_role?: string) => {
+    return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
   };
 
   return (
@@ -254,7 +242,7 @@ export const TopNav: React.FC<TopNavProps> = ({
                         className="w-full px-3 py-2 text-left text-xs font-medium rounded-xl hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-2 text-purple-600 dark:text-purple-400"
                       >
                         <ShieldAlert className="w-3.5 h-3.5" />
-                        <span>Painel Super Admin</span>
+                        <span>Painel de Controle</span>
                       </button>
                     )}
 
@@ -267,7 +255,7 @@ export const TopNav: React.FC<TopNavProps> = ({
                         className="w-full px-3 py-2 text-left text-xs font-medium rounded-xl hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-2 text-amber-600 dark:text-amber-400"
                       >
                         <LayoutDashboard className="w-3.5 h-3.5" />
-                        <span>Gestão do Parceiro</span>
+                        <span>Painel Administrativo</span>
                       </button>
                     )}
 
@@ -280,7 +268,7 @@ export const TopNav: React.FC<TopNavProps> = ({
                         className="w-full px-3 py-2 text-left text-xs font-medium rounded-xl hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-2 text-emerald-600 dark:text-emerald-400"
                       >
                         <Briefcase className="w-3.5 h-3.5" />
-                        <span>Minha Agenda</span>
+                        <span>Agenda e Atendimentos</span>
                       </button>
                     )}
 

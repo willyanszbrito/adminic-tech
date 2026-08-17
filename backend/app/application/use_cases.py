@@ -1382,7 +1382,7 @@ class DemoLoginUseCase:
                 usuario=email_clean,
                 detalhes={"status": "BLOQUEADO", "motivo": "E-mail fora da whitelist"}
             )
-            raise DomainException("Acesso Super Admin restrito exclusivamente para os e-mails credenciados da governança central.")
+            raise DomainException("Acesso não autorizado.")
 
         name = request.name or email_clean.split("@")[0].replace(".", " ").title()
         avatar = f"https://placehold.co/100x100/18181b/f59e0b?text={name[:2].upper()}"

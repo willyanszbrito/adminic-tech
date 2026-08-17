@@ -114,13 +114,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-3">
               <Lock className="w-3.5 h-3.5 text-amber-500" />
-              <span>Acesso Seguro</span>
+              <span>Acesso ao Sistema</span>
             </div>
             <h2 className="text-2xl font-bold font-heading text-slate-900 dark:text-white tracking-tight">
-              Portal do Ecossistema
+              Acesso Restrito
             </h2>
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-1.5">
-              Acesso corporativo para colaboradores, gestores e administração.
+              Identifique-se para acessar os recursos da plataforma.
             </p>
           </div>
 
@@ -263,7 +263,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>Conformidade com a LGPD</span>
             </div>
-            <span>Criptografia SSL 256-bit</span>
+            <span>Conexão Segura</span>
           </div>
         </div>
       </div>

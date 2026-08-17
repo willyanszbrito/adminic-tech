@@ -216,7 +216,7 @@ export const Step4CustomerForm: React.FC<Step4CustomerFormProps> = ({
       <div className="pt-4 border-t border-black/10 dark:border-white/10 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
         <div className="flex items-center space-x-2">
           <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span>Tratamento seguro de dados cadastrais com criptografia SSL 256-bit.</span>
+          <span>Seus dados cadastrais estão protegidos em conformidade com a LGPD.</span>
         </div>
         <div className="flex items-center space-x-1 text-amber-600 dark:text-amber-400 font-medium">
           <Sparkles className="w-3.5 h-3.5" />

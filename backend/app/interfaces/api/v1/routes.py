@@ -520,8 +520,8 @@ def authenticate_google(
 ):
     try:
         return use_case.execute(request)
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Falha na validação do token Google: {str(e)}")
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Não foi possível validar as credenciais informadas.")
 
 
 @router.post(

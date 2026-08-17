@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import type { UserRole, Tenant } from '../../types';
-import { Lock, Shield, CheckCircle2, User, Briefcase, LayoutDashboard, ShieldAlert } from 'lucide-react';
+import { Lock, Shield, CheckCircle2 } from 'lucide-react';
 
 interface LoginPageProps {
   tenant: Tenant | null;
@@ -43,38 +43,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       triggerGoogleOneTap();
     } else {
       loginDemo('usuario.google@empresa.com.br', selectedRole, 'Usuário Google Autenticado', tenant?.slug);
-    }
-  };
-
-  const handleRoleDemoLogin = async (role: UserRole) => {
-    setErrorMessage(null);
-    let email = '';
-    let name = '';
-    let staffId: string | undefined = undefined;
-
-    switch (role) {
-      case 'customer':
-        email = 'valerius.maximus@empresa.com.br';
-        name = 'Valerius Maximus';
-        break;
-      case 'staff':
-        email = 'marcus.barber@empresa.com.br';
-        name = 'Marcus Aurelius Silva Jr.';
-        staffId = 'stf-marcus-barber';
-        break;
-      case 'partner_admin':
-        email = 'diretoria@aurabarber.com.br';
-        name = 'Diretoria do Estabelecimento';
-        break;
-      case 'super_admin':
-        email = 'diretoria@adminic.com.br';
-        name = 'Diretoria Global Adminic';
-        break;
-    }
-
-    const success = await loginDemo(email, role, name, tenant?.slug, staffId);
-    if (success && onSuccessRedirect) {
-      onSuccessRedirect(role);
     }
   };
 
@@ -137,73 +105,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             <span>{isLoading ? 'Autenticando...' : 'Fazer Login com o Google'}</span>
           </button>
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200 dark:border-white/10" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white dark:bg-[#111115] px-3 text-slate-500 dark:text-slate-400 font-bold">Ou teste com perfis prontos</span>
-            </div>
-          </div>
-
-          {/* Quick Demo Switcher Cards */}
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => handleRoleDemoLogin('customer')}
-              className="p-3 text-left rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 hover:border-brand-primary/60 transition-all flex items-start gap-2.5 group cursor-pointer"
-            >
-              <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                <User className="w-3.5 h-3.5" />
-              </div>
-              <div>
-                <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-brand-primary transition-colors">Cliente</div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">Vouchers e histórico</div>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleRoleDemoLogin('staff')}
-              className="p-3 text-left rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 hover:border-brand-primary/60 transition-all flex items-start gap-2.5 group cursor-pointer"
-            >
-              <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                <Briefcase className="w-3.5 h-3.5" />
-              </div>
-              <div>
-                <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-brand-primary transition-colors">Colaborador</div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">Agenda e bloqueios</div>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleRoleDemoLogin('partner_admin')}
-              className="p-3 text-left rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 hover:border-brand-primary/60 transition-all flex items-start gap-2.5 group cursor-pointer"
-            >
-              <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                <LayoutDashboard className="w-3.5 h-3.5" />
-              </div>
-              <div>
-                <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-brand-primary transition-colors">Gestão</div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">Catálogo e tema</div>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleRoleDemoLogin('super_admin')}
-              className="p-3 text-left rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 hover:border-brand-primary/60 transition-all flex items-start gap-2.5 group cursor-pointer"
-            >
-              <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
-                <ShieldAlert className="w-3.5 h-3.5" />
-              </div>
-              <div>
-                <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-brand-primary transition-colors">Super Admin</div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">Visão executiva</div>
-              </div>
-            </button>
-          </div>
         </div>
 
         {/* Security and Privacy Assurance */}
@@ -212,7 +113,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>Conformidade com a LGPD</span>
           </div>
-          <span>Criptografia SSL 256-bit</span>
+          <span>Conexão Segura</span>
         </div>
       </div>
     </div>

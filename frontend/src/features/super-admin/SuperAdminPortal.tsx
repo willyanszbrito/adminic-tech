@@ -127,35 +127,32 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     }
   };
 
-  // 1. Tela de Bloqueio de Acesso se não for Super Admin
+  // 1. Tela de Bloqueio de Acesso
   if (!isSuperAdminAuthorized) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center animate-fade-in">
-        <div className="w-full max-w-md p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl space-y-6">
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
+        <div className="w-full max-w-md p-8 rounded-3xl glass-panel border border-amber-500/30 shadow-2xl space-y-6 bg-white dark:bg-zinc-950">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center mx-auto border border-amber-500/30 shadow-lg shadow-amber-500/10">
             <Lock className="w-8 h-8" />
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-xl font-bold font-heading text-white">
-              Acesso Restrito à Governança Central
+            <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+              Acesso Restrito
+            </span>
+            <h2 className="text-xl sm:text-2xl font-bold font-heading text-slate-900 dark:text-white pt-2">
+              Acesso Restrito
             </h2>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              O portal <strong>Super Admin</strong> é exclusivo para administradores autenticados com credenciais validadas no backend.
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              Esta área requer autenticação e permissões adequadas para acesso.
             </p>
           </div>
 
-          {user && (
-            <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700 text-xs text-slate-300">
-              Sessão atual: <span className="text-white font-medium">{user.email}</span> (Não Autorizado)
-            </div>
-          )}
-
           <button
             onClick={() => openLoginModal('super_admin')}
-            className="w-full py-3.5 px-6 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm transition-all shadow-lg shadow-amber-500/20 cursor-pointer"
+            className="w-full py-3.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center justify-center space-x-2 transition-all shadow-lg shadow-amber-500/20 cursor-pointer"
           >
-            Autenticar com Google
+            <span>Fazer Login para Acessar</span>
           </button>
         </div>
       </div>

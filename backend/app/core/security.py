@@ -122,20 +122,20 @@ def require_roles(allowed_roles: List[str]):
         if user_role not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Acesso negado: permissão insuficiente para executar esta ação."
+                detail="Acesso não autorizado."
             )
         return current_user
     return role_checker
 
 async def require_super_admin(current_user: Dict[str, Any] = Depends(get_current_user_required)):
-    """Validação estrita e isolada para o Super Admin Global (willyanszbrito@gmail.com)."""
+    """Validação estrita e isolada para o Super Admin Global."""
     user_email = current_user.get("email", "").lower().strip()
     user_role = current_user.get("role")
 
     if user_role != UserRole.SUPER_ADMIN.value or user_email not in SUPER_ADMIN_WHITELIST:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Acesso negado: o portal de governança é restrito a willyanszbrito@gmail.com."
+            detail="Acesso não autorizado."
         )
     return current_user
 

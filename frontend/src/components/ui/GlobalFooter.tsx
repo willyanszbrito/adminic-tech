@@ -35,7 +35,7 @@ export const GlobalFooter: React.FC = () => {
             <span>•</span>
             <span className="flex items-center gap-1 text-slate-400 dark:text-slate-500">
               <Lock className="w-3.5 h-3.5" />
-              <span>Criptografia Ponta a Ponta</span>
+              <span>Conexão Segura</span>
             </span>
           </div>
         </div>
