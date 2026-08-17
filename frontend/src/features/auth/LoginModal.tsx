@@ -271,22 +271,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">Métricas, faturamento e catálogo</p>
                   </div>
                 </button>
+              </div>
 
-                {/* 4. Super Admin */}
-                <button
-                  type="button"
-                  onClick={() => handleDemoSubmit('super_admin')}
-                  disabled={isLoading}
-                  className="p-3.5 text-left rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 hover:border-brand-primary/60 transition-all flex items-start gap-3 group cursor-pointer"
-                >
-                  <div className="p-2 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
-                    <ShieldAlert className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">Super Admin Global</h4>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">Visão executiva e onboarding</p>
-                  </div>
-                </button>
+              {/* Informação de Segurança de Super Admin */}
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-400 flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 flex-shrink-0 text-amber-400" />
+                <span>
+                  <strong>Acesso Super Admin:</strong> Restrito exclusivamente para <code>willyanszbrito@gmail.com</code> via Autenticação Google oficial.
+                </span>
               </div>
             </div>
           )}

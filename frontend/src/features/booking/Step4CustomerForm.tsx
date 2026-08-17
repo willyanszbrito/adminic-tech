@@ -145,7 +145,7 @@ export const Step4CustomerForm: React.FC<Step4CustomerFormProps> = ({
                   </span>
                 </div>
                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                  Mercado Pago
+                  Aprovação Automática
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">

@@ -276,7 +276,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         mercadopago_pix_key: mpPixKey,
         whatsapp_custom_message: whatsappMsg,
       });
-      setSuccessMessage('Configurações de PIX e Mercado Pago atualizadas com sucesso!');
+      setSuccessMessage('Configurações de PIX atualizadas com sucesso!');
       onRefreshTenant();
     } catch (err: any) {
       setErrorMessage(err.message || 'Erro ao salvar configurações de pagamento.');
@@ -409,7 +409,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             }`}
           >
             <QrCode className="w-3.5 h-3.5" />
-            <span>PIX & Mercado Pago (R$ 0,01)</span>
+            <span>PIX Instantâneo (Adminic Pay)</span>
           </button>
 
           <button
@@ -970,7 +970,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             <div>
               <h3 className="text-lg font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">
                 <QrCode className="w-5 h-5 text-emerald-500" />
-                <span>Integração de Pagamento PIX Instantâneo & Mercado Pago</span>
+                <span>Integração de Pagamento PIX Instantâneo (Adminic Pay)</span>
               </h3>
               <p className="text-xs text-slate-500 mt-1">
                 Configure as credenciais e escolha o modo de cobrança para validação real em produção ou valor integral.
@@ -1072,11 +1072,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               </div>
             </div>
 
-            {/* Mercado Pago API Keys */}
+            {/* Gateway API Keys */}
             <div className="space-y-4 pt-2">
               <h4 className="text-xs font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-brand-primary" />
-                <span>Credenciais do Mercado Pago</span>
+                <span>Credenciais do Gateway PIX</span>
               </h4>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

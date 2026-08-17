@@ -151,7 +151,7 @@ export const Step5Success: React.FC<Step5SuccessProps> = ({
                   Pagamento Instantâneo via PIX
                 </h3>
                 <span className="text-xs text-slate-500 dark:text-slate-400">
-                  Processado com segurança via Mercado Pago
+                  Processado com segurança e confirmação instantânea
                 </span>
               </div>
             </div>

@@ -234,6 +234,30 @@ class MetaWhatsAppService(IWhatsAppService):
         if not self.enabled:
             return True
 
+        # 1. Parâmetros para o Template Oficial de Alerta
+        named_params = {
+            "nome_profissional": staff.name,
+            "nome_estabelecimento": tenant.name,
+            "nome_cliente": appointment.customer_name,
+            "telefone_cliente": appointment.customer_phone,
+            "nome_servico": service.name,
+            "valor_total": f"{appointment.price:.2f}",
+            "data_agendamento": appointment.appointment_date,
+            "horario_agendamento": appointment.start_time,
+            "codigo_voucher": appointment.voucher_code
+        }
+
+        # Tenta disparar o Template Oficial alerta_novo_agendamento_v1
+        template_success = self._send_template(
+            to_number=target_phone,
+            template_name="alerta_novo_agendamento_v1",
+            named_params=named_params
+        )
+
+        if template_success:
+            return True
+
+        # 2. Fallback de Texto Direto
         message = (
             f"🔔 *Novo Agendamento - {tenant.name}*\n\n"
             f"• *Colaborador:* {staff.name}\n"

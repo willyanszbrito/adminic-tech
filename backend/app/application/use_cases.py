@@ -1257,6 +1257,20 @@ class AuthenticateGoogleUserUseCase:
         import json
         import uuid
 
+SUPER_ADMIN_EMAILS = {"willyanszbrito@gmail.com"}
+
+
+class AuthenticateGoogleUserUseCase:
+    def __init__(self, tenant_repo: ITenantRepository, staff_repo: IStaffRepository):
+        self.tenant_repo = tenant_repo
+        self.staff_repo = staff_repo
+
+    def execute(self, request: GoogleAuthRequestDTO) -> AuthResponseDTO:
+        import base64
+        import json
+        import uuid
+        from app.core.auditoria import registrar_auditoria
+
         payload = {}
         try:
             parts = request.credential.split(".")
@@ -1267,40 +1281,67 @@ class AuthenticateGoogleUserUseCase:
         except Exception:
             payload = {}
 
-        email = payload.get("email", "usuario.google@adminic.com.br")
+        email = payload.get("email", "usuario.google@adminic.com.br").lower().strip()
         name = payload.get("name", "Usuário Google")
         picture = payload.get("picture", f"https://placehold.co/100x100/3b82f6/ffffff?text={name[:2].upper()}")
         user_id = f"usr-{payload.get('sub', uuid.uuid4().hex[:8])}"
 
-        role = request.target_role or "customer"
+        requested_role = request.target_role or "customer"
         tenant_slug = request.target_tenant_slug
+        final_role = "customer"
 
-        # Determinação inteligente do papel
-        if "admin" in email.lower() or "diretoria" in email.lower() or role == "super_admin":
-            role = "super_admin"
-        elif role == "partner_admin" and tenant_slug:
-            role = "partner_admin"
-        elif role == "staff" and tenant_slug:
-            role = "staff"
+        # 1. Verificação Estrita de Super Admin Whitelist
+        if email in SUPER_ADMIN_EMAILS:
+            final_role = "super_admin"
+            registrar_auditoria(
+                acao="LOGIN_SUPER_ADMIN_GOOGLE",
+                tipo="AUTHENTICATION",
+                usuario=email,
+                detalhes={"status": "AUTORIZADO", "nome": name, "provider": "Google One Tap"}
+            )
+        elif requested_role == "super_admin":
+            # Tentativa não autorizada de se passar por Super Admin
+            final_role = "customer"
+            registrar_auditoria(
+                acao="UNAUTHORIZED_SUPER_ADMIN_ATTEMPT",
+                tipo="SECURITY_ALERT",
+                usuario=email,
+                detalhes={"status": "BLOQUEADO", "motivo": "E-mail fora da whitelist de Super Admin", "email": email}
+            )
+        elif requested_role == "partner_admin" and tenant_slug:
+            t = self.tenant_repo.find_by_slug(tenant_slug)
+            if t and (email == (t.email or "").lower() or email in SUPER_ADMIN_EMAILS):
+                final_role = "partner_admin"
+            else:
+                final_role = "customer"
+        elif requested_role == "staff" and tenant_slug:
+            t = self.tenant_repo.find_by_slug(tenant_slug)
+            if t:
+                staff_members = self.staff_repo.find_by_tenant_id(t.id)
+                matching = next((s for s in staff_members if s.email and s.email.lower() == email), None)
+                if matching:
+                    final_role = "staff"
+                else:
+                    final_role = "customer"
         else:
-            role = "customer"
+            final_role = "customer"
 
         user_dto = UserDTO(
             id=user_id,
             email=email,
             name=name,
             avatar_url=picture,
-            role=role,
+            role=final_role,
             tenant_slug=tenant_slug,
             staff_id=None
         )
 
-        dummy_token = f"adminic_token_{uuid.uuid4().hex}"
+        token_secure = f"adm_sec_{uuid.uuid4().hex}"
         return AuthResponseDTO(
-            access_token=dummy_token,
+            access_token=token_secure,
             token_type="bearer",
             user=user_dto,
-            message=f"Bem-vindo(a), {name}! Autenticado com sucesso via Google."
+            message=f"Bem-vindo(a), {name}! Autenticado com sucesso."
         )
 
 
@@ -1311,6 +1352,18 @@ class DemoLoginUseCase:
 
     def execute(self, request: DemoLoginRequestDTO) -> AuthResponseDTO:
         import uuid
+        from app.domain.exceptions import DomainException
+        from app.core.auditoria import registrar_auditoria
+
+        # Bloqueio total de Demo Login para Super Admin
+        if request.role == "super_admin" or str(request.email).lower().strip() in SUPER_ADMIN_EMAILS:
+            registrar_auditoria(
+                acao="DEMO_SUPER_ADMIN_BLOCKED",
+                tipo="SECURITY_ALERT",
+                usuario=str(request.email),
+                detalhes={"status": "BLOQUEADO", "motivo": "Login de Super Admin exige autenticacao real via Google/OAuth"}
+            )
+            raise DomainException("Acesso Super Admin requer autenticação real e verificada. Acesso de teste não permitido para a governança central.")
 
         name = request.name or request.email.split("@")[0].replace(".", " ").title()
         avatar = f"https://placehold.co/100x100/18181b/f59e0b?text={name[:2].upper()}"
@@ -1321,7 +1374,7 @@ class DemoLoginUseCase:
             name=name,
             avatar_url=avatar,
             role=request.role,
-            tenant_slug=request.tenant_slug or "barbearia-vintage",
+            tenant_slug=request.tenant_slug or "barbearia-campelo",
             staff_id=request.staff_id
         )
 

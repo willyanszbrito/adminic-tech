@@ -2,8 +2,8 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { SuperAdminOverview } from '../../types';
 import { api } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import {
-  ShieldAlert,
   Building2,
   Users,
   DollarSign,
@@ -12,10 +12,14 @@ import {
   CheckCircle2,
   AlertCircle,
   Clock,
-  Layers,
-  Sparkles,
   Loader2,
-  X
+  X,
+  Lock,
+  FileCheck2,
+  Activity,
+  ShieldCheck,
+  Search,
+  RefreshCw
 } from 'lucide-react';
 
 export interface SuperAdminPortalProps {
@@ -27,8 +31,12 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   onImpersonateTenant,
   onRefreshEcosystem,
 }) => {
+  const { user, isAuthenticated, openLoginModal } = useAuth();
   const [overview, setOverview] = useState<SuperAdminOverview | null>(null);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'overview' | 'audit'>('overview');
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingAudit, setIsLoadingAudit] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // New Tenant Form State
@@ -40,12 +48,15 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   const [newPhone, setNewPhone] = useState('');
   const [newWhatsapp, setNewWhatsapp] = useState('');
   const [newAddress, setNewAddress] = useState('');
-  const [newPrimaryColor, setNewPrimaryColor] = useState('#0ea5e9');
-  const [newSecondaryColor, setNewSecondaryColor] = useState('#0f172a');
+  const [newPrimaryColor, setNewPrimaryColor] = useState('#d4af37');
+  const [newSecondaryColor, setNewSecondaryColor] = useState('#121212');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [auditFilter, setAuditFilter] = useState('');
+
+  const isSuperAdminAuthorized = isAuthenticated && user?.email?.toLowerCase().trim() === 'willyanszbrito@gmail.com';
 
   const loadOverview = async () => {
     setIsLoading(true);
@@ -59,9 +70,24 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     }
   };
 
+  const loadAuditLogs = async () => {
+    setIsLoadingAudit(true);
+    try {
+      const logs = await api.getAuditTrail(100);
+      setAuditLogs(logs);
+    } catch (e) {
+      console.warn('Erro ao carregar auditoria:', e);
+    } finally {
+      setIsLoadingAudit(false);
+    }
+  };
+
   useEffect(() => {
-    loadOverview();
-  }, []);
+    if (isSuperAdminAuthorized) {
+      loadOverview();
+      loadAuditLogs();
+    }
+  }, [isSuperAdminAuthorized]);
 
   const handleCreateTenant = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,6 +127,53 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     }
   };
 
+  // 1. Tela de Bloqueio de Acesso se não for willyanszbrito@gmail.com
+  if (!isSuperAdminAuthorized) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+        <div className="w-full max-w-md p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl space-y-6">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
+            <Lock className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold font-heading text-white">
+              Acesso Restrito à Governança Central
+            </h2>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              O portal <strong>Super Admin</strong> é exclusivo e restrito para o e-mail oficial <code className="text-amber-400 font-mono">willyanszbrito@gmail.com</code>.
+            </p>
+          </div>
+
+          {user && (
+            <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700 text-xs text-slate-300">
+              Sessão atual: <span className="text-white font-medium">{user.email}</span> (Não Autorizado)
+            </div>
+          )}
+
+          <button
+            onClick={() => openLoginModal('super_admin')}
+            className="w-full py-3.5 px-6 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm transition-all shadow-lg shadow-amber-500/20 cursor-pointer"
+          >
+            Autenticar com Google (willyanszbrito@gmail.com)
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const filteredLogs = auditLogs.filter((log) => {
+    if (!auditFilter) return true;
+    const q = auditFilter.toLowerCase();
+    return (
+      (log.acao && log.acao.toLowerCase().includes(q)) ||
+      (log.usuario && log.usuario.toLowerCase().includes(q)) ||
+      (log.tipo && log.tipo.toLowerCase().includes(q)) ||
+      (log.ip_origem && log.ip_origem.toLowerCase().includes(q)) ||
+      (log.hash_integridade && log.hash_integridade.toLowerCase().includes(q))
+    );
+  });
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       {/* Top Banner */}
@@ -108,373 +181,397 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center space-x-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/30 flex items-center space-x-1">
-                <ShieldAlert className="w-3.5 h-3.5" />
-                <span>Super Administrador Executivo</span>
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center space-x-1">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Super Administrador • willyanszbrito@gmail.com</span>
               </span>
-              <span className="text-xs text-slate-500 font-mono">adminic.com.br</span>
+              <span className="text-xs text-slate-500 font-mono">ia.adminic.com.br</span>
             </div>
             <h2 className="text-2xl font-extrabold font-heading text-slate-900 dark:text-white mt-1">
-              Centro de Controle Global do Ecossistema
+              Centro de Governança e Auditoria do Ecossistema
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
-              Visão macro de todas as empresas cadastradas, licenciamento de trials de 30 dias e impersonação direta.
+              Monitoramento dos parceiros credenciados, gestão de trials e trilha de auditoria criptográfica com SHA-256.
             </p>
           </div>
 
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="px-5 py-2.5 rounded-2xl text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-600 shadow-md shadow-amber-500/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap"
+            >
+              <Plus className="w-4 h-4 stroke-[3]" />
+              <span>Credenciar Novo Parceiro</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex border-b border-slate-700/60 pt-2 gap-4">
           <button
-            onClick={() => setIsModalOpen(true)}
-            className="px-5 py-2.5 rounded-2xl text-xs font-bold bg-brand-primary text-black hover:opacity-90 shadow-md shadow-brand-primary/20 transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap self-start sm:self-auto"
+            onClick={() => setActiveTab('overview')}
+            className={`pb-3 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border-b-2 ${
+              activeTab === 'overview'
+                ? 'border-amber-400 text-amber-400'
+                : 'border-transparent text-slate-400 hover:text-white'
+            }`}
           >
-            <Plus className="w-4 h-4 stroke-[3]" />
-            <span>Credenciar Novo Parceiro</span>
+            <Building2 className="w-4 h-4" />
+            <span>Visão dos Parceiros ({overview?.tenants?.length || 0})</span>
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('audit');
+              loadAuditLogs();
+            }}
+            className={`pb-3 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border-b-2 ${
+              activeTab === 'audit'
+                ? 'border-amber-400 text-amber-400'
+                : 'border-transparent text-slate-400 hover:text-white'
+            }`}
+          >
+            <Activity className="w-4 h-4" />
+            <span>Trilha de Auditoria Criptográfica ({auditLogs.length})</span>
           </button>
         </div>
       </div>
 
       {/* Notifications */}
       {successMessage && (
-        <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs font-medium flex items-center space-x-2">
+        <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-medium flex items-center space-x-2">
           <CheckCircle2 className="w-4 h-4 shrink-0" />
           <span>{successMessage}</span>
         </div>
       )}
 
       {errorMessage && (
-        <div className="p-4 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-600 dark:text-rose-300 text-xs font-medium flex items-center space-x-2">
+        <div className="p-4 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-medium flex items-center space-x-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{errorMessage}</span>
         </div>
       )}
 
-      {/* Global Metrics Cards */}
-      {isLoading ? (
-        <div className="glass-panel rounded-3xl p-12 text-center text-slate-400">
-          <Loader2 className="w-8 h-8 animate-spin text-brand-primary mx-auto" />
-        </div>
-      ) : overview && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="glass-panel rounded-3xl p-6 border border-black/10 dark:border-white/10 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs uppercase font-bold text-slate-500 tracking-wider">Parceiros Ativos</span>
-              <div className="p-2 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400">
-                <Building2 className="w-4 h-4" />
+      {/* TAB 1: OVERVIEW DOS PARCEIROS */}
+      {activeTab === 'overview' && (
+        <>
+          {/* Key Metrics Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="glass-panel p-5 rounded-2xl space-y-2">
+              <div className="flex items-center justify-between text-slate-400 text-xs">
+                <span>Parceiros Credenciados</span>
+                <Building2 className="w-4 h-4 text-amber-400" />
+              </div>
+              <div className="text-2xl font-black font-heading text-white">
+                {overview?.total_tenants || 0}
+              </div>
+              <div className="text-[11px] text-slate-400 flex items-center gap-1">
+                <span className="text-emerald-400 font-bold">{overview?.active_trials || 0}</span> ativos
               </div>
             </div>
-            <p className="text-2xl font-extrabold font-heading text-slate-900 dark:text-white">
-              {overview.total_tenants}
-            </p>
-            <span className="text-[11px] text-slate-500 block">
-              Empresas operando no ecossistema
-            </span>
+
+            <div className="glass-panel p-5 rounded-2xl space-y-2">
+              <div className="flex items-center justify-between text-slate-400 text-xs">
+                <span>Faturamento Mensal Consolidado</span>
+                <DollarSign className="w-4 h-4 text-emerald-400" />
+              </div>
+              <div className="text-2xl font-black font-heading text-white">
+                R$ {(overview?.total_monthly_volume || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </div>
+              <div className="text-[11px] text-slate-400">Volume transacionado no ecossistema</div>
+            </div>
+
+            <div className="glass-panel p-5 rounded-2xl space-y-2">
+              <div className="flex items-center justify-between text-slate-400 text-xs">
+                <span>Trials Ativos (30 dias)</span>
+                <Clock className="w-4 h-4 text-amber-400" />
+              </div>
+              <div className="text-2xl font-black font-heading text-white">
+                {overview?.active_trials || 0}
+              </div>
+              <div className="text-[11px] text-slate-400">Período gratuito de experimentação</div>
+            </div>
+
+            <div className="glass-panel p-5 rounded-2xl space-y-2">
+              <div className="flex items-center justify-between text-slate-400 text-xs">
+                <span>Total de Agendamentos</span>
+                <Users className="w-4 h-4 text-sky-400" />
+              </div>
+              <div className="text-2xl font-black font-heading text-white">
+                {overview?.total_ecosystem_appointments || 0}
+              </div>
+              <div className="text-[11px] text-slate-400">Vouchers emitidos e validados</div>
+            </div>
           </div>
 
-          <div className="glass-panel rounded-3xl p-6 border border-black/10 dark:border-white/10 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs uppercase font-bold text-slate-500 tracking-wider">Trials Ativos</span>
-              <div className="p-2 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                <Clock className="w-4 h-4" />
+          {/* Tenants List */}
+          <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <h3 className="text-lg font-bold font-heading text-white">
+              Estabelecimentos Parceiros Credenciados
+            </h3>
+
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12 text-slate-400">
+                <Loader2 className="w-8 h-8 animate-spin" />
               </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {overview?.tenants?.map((t) => (
+                  <div
+                    key={t.id}
+                    className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-amber-500/40 transition-all space-y-4 flex flex-col justify-between"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
+                          {t.category}
+                        </span>
+                        <span className="text-[11px] text-emerald-400 font-medium">
+                          {t.trial_days_remaining} dias restantes
+                        </span>
+                      </div>
+                      <h4 className="text-base font-bold text-white">{t.name}</h4>
+                      <p className="text-xs text-slate-400">
+                        Responsável: <span className="text-slate-300 font-mono">{t.owner_email || 'N/A'}</span>
+                      </p>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                      <span className="text-xs text-slate-400 font-mono">/{t.slug}</span>
+                      <button
+                        onClick={() => onImpersonateTenant(t.slug)}
+                        className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                      >
+                        <span>Acessar Portal</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* TAB 2: TRILHA DE AUDITORIA CRIPTOGRÁFICA (SHA-256) */}
+      {activeTab === 'audit' && (
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-bold font-heading text-white flex items-center gap-2">
+                <FileCheck2 className="w-5 h-5 text-amber-400" />
+                <span>Trilha de Auditoria Digital Imutável (SHA-256)</span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Registros de integridade encadeados por hash SHA-256 com rastreamento de IP, User-Agent e ações.
+              </p>
             </div>
-            <p className="text-2xl font-extrabold font-heading text-slate-900 dark:text-white">
-              {overview.active_trials}
-            </p>
-            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold block">
-              100% de adesão ao período de 30 dias
-            </span>
+
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Filtrar por ação, IP ou hash..."
+                  value={auditFilter}
+                  onChange={(e) => setAuditFilter(e.target.value)}
+                  className="pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 w-64"
+                />
+              </div>
+              <button
+                onClick={loadAuditLogs}
+                disabled={isLoadingAudit}
+                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
+                title="Atualizar Logs"
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoadingAudit ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
           </div>
 
-          <div className="glass-panel rounded-3xl p-6 border border-black/10 dark:border-white/10 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs uppercase font-bold text-slate-500 tracking-wider">Agendamentos Totais</span>
-              <div className="p-2 rounded-xl bg-brand-primary/15 text-brand-primary">
-                <Users className="w-4 h-4" />
-              </div>
+          {isLoadingAudit ? (
+            <div className="flex items-center justify-center py-12 text-slate-400">
+              <Loader2 className="w-8 h-8 animate-spin" />
             </div>
-            <p className="text-2xl font-extrabold font-heading text-slate-900 dark:text-white">
-              {overview.total_ecosystem_appointments}
-            </p>
-            <span className="text-[11px] text-slate-500 block">
-              Processados em toda a rede Adminic
-            </span>
-          </div>
-
-          <div className="glass-panel rounded-3xl p-6 border border-black/10 dark:border-white/10 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs uppercase font-bold text-slate-500 tracking-wider">Volume Mensal</span>
-              <div className="p-2 rounded-xl bg-cyan-500/15 text-cyan-600 dark:text-cyan-400">
-                <DollarSign className="w-4 h-4" />
-              </div>
+          ) : filteredLogs.length === 0 ? (
+            <div className="py-12 text-center text-slate-500 text-xs">
+              Nenhum registro de auditoria encontrado para o filtro aplicado.
             </div>
-            <p className="text-2xl font-extrabold font-heading text-slate-900 dark:text-white">
-              R$ {overview.total_monthly_volume.toFixed(2)}
-            </p>
-            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold block">
-              Volume consolidado dos parceiros
-            </span>
-          </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-800 text-slate-400 font-semibold">
+                    <th className="pb-3 pr-4">Data e Hora (Manaus)</th>
+                    <th className="pb-3 pr-4">Ação</th>
+                    <th className="pb-3 pr-4">Tipo</th>
+                    <th className="pb-3 pr-4">Usuário</th>
+                    <th className="pb-3 pr-4">IP de Origem</th>
+                    <th className="pb-3">Hash de Integridade (SHA-256)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
+                  {filteredLogs.map((log, idx) => (
+                    <tr key={log.id || idx} className="hover:bg-slate-900/40 transition-colors">
+                      <td className="py-3 pr-4 text-slate-400 whitespace-nowrap">
+                        {log.timestamp ? log.timestamp.replace('T', ' ').substring(0, 19) : 'N/A'}
+                      </td>
+                      <td className="py-3 pr-4 text-white font-semibold">
+                        {log.acao}
+                      </td>
+                      <td className="py-3 pr-4">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          log.tipo?.includes('SECURITY') ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' :
+                          log.tipo?.includes('AUTH') ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
+                          log.tipo?.includes('WRITE') ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
+                          'bg-slate-800 text-slate-400'
+                        }`}>
+                          {log.tipo}
+                        </span>
+                      </td>
+                      <td className="py-3 pr-4 text-slate-300">
+                        {log.usuario}
+                      </td>
+                      <td className="py-3 pr-4 text-slate-400">
+                        {log.ip_origem || '0.0.0.0'}
+                      </td>
+                      <td className="py-3 text-amber-400/90 font-mono text-[10px] truncate max-w-xs" title={log.hash_integridade}>
+                        {log.hash_integridade ? `${log.hash_integridade.substring(0, 16)}...` : 'N/A'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Tenants Roster Table */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4">
-        <div className="flex items-center justify-between pb-4 border-b border-black/10 dark:border-white/10">
-          <h3 className="text-base font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">
-            <Layers className="w-4 h-4 text-brand-primary" />
-            <span>Relação de Empresas e Status de Licenciamento (30 Dias)</span>
-          </h3>
-          <span className="text-xs text-slate-500">
-            {overview?.tenants.length || 0} credenciadas
-          </span>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-black/10 dark:border-white/10 text-slate-500 uppercase tracking-wider font-semibold">
-                <th className="py-3 px-3">Empresa Parceira</th>
-                <th className="py-3 px-3">Segmento</th>
-                <th className="py-3 px-3">Status do Trial (30 Dias)</th>
-                <th className="py-3 px-3">Faturamento Estimado</th>
-                <th className="py-3 px-3 text-right">Ação</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-black/5 dark:divide-white/5">
-              {overview?.tenants.map((t) => (
-                <tr key={t.id} className="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-                  <td className="py-4 px-3">
-                    <div className="font-bold text-slate-900 dark:text-white text-sm">{t.name}</div>
-                    <span className="font-mono text-[10px] text-slate-500">ia.adminic.com.br/{t.slug}</span>
-                  </td>
-
-                  <td className="py-4 px-3 capitalize text-slate-700 dark:text-slate-300 font-medium">
-                    {t.category}
-                  </td>
-
-                  <td className="py-4 px-3">
-                    <div className="space-y-1.5 w-48">
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                          {t.trial_days_remaining} dias restantes
-                        </span>
-                        <span className="text-slate-400 font-mono text-[10px]">Término: {t.trial_ends_at}</span>
-                      </div>
-                      <div className="w-full bg-black/10 dark:bg-white/10 rounded-full h-1.5 overflow-hidden">
-                        <div
-                          className="bg-emerald-500 h-full rounded-full"
-                          style={{ width: `${(t.trial_days_remaining / 30) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className="py-4 px-3 font-extrabold text-slate-900 dark:text-white font-heading">
-                    R$ {t.monthly_revenue.toFixed(2)}
-                  </td>
-
-                  <td className="py-4 px-3 text-right">
-                    <button
-                      onClick={() => onImpersonateTenant(t.slug)}
-                      className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-brand-primary text-black hover:opacity-90 transition-all flex items-center space-x-1 ml-auto cursor-pointer shadow-sm"
-                      title="Abrir ambiente desta empresa"
-                    >
-                      <span>Impersonar / Acessar</span>
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Modal: Credenciar Novo Parceiro */}
+      {/* Modal Credenciar Novo Parceiro */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-2xl glass-panel rounded-3xl p-6 sm:p-8 border border-black/10 dark:border-white/15 shadow-2xl bg-white dark:bg-zinc-950 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-4 border-b border-black/10 dark:border-white/10">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-2xl bg-brand-primary/20 text-brand-primary flex items-center justify-center">
-                  <Building2 className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold font-heading text-slate-900 dark:text-white">
-                    Credenciar Nova Empresa Parceira
-                  </h3>
-                  <p className="text-xs text-slate-500">Inicia automaticamente com 30 dias de Trial gratuito</p>
-                </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+          <div
+            className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl text-slate-100 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-amber-400" />
+                <h3 className="text-lg font-bold font-heading text-white">Credenciar Novo Parceiro</h3>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateTenant} className="space-y-4 pt-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Slug da URL *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={newSlug}
-                    onChange={(e) => setNewSlug(e.target.value)}
-                    placeholder="ex: nova-clinica-prime"
-                    className="w-full glass-input px-3 py-2 rounded-xl text-xs font-mono"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Nome da Empresa *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    placeholder="ex: Clínica Prime Saúde"
-                    className="w-full glass-input px-3 py-2 rounded-xl text-xs"
-                  />
-                </div>
-              </div>
-
+            <form onSubmit={handleCreateTenant} className="space-y-4 text-xs">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Slogan ou Frase de Impacto *
-                </label>
+                <label className="block text-slate-300 font-medium mb-1">Nome do Estabelecimento *</label>
                 <input
                   type="text"
                   required
-                  value={newSlogan}
-                  onChange={(e) => setNewSlogan(e.target.value)}
-                  placeholder="ex: Medicina Integrada e Bem-Estar"
-                  className="w-full glass-input px-3 py-2 rounded-xl text-xs"
+                  placeholder="Ex: Barbearia Imperial"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-amber-400"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-slate-300 font-medium mb-1">Slug da URL (ex: barbearia-imperial) *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="barbearia-imperial"
+                  value={newSlug}
+                  onChange={(e) => setNewSlug(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-amber-400 font-mono"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Segmento *
-                  </label>
+                  <label className="block text-slate-300 font-medium mb-1">Categoria</label>
                   <select
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value)}
-                    className="w-full glass-input px-3 py-2 rounded-xl text-xs bg-transparent"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-amber-400"
                   >
-                    <option value="barbearia" className="bg-white dark:bg-zinc-900">Barbearia</option>
-                    <option value="clinica" className="bg-white dark:bg-zinc-900">Clínica</option>
-                    <option value="estetica" className="bg-white dark:bg-zinc-900">Estética e Beleza</option>
-                    <option value="automotivo" className="bg-white dark:bg-zinc-900">Estética Automotiva</option>
+                    <option value="barbearia">Barbearia</option>
+                    <option value="clinica">Clínica</option>
+                    <option value="estetica">Estética e Beleza</option>
+                    <option value="automotivo">Automotivo</option>
                   </select>
                 </div>
-
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    E-mail do Responsável *
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                    placeholder="contato@empresa.com.br"
-                    className="w-full glass-input px-3 py-2 rounded-xl text-xs"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    WhatsApp *
-                  </label>
+                  <label className="block text-slate-300 font-medium mb-1">WhatsApp (com DDD) *</label>
                   <input
                     type="text"
                     required
+                    placeholder="92984899955"
                     value={newWhatsapp}
                     onChange={(e) => setNewWhatsapp(e.target.value)}
-                    placeholder="5511988887777"
-                    className="w-full glass-input px-3 py-2 rounded-xl text-xs"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-amber-400"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Endereço Completo *
-                </label>
+                <label className="block text-slate-300 font-medium mb-1">E-mail do Responsável *</label>
                 <input
-                  type="text"
+                  type="email"
                   required
-                  value={newAddress}
-                  onChange={(e) => setNewAddress(e.target.value)}
-                  placeholder="Avenida Paulista, 1000, São Paulo - SP"
-                  className="w-full glass-input px-3 py-2 rounded-xl text-xs"
+                  placeholder="contato@empresa.com.br"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-amber-400"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Cor Primária (HEX)
-                  </label>
-                  <div className="flex items-center space-x-2">
+                  <label className="block text-slate-300 font-medium mb-1">Cor Primária</label>
+                  <div className="flex items-center gap-2">
                     <input
                       type="color"
                       value={newPrimaryColor}
                       onChange={(e) => setNewPrimaryColor(e.target.value)}
-                      className="w-8 h-8 rounded-lg cursor-pointer"
+                      className="w-10 h-9 rounded-lg bg-transparent border border-slate-700 cursor-pointer"
                     />
-                    <input
-                      type="text"
-                      value={newPrimaryColor}
-                      onChange={(e) => setNewPrimaryColor(e.target.value)}
-                      className="w-full glass-input px-3 py-1.5 rounded-xl text-xs font-mono"
-                    />
+                    <span className="text-[11px] font-mono text-slate-400">{newPrimaryColor}</span>
                   </div>
                 </div>
-
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Cor Secundária (HEX)
-                  </label>
-                  <div className="flex items-center space-x-2">
+                  <label className="block text-slate-300 font-medium mb-1">Cor Secundária</label>
+                  <div className="flex items-center gap-2">
                     <input
                       type="color"
                       value={newSecondaryColor}
                       onChange={(e) => setNewSecondaryColor(e.target.value)}
-                      className="w-8 h-8 rounded-lg cursor-pointer"
+                      className="w-10 h-9 rounded-lg bg-transparent border border-slate-700 cursor-pointer"
                     />
-                    <input
-                      type="text"
-                      value={newSecondaryColor}
-                      onChange={(e) => setNewSecondaryColor(e.target.value)}
-                      className="w-full glass-input px-3 py-1.5 rounded-xl text-xs font-mono"
-                    />
+                    <span className="text-[11px] font-mono text-slate-400">{newSecondaryColor}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 flex items-center justify-end space-x-3">
+              <div className="pt-4 flex justify-end gap-3 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                  className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-2.5 rounded-2xl text-xs font-bold bg-brand-primary text-black hover:opacity-90 shadow-md shadow-brand-primary/20 transition-all flex items-center space-x-1.5 cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold transition-all disabled:opacity-50"
                 >
-                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  <span>Finalizar Credenciamento</span>
+                  {isSubmitting ? 'Cadastrando...' : 'Credenciar Parceiro'}
                 </button>
               </div>
             </form>

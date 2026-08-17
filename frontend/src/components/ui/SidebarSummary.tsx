@@ -145,7 +145,7 @@ export const SidebarSummary: React.FC<SidebarSummaryProps> = ({
             <span className="block text-[10px] text-slate-500 dark:text-slate-400">
               {currentStep === 4
                 ? paymentMethod === 'pix'
-                  ? 'PIX Instantâneo (Mercado Pago)'
+                  ? 'PIX Instantâneo (Adminic Pay)'
                   : 'Pagamento no Estabelecimento'
                 : 'Pagamento no estabelecimento'}
             </span>

@@ -308,6 +308,14 @@ export const api = {
     return fetchJSON<SuperAdminOverview>('/super-admin/overview');
   },
 
+  async getAuditTrail(limit: number = 100): Promise<any[]> {
+    try {
+      return await fetchJSON<any[]>(`/super-admin/auditoria?limit=${limit}`);
+    } catch {
+      return [];
+    }
+  },
+
   async createTenant(payload: {
     slug: string;
     name: string;
@@ -366,7 +374,7 @@ export const api = {
   },
 
   // ============================================================================
-  // 7. Pagamentos PIX Integrados (Mercado Pago)
+  // 7. Pagamentos PIX Integrados (Adminic Pay)
   // ============================================================================
   async createPixPayment(slug: string, appointmentId: string): Promise<PixPayment> {
     return fetchJSON<PixPayment>(`/tenants/${slug}/payments/pix`, {

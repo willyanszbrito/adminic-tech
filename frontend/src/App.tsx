@@ -18,6 +18,7 @@ import { StaffPortal } from './features/staff/StaffPortal';
 import { AdminPortal } from './features/admin/AdminPortal';
 import { SuperAdminPortal } from './features/super-admin/SuperAdminPortal';
 import { LoginModal } from './features/auth/LoginModal';
+import { GlobalFooter } from './components/ui/GlobalFooter';
 import { PortalView } from './types';
 import { Shield, ArrowLeft } from 'lucide-react';
 
@@ -302,17 +303,8 @@ const AppContent: React.FC = () => {
         targetSlug={tenant.slug}
       />
 
-      {/* Modern Footer */}
-      <footer className="mt-20 pt-8 pb-12 border-t border-black/10 dark:border-white/10 text-center text-xs text-slate-500 space-y-2">
-        <div className="flex items-center justify-center space-x-2">
-          <span className="font-bold font-heading text-slate-900 dark:text-white">Adminic Smart Booking</span>
-          <span>•</span>
-          <span>Arquitetura Multi-Tenant com Zero Hardcode</span>
-        </div>
-        <p className="text-[11px] text-slate-500">
-          Frontend acessível via <span className="font-mono text-slate-600 dark:text-slate-400">ia.adminic.com.br/:slug</span> | API centralizada em <span className="font-mono text-slate-600 dark:text-slate-400">api.adminic.com.br</span>
-        </p>
-      </footer>
+      {/* Global Legal & Security Footer */}
+      <GlobalFooter />
     </div>
   );
 };

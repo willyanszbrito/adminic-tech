@@ -463,6 +463,25 @@ def get_super_admin_overview(
     return use_case.execute()
 
 
+@router.get(
+    "/super-admin/auditoria",
+    summary="Consultar Trilha de Auditoria Criptográfica com SHA-256",
+    description="Retorna os registros de auditoria com hashes encadeados para compliance e segurança."
+)
+def get_audit_trail(
+    limit: int = 100
+):
+    from app.core.auditoria import get_audit_db
+    conn = get_audit_db()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM trilha_auditoria ORDER BY timestamp DESC LIMIT ?", (limit,))
+        rows = cursor.fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        conn.close()
+
+
 @router.post(
     "/super-admin/tenants",
     response_model=TenantResponseDTO,
