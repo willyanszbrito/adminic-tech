@@ -21,7 +21,7 @@ const isLocalhost = isBrowser && (window.location.hostname === 'localhost' || wi
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
-  (isLocalhost ? 'http://localhost:8000/api/v1' : 'https://api.adminic.com.br/api/v1');
+  (isLocalhost ? 'http://localhost:8000/api/v1' : 'https://adminic-tech.onrender.com/api/v1');
 
 async function fetchJSON<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
