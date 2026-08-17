@@ -537,6 +537,21 @@ def demo_login(
     return use_case.execute(request)
 
 
+@router.get(
+    "/config/public",
+    summary="Configurações Públicas de Integração em Tempo de Execução",
+    description="Retorna configurações de clientes públicos (ex: Google Client ID) sem necessidade de variáveis de ambiente no frontend."
+)
+def get_public_client_config():
+    from app.core.config import settings
+    return {
+        "google_client_id": settings.GOOGLE_CLIENT_ID or "564423794141-eum30ivtuprbv8ikk8qi6b7gapgm6a2v.apps.googleusercontent.com",
+        "app_domain": settings.APP_DOMAIN,
+        "api_domain": settings.API_DOMAIN,
+        "environment": settings.ENVIRONMENT
+    }
+
+
 # ==============================================================================
 # 7. Pagamentos Instantâneos PIX e Mercado Pago Integrado
 # ==============================================================================

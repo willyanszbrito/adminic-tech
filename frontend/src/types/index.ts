@@ -261,3 +261,18 @@ export interface AuthResponse {
   message: string;
 }
 
+export interface AuthContextType {
+  user: AuthUser | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  isLoginModalOpen: boolean;
+  targetRoleForLogin: UserRole | null;
+  openLoginModal: (targetRole?: UserRole) => void;
+  closeLoginModal: () => void;
+  loginWithGoogle: (credential: string, targetRole?: string, targetTenantSlug?: string) => Promise<boolean>;
+  loginDemo: (email: string, role: string, name?: string, tenantSlug?: string, staffId?: string) => Promise<boolean>;
+  logout: () => void;
+  triggerGoogleOneTap: () => void;
+}
+

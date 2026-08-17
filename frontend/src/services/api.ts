@@ -19,9 +19,13 @@ import { MOCK_TENANTS, MOCK_CATALOGS, MOCK_STAFF } from './mockData';
 const isBrowser = typeof window !== 'undefined';
 const isLocalhost = isBrowser && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  (isLocalhost ? 'http://localhost:8000/api/v1' : 'https://adminic-tech.onrender.com/api/v1');
+const getApiBaseUrl = (): string => {
+  if (!isBrowser) return 'https://api.adminic.com.br/api/v1';
+  if (isLocalhost) return 'http://localhost:8000/api/v1';
+  return 'https://adminic-tech.onrender.com/api/v1';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 async function fetchJSON<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -395,5 +399,21 @@ export const api = {
 
   async simulateConfirmPayment(slug: string, paymentId: string): Promise<PaymentStatusResponse> {
     return this.confirmPaymentManual(slug, paymentId);
+  },
+
+  // ============================================================================
+  // 8. Configurações Públicas de Integração (Zero-Config Frontend)
+  // ============================================================================
+  async getPublicConfig(): Promise<{ google_client_id: string; app_domain: string; api_domain: string; environment: string }> {
+    try {
+      return await fetchJSON('/config/public');
+    } catch {
+      return {
+        google_client_id: '564423794141-eum30ivtuprbv8ikk8qi6b7gapgm6a2v.apps.googleusercontent.com',
+        app_domain: 'ia.adminic.com.br',
+        api_domain: 'api.adminic.com.br',
+        environment: 'production'
+      };
+    }
   }
 };

@@ -51,7 +51,7 @@ async def security_and_audit_middleware(request: Request, call_next):
     
     process_time = time.time() - start_time
     
-    # 1. Ocultação de Stack Tecnológica & Headers de Segurança Enterprise
+    # 1. Ocultação de Stack Tecnológica & Headers de Segurança Enterprise (OWASP)
     response.headers["Server"] = "Adminic-Shield-Gateway/2026"
     if "X-Powered-By" in response.headers:
         del response.headers["X-Powered-By"]
@@ -59,6 +59,20 @@ async def security_and_audit_middleware(request: Request, call_next):
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), payment=()"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self' https://ia.adminic.com.br https://adminic.com.br; "
+        "script-src 'self' 'unsafe-inline' https://accounts.google.com https://apis.google.com; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com data:; "
+        "img-src 'self' data: https: blob:; "
+        "connect-src 'self' https://ia.adminic.com.br https://adminic-tech.onrender.com https://api.adminic.com.br https://accounts.google.com http://localhost:8000; "
+        "frame-src https://accounts.google.com; "
+        "frame-ancestors 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self';"
+    )
     response.headers["X-Response-Time-Ms"] = f"{process_time * 1000:.2f}"
     
     # 2. Trilha de Auditoria Automática (ignora endpoints estáticos de documentação)

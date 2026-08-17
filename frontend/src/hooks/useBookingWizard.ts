@@ -31,7 +31,7 @@ export function useBookingWizard() {
     const params = new URLSearchParams(window.location.search);
     const tenantParam = params.get('tenant') || params.get('slug');
     if (tenantParam) {
-      localStorage.setItem('adminic_active_tenant', tenantParam);
+      sessionStorage.setItem('adminic_active_tenant', tenantParam);
       return tenantParam;
     }
 
@@ -43,7 +43,7 @@ export function useBookingWizard() {
 
       // If the first segment is a partner slug (e.g. /clinica-dermatologia or /barbearia-vintage)
       if (!RESERVED_SYSTEM_ROUTES.includes(firstSegment) && !firstSegment.includes('.')) {
-        localStorage.setItem('adminic_active_tenant', firstSegment);
+        sessionStorage.setItem('adminic_active_tenant', firstSegment);
         return firstSegment;
       }
 
@@ -51,14 +51,14 @@ export function useBookingWizard() {
       if (pathParts.length > 1) {
         const secondSegment = pathParts[1].toLowerCase();
         if (!RESERVED_SYSTEM_ROUTES.includes(secondSegment)) {
-          localStorage.setItem('adminic_active_tenant', secondSegment);
+          sessionStorage.setItem('adminic_active_tenant', secondSegment);
           return secondSegment;
         }
       }
     }
 
     // 3. Check persistent storage from previous session
-    const saved = localStorage.getItem('adminic_active_tenant');
+    const saved = sessionStorage.getItem('adminic_active_tenant');
     if (saved && saved.trim() !== '') {
       return saved;
     }
@@ -121,7 +121,7 @@ export function useBookingWizard() {
       setAllTenants(tenantsList);
       setTenant(tenantData);
       setCatalog(catalogData);
-      localStorage.setItem('adminic_active_tenant', targetSlug);
+      sessionStorage.setItem('adminic_active_tenant', targetSlug);
 
       const staffData = await api.getStaff(targetSlug);
       setStaffList(staffData);
@@ -256,7 +256,7 @@ export function useBookingWizard() {
   const handleSwitchTenant = (newSlug: string) => {
     setSlug(newSlug);
     setIsSwitcherOpen(false);
-    localStorage.setItem('adminic_active_tenant', newSlug);
+    sessionStorage.setItem('adminic_active_tenant', newSlug);
   };
 
   // Step jump

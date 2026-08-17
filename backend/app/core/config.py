@@ -1,5 +1,4 @@
-from pydantic_settings import BaseSettings
-from pydantic import ConfigDict
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List, Optional
 import os
 
@@ -8,13 +7,13 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     CORS_ORIGINS: List[str] = [
+        "https://ia.adminic.com.br",
+        "https://adminic.com.br",
+        "https://api.adminic.com.br",
         "http://localhost:3000",
         "http://localhost:5173",
         "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173",
-        "https://ia.adminic.com.br",
-        "https://adminic.com.br",
-        "*"
+        "http://127.0.0.1:5173"
     ]
     ENVIRONMENT: str = "development"
     APP_DOMAIN: str = "ia.adminic.com.br"
@@ -52,7 +51,7 @@ class Settings(BaseSettings):
     SMTP_ENABLED: bool = os.getenv("SMTP_ENABLED", "true").lower() in ("true", "1", "t")
 
 
-    model_config = ConfigDict(
+    model_config = SettingsConfigDict(
         env_file=".env",
         case_sensitive=True,
         extra="ignore"

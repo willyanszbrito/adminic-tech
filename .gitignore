@@ -6,11 +6,16 @@ node_modules/
 # Testing & Coverage
 coverage/
 .nyc_output/
+.pytest_cache/
+*.pytest_cache/
 
-# Production Build
+# Production Build & Source Maps Protection
 dist/
 build/
 frontend/dist/
+*.map
+*.js.map
+*.css.map
 
 # Python & Virtualenv
 __pycache__/
@@ -26,17 +31,36 @@ backend/__pycache__/
 backend/*/__pycache__/
 backend/*/*/__pycache__/
 
-# Environment variables & secrets
+# Environment variables, Secrets & Certificates
 .env
 .env.*
+*.env
+*.env.*
 !.env.example
+!backend/.env.example
+!frontend/.env.example
 backend/.env
 frontend/.env
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.id_rsa
+*.id_ed25519
 
+# Databases & Local Logs
 *.log
 *.sqlite
 *.sqlite3
 *.db
+backend/data/*.db
+data/*.db
+
+# Cloud & Deployment Artifacts
+.wrangler/
+.vercel/
+.coolify/
 
 # IDE & OS
 .vscode/
@@ -44,6 +68,8 @@ frontend/.env
 .DS_Store
 Thumbs.db
 *.swp
+*.bak
+*.orig
 
 # Temp Media Storage
 .tempmediaStorage/
