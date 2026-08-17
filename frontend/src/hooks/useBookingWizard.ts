@@ -27,6 +27,26 @@ const RESERVED_SYSTEM_ROUTES = [
 
 export function useBookingWizard() {
   const getInitialSlug = (): string => {
+    // 0. Check custom partner subdomain (e.g. campelo.adminic.com.br or segredos.adminic.com.br)
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname.toLowerCase();
+      if (hostname.endsWith('.adminic.com.br') || hostname.endsWith('.adminic.tech')) {
+        const subdomain = hostname.split('.')[0];
+        if (!['ia', 'api', 'app', 'admin', 'www', 'mail', 'webmail'].includes(subdomain)) {
+          if (subdomain === 'campelo' || subdomain === 'barbearia-campelo') {
+            sessionStorage.setItem('adminic_active_tenant', 'barbearia-campelo');
+            return 'barbearia-campelo';
+          }
+          if (subdomain === 'segredos' || subdomain === 'segredosdocorte' || subdomain === 'segredos-do-corte') {
+            sessionStorage.setItem('adminic_active_tenant', 'segredos-do-corte');
+            return 'segredos-do-corte';
+          }
+          sessionStorage.setItem('adminic_active_tenant', subdomain);
+          return subdomain;
+        }
+      }
+    }
+
     // 1. Check query param ?tenant=... or ?slug=...
     const params = new URLSearchParams(window.location.search);
     const tenantParam = params.get('tenant') || params.get('slug');

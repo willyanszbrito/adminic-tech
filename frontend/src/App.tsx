@@ -69,6 +69,15 @@ const AppContent: React.FC = () => {
     if (path.includes('gestao') || (path.includes('admin') && !path.includes('super-admin'))) return 'admin';
     if (path.includes('super-admin')) return 'super-admin';
 
+    // Se for subdomínio dedicado de um parceiro (ex: campelo.adminic.com.br ou segredos.adminic.com.br)
+    const hostname = window.location.hostname.toLowerCase();
+    if (hostname.endsWith('.adminic.com.br') || hostname.endsWith('.adminic.tech')) {
+      const subdomain = hostname.split('.')[0];
+      if (!['ia', 'api', 'app', 'admin', 'www', 'mail', 'webmail'].includes(subdomain)) {
+        return 'booking';
+      }
+    }
+
     // Se houver um slug de parceiro na URL (ex: /barbearia-campelo)
     if (path && !['meus-agendamentos', 'cliente', 'colaborador', 'staff', 'gestao', 'admin', 'super-admin'].includes(path)) {
       return 'booking';
