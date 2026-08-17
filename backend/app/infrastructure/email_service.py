@@ -306,6 +306,180 @@ class GmailSmtpEmailService(IEmailService):
 
         return self._send_smtp_email(recipient, subject, html_content, plain_text)
 
+    def send_partner_welcome_email(self, tenant: Tenant) -> bool:
+        """Dispara e-mail de boas-vindas com instruções de login via Google para o parceiro recém-credenciado."""
+        recipient = tenant.email
+        subject = f"Bem-vindo ao Adminic - Acesso Liberado para {tenant.name}"
+
+        portal_url = f"https://{tenant.slug}.adminic.com.br?view=admin"
+        central_url = f"https://{settings.APP_DOMAIN}?tenant={tenant.slug}&view=admin"
+
+        html_content = f"""
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>{subject}</title>
+          <style>
+            body {{
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+              background-color: #0c0d12;
+              margin: 0;
+              padding: 24px;
+              color: #f1f5f9;
+            }}
+            .container {{
+              max-width: 600px;
+              margin: 0 auto;
+              background-color: #13151b;
+              border-radius: 24px;
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+              overflow: hidden;
+            }}
+            .header {{
+              background: linear-gradient(135deg, #181b22, #0f1117);
+              padding: 36px 24px;
+              text-align: center;
+              border-bottom: 2px solid {tenant.theme.primary_color};
+            }}
+            .badge {{
+              display: inline-block;
+              padding: 6px 14px;
+              background: rgba(245, 158, 11, 0.15);
+              color: #f59e0b;
+              border: 1px solid rgba(245, 158, 11, 0.3);
+              border-radius: 9999px;
+              font-size: 12px;
+              font-weight: 700;
+              margin-bottom: 12px;
+            }}
+            .header h1 {{
+              margin: 0;
+              font-size: 24px;
+              font-weight: 800;
+              color: #ffffff;
+            }}
+            .content {{
+              padding: 32px 24px;
+            }}
+            .info-card {{
+              background: rgba(255, 255, 255, 0.03);
+              border: 1px solid rgba(255, 255, 255, 0.08);
+              border-radius: 16px;
+              padding: 20px;
+              margin: 20px 0;
+            }}
+            .info-row {{
+              display: flex;
+              justify-content: space-between;
+              padding: 8px 0;
+              border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+              font-size: 13px;
+            }}
+            .info-row:last-child {{
+              border-bottom: none;
+            }}
+            .info-label {{
+              color: #94a3b8;
+            }}
+            .info-value {{
+              color: #f8fafc;
+              font-weight: 600;
+            }}
+            .btn-primary {{
+              display: block;
+              width: 100%;
+              box-sizing: border-box;
+              text-align: center;
+              background-color: {tenant.theme.primary_color};
+              color: #000000;
+              font-weight: 800;
+              font-size: 14px;
+              padding: 16px;
+              border-radius: 14px;
+              text-decoration: none;
+              margin: 24px 0 12px 0;
+            }}
+            .footer {{
+              padding: 24px;
+              background: #0d0e13;
+              text-align: center;
+              font-size: 11px;
+              color: #64748b;
+              border-top: 1px solid rgba(255, 255, 255, 0.05);
+            }}
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <div class="badge">Parceiro Oficial Homologado</div>
+              <h1>Bem-vindo ao Adminic!</h1>
+              <p style="margin: 8px 0 0 0; color: #94a3b8; font-size: 14px;">Seu estabelecimento <strong>{tenant.name}</strong> está credenciado.</p>
+            </div>
+            
+            <div class="content">
+              <p style="font-size: 14px; line-height: 1.6; color: #cbd5e1; margin-top: 0;">
+                Olá, Gestor! O seu ambiente de gestão no Adminic já está pronto para receber agendamentos online, gerenciar equipe e receber pagamentos via PIX instantâneo.
+              </p>
+
+              <div class="info-card">
+                <div class="info-row">
+                  <span class="info-label">Estabelecimento:</span>
+                  <span class="info-value">{tenant.name}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">E-mail Google Autorizado:</span>
+                  <span class="info-value">{tenant.email}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Plano Ativo:</span>
+                  <span class="info-value">{tenant.plan_name}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Período de Teste (Trial):</span>
+                  <span class="info-value">30 Dias Gratuitos</span>
+                </div>
+              </div>
+
+              <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 14px; padding: 16px; margin-bottom: 20px;">
+                <p style="margin: 0; font-size: 13px; color: #34d399; font-weight: 600;">
+                  Como Acessar com 1 Clique:
+                </p>
+                <p style="margin: 6px 0 0 0; font-size: 12px; color: #a7f3d0; line-height: 1.5;">
+                  Basta clicar no botão abaixo e selecionar a opção <strong>"Entrar com Conta Google"</strong> usando o e-mail <strong>{tenant.email}</strong>. O sistema reconhecerá automaticamente seu acesso como Gestor Oficial.
+                </p>
+              </div>
+
+              <a href="{central_url}" class="btn-primary" target="_blank">
+                Acessar Painel de Gestão
+              </a>
+              <p style="text-align: center; font-size: 11px; color: #64748b; margin: 0;">
+                Link direto: <a href="{portal_url}" style="color: #94a3b8;">{portal_url}</a>
+              </p>
+            </div>
+
+            <div class="footer">
+              <p style="margin: 0 0 4px 0;">Adminic Smart Booking Platform &copy; 2026</p>
+              <p style="margin: 0;">Este é um e-mail transacional de ativação corporativa enviado para {tenant.email}.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+        """
+
+        plain_text = (
+            f"Bem-vindo ao Adminic - Acesso Liberado para {tenant.name}\n\n"
+            f"Olá! Seu estabelecimento {tenant.name} foi credenciado com sucesso no Adminic.\n\n"
+            f"E-mail Google Autorizado: {tenant.email}\n"
+            f"Link de Acesso: {central_url}\n\n"
+            f"Para acessar o painel de gestão, abra o link acima e clique em 'Entrar com Conta Google' usando a conta {tenant.email}.\n"
+        )
+
+        return self._send_smtp_email(recipient, subject, html_content, plain_text)
+
 
     def _send_smtp_email(self, recipient: str, subject: str, html_body: str, plain_body: str) -> bool:
         logger.info(f"[Gmail SMTP] Preparando envio para: {recipient} | Assunto: {subject}")

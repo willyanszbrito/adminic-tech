@@ -17,7 +17,7 @@ from app.application.use_cases import (
     UpdateStaffProfileUseCase, CreateStaffUseCase, DeleteStaffUseCase, BlockStaffSlotUseCase,
     GetTenantDashboardMetricsUseCase, CreateServiceUseCase, UpdateServiceUseCase, DeleteServiceUseCase,
     CreateCategoryUseCase, DeleteCategoryUseCase, UpdateTenantSettingsUseCase, UpdateTenantThemeUseCase,
-    GetSuperAdminOverviewUseCase, CreateTenantUseCase,
+    GetSuperAdminOverviewUseCase, CreateTenantUseCase, SendPartnerWelcomeEmailUseCase,
     AuthenticateGoogleUserUseCase, DemoLoginUseCase,
     CreatePixPaymentUseCase, GetPaymentStatusUseCase, ConfirmPaymentUseCase
 )
@@ -155,9 +155,10 @@ def get_tenant_dashboard_metrics_use_case(
 
 def create_service_use_case(
     t_repo: ITenantRepository = Depends(get_tenant_repo),
-    c_repo: ICatalogRepository = Depends(get_catalog_repo)
+    c_repo: ICatalogRepository = Depends(get_catalog_repo),
+    s_repo: IStaffRepository = Depends(get_staff_repo)
 ) -> CreateServiceUseCase:
-    return CreateServiceUseCase(t_repo, c_repo)
+    return CreateServiceUseCase(t_repo, c_repo, s_repo)
 
 def update_service_use_case(
     t_repo: ITenantRepository = Depends(get_tenant_repo),
@@ -200,9 +201,17 @@ def get_super_admin_overview_use_case(
     return GetSuperAdminOverviewUseCase(t_repo, a_repo)
 
 def create_tenant_use_case(
-    t_repo: ITenantRepository = Depends(get_tenant_repo)
+    t_repo: ITenantRepository = Depends(get_tenant_repo),
+    s_repo: IStaffRepository = Depends(get_staff_repo),
+    e_serv: IEmailService = Depends(get_email_service)
 ) -> CreateTenantUseCase:
-    return CreateTenantUseCase(t_repo)
+    return CreateTenantUseCase(t_repo, s_repo, e_serv)
+
+def send_partner_welcome_email_use_case(
+    t_repo: ITenantRepository = Depends(get_tenant_repo),
+    e_serv: IEmailService = Depends(get_email_service)
+) -> SendPartnerWelcomeEmailUseCase:
+    return SendPartnerWelcomeEmailUseCase(t_repo, e_serv)
 
 def authenticate_google_user_use_case(
     t_repo: ITenantRepository = Depends(get_tenant_repo),

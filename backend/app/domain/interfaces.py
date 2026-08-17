@@ -218,4 +218,12 @@ class IEmailService(ABC):
         """Dispara e-mail de alerta de novo agendamento para o profissional/barbeiro."""
         pass
 
+    @abstractmethod
+    def send_partner_welcome_email(
+        self,
+        tenant: Tenant
+    ) -> bool:
+        """Dispara e-mail de boas-vindas com instruções de login via Google para o parceiro recém-credenciado."""
+        pass
+
 

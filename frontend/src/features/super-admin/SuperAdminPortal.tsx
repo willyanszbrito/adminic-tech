@@ -19,7 +19,8 @@ import {
   Activity,
   ShieldCheck,
   Search,
-  RefreshCw
+  RefreshCw,
+  Mail
 } from 'lucide-react';
 
 export interface SuperAdminPortalProps {
@@ -38,6 +39,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingAudit, setIsLoadingAudit] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [sendingEmailSlug, setSendingEmailSlug] = useState<string | null>(null);
 
   // New Tenant Form State
   const [newSlug, setNewSlug] = useState('');
@@ -63,8 +65,8 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     try {
       const data = await api.getSuperAdminOverview();
       setOverview(data);
-    } catch {
-      // fallback handled gracefully
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Erro ao carregar dados do ecossistema.');
     } finally {
       setIsLoading(false);
     }
@@ -75,8 +77,8 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     try {
       const logs = await api.getAuditTrail(100);
       setAuditLogs(logs);
-    } catch (e) {
-      console.warn('Erro ao carregar auditoria:', e);
+    } catch (err: any) {
+      setErrorMessage('Erro ao carregar trilha de auditoria.');
     } finally {
       setIsLoadingAudit(false);
     }
@@ -85,15 +87,26 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   useEffect(() => {
     if (isSuperAdminAuthorized) {
       loadOverview();
-      loadAuditLogs();
     }
   }, [isSuperAdminAuthorized]);
+
+  const handleSendWelcomeEmail = async (slug: string, name: string) => {
+    setSendingEmailSlug(slug);
+    try {
+      await api.sendPartnerWelcomeEmail(slug);
+      setSuccessMessage(`E-mail de acesso e instruções enviado com sucesso para o parceiro "${name}"!`);
+    } catch (err: any) {
+      setErrorMessage(err.message || `Falha ao enviar e-mail para ${name}.`);
+    } finally {
+      setSendingEmailSlug(null);
+    }
+  };
 
   const handleCreateTenant = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setSuccessMessage(null);
     setErrorMessage(null);
+    setSuccessMessage(null);
 
     try {
       await api.createTenant({
@@ -109,7 +122,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         secondary_color: newSecondaryColor,
       });
 
-      setSuccessMessage(`Parceiro "${newName}" credenciado com sucesso com 30 dias de Trial ativo!`);
+      setSuccessMessage(`Parceiro "${newName}" credenciado com sucesso! E-mail com link de acesso via Google enviado para ${newEmail.trim()}.`);
       setIsModalOpen(false);
       setNewSlug('');
       setNewName('');
@@ -206,31 +219,33 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-black/10 dark:border-white/10 pt-2 gap-2 sm:gap-4 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
+        <div className="flex items-center space-x-2 pt-2 border-t border-black/10 dark:border-white/10 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none flex-nowrap">
           <button
+            type="button"
             onClick={() => setActiveTab('overview')}
-            className={`pb-3 px-1 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border-b-2 whitespace-nowrap touch-target ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap shrink-0 touch-target ${
               activeTab === 'overview'
-                ? 'border-amber-500 text-amber-600 dark:text-amber-400'
-                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                : 'glass-pill text-slate-600 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10'
             }`}
           >
-            <Building2 className="w-4 h-4 shrink-0" />
+            <Building2 className="w-3.5 h-3.5 shrink-0" />
             <span>Visão dos Parceiros ({overview?.tenants?.length || 0})</span>
           </button>
           <button
+            type="button"
             onClick={() => {
               setActiveTab('audit');
               loadAuditLogs();
             }}
-            className={`pb-3 px-1 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border-b-2 whitespace-nowrap touch-target ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap shrink-0 touch-target ${
               activeTab === 'audit'
-                ? 'border-amber-500 text-amber-600 dark:text-amber-400'
-                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                : 'glass-pill text-slate-600 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10'
             }`}
           >
-            <Activity className="w-4 h-4 shrink-0" />
-            <span>Trilha de Auditoria Criptográfica ({auditLogs.length})</span>
+            <Activity className="w-3.5 h-3.5 shrink-0" />
+            <span>Trilha de Auditoria ({auditLogs.length})</span>
           </button>
         </div>
       </div>
@@ -334,15 +349,28 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                       </p>
                     </div>
 
-                    <div className="pt-3 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
+                    <div className="pt-3 border-t border-slate-200 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
                       <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">/{t.slug}</span>
-                      <button
-                        onClick={() => onImpersonateTenant(t.slug)}
-                        className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer touch-target"
-                      >
-                        <span>Acessar Portal</span>
-                        <ArrowUpRight className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSendWelcomeEmail(t.slug, t.name)}
+                          disabled={sendingEmailSlug === t.slug}
+                          className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer touch-target disabled:opacity-50"
+                          title="Enviar e-mail com link de acesso e instruções de login Google"
+                        >
+                          <Mail className={`w-3.5 h-3.5 text-amber-500 ${sendingEmailSlug === t.slug ? 'animate-bounce' : ''}`} />
+                          <span className="hidden sm:inline">{sendingEmailSlug === t.slug ? 'Enviando...' : 'Enviar Acesso'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onImpersonateTenant(t.slug)}
+                          className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer touch-target"
+                        >
+                          <span>Acessar</span>
+                          <ArrowUpRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

@@ -149,6 +149,8 @@ class ListStaffForServiceUseCase:
             if not service:
                 raise ServiceNotFoundException(f"Serviço com ID '{service_id}' não encontrado.")
             staff_members = self.staff_repo.get_staff_for_service(tenant.id, service_id)
+            if not staff_members:
+                staff_members = self.staff_repo.get_staff_by_tenant(tenant.id)
         else:
             staff_members = self.staff_repo.get_staff_by_tenant(tenant.id)
 
@@ -230,13 +232,17 @@ class CalculateAvailabilityUseCase:
             staff = self.staff_repo.get_staff_by_id(tenant.id, staff_id)
             if not staff:
                 raise StaffNotFoundException(f"Profissional '{staff_id}' não encontrado.")
-            if service_id and service_id not in staff.specialty_service_ids:
-                raise StaffNotQualifiedException(f"O profissional {staff.name} não executa o serviço selecionado.")
+            if service_id and staff.specialty_service_ids and service_id not in staff.specialty_service_ids:
+                qualified = self.staff_repo.get_staff_for_service(tenant.id, service_id)
+                if qualified and staff.id not in [q.id for q in qualified]:
+                    raise StaffNotQualifiedException(f"O profissional {staff.name} não executa o serviço selecionado.")
             staff_list = [staff]
             staff_display_name = staff.name
         else:
             if service_id:
                 staff_list = self.staff_repo.get_staff_for_service(tenant.id, service_id)
+                if not staff_list:
+                    staff_list = self.staff_repo.get_staff_by_tenant(tenant.id)
             else:
                 staff_list = self.staff_repo.get_staff_by_tenant(tenant.id)
             staff_display_name = "Qualquer Profissional Disponível"
@@ -903,15 +909,22 @@ class GetTenantDashboardMetricsUseCase:
                     )
                 )
 
+        total_rev = sum(a.price for a in confirmed)
+        avg_ticket = (total_rev / len(confirmed)) if confirmed else 0.0
+
+        total_staff = len(self.staff_repo.get_staff_by_tenant(tenant.id) or [1])
+        total_possible = 16 * total_staff * len(tenant.business_hours.days_open)
+        occupancy = round((len(confirmed) / total_possible) * 100, 1) if (total_possible > 0 and confirmed) else 0.0
+
         return DashboardMetricsDTO(
             tenant_slug=tenant.slug,
             tenant_name=tenant.name,
             total_appointments=len(appts),
             confirmed_appointments=len(confirmed),
             cancelled_appointments=len(cancelled),
-            monthly_revenue=tenant.monthly_revenue or total_rev,
+            monthly_revenue=round(total_rev, 2),
             average_ticket=round(avg_ticket, 2),
-            occupancy_rate_percent=87.5,
+            occupancy_rate_percent=occupancy,
             trial_days_remaining=tenant.trial_days_remaining,
             trial_status=tenant.trial_status,
             recent_appointments=recent_dtos
@@ -919,9 +932,10 @@ class GetTenantDashboardMetricsUseCase:
 
 
 class CreateServiceUseCase:
-    def __init__(self, tenant_repo: ITenantRepository, catalog_repo: ICatalogRepository):
+    def __init__(self, tenant_repo: ITenantRepository, catalog_repo: ICatalogRepository, staff_repo: Optional[IStaffRepository] = None):
         self.tenant_repo = tenant_repo
         self.catalog_repo = catalog_repo
+        self.staff_repo = staff_repo
 
     def execute(self, slug: str, request: CreateServiceRequestDTO) -> ServiceDTO:
         tenant = self.tenant_repo.get_by_slug(slug)
@@ -941,6 +955,14 @@ class CreateServiceUseCase:
             is_active=True
         )
         saved = self.catalog_repo.save_service(srv)
+
+        if self.staff_repo:
+            staff_list = self.staff_repo.get_staff_by_tenant(tenant.id)
+            for s in staff_list:
+                if saved.id not in s.specialty_service_ids:
+                    s.specialty_service_ids.append(saved.id)
+                    self.staff_repo.save_staff(s)
+
         return ServiceDTO(
             id=saved.id,
             tenant_id=saved.tenant_id,
@@ -1162,8 +1184,10 @@ class GetSuperAdminOverviewUseCase:
 
         for t in tenants:
             t_appts = self.appointment_repo.get_appointments_by_tenant(t.id)
+            t_confirmed = [a for a in t_appts if a.status == "confirmed"]
+            t_rev = sum(a.price for a in t_confirmed)
             total_ecosystem_appts += len(t_appts)
-            total_volume += t.monthly_revenue
+            total_volume += t_rev
 
             items.append(
                 TenantOverviewItemDTO(
@@ -1175,7 +1199,7 @@ class GetSuperAdminOverviewUseCase:
                     trial_status=t.trial_status,
                     trial_days_remaining=t.trial_days_remaining,
                     trial_ends_at=t.trial_ends_at,
-                    monthly_revenue=t.monthly_revenue,
+                    monthly_revenue=round(t_rev, 2),
                     total_appointments=len(t_appts),
                     is_active=t.is_active,
                     owner_email=t.email,
@@ -1197,8 +1221,15 @@ class GetSuperAdminOverviewUseCase:
 
 
 class CreateTenantUseCase:
-    def __init__(self, tenant_repo: ITenantRepository):
+    def __init__(
+        self,
+        tenant_repo: ITenantRepository,
+        staff_repo: Optional[IStaffRepository] = None,
+        email_service: Optional[IEmailService] = None
+    ):
         self.tenant_repo = tenant_repo
+        self.staff_repo = staff_repo
+        self.email_service = email_service
 
     def execute(self, request: CreateTenantRequestDTO) -> TenantResponseDTO:
         existing = self.tenant_repo.get_by_slug(request.slug)
@@ -1208,7 +1239,7 @@ class CreateTenantUseCase:
         new_id = f"tnt-{uuid.uuid4().hex[:8]}"
         trial_end = (datetime.now(timezone.utc) + timedelta(days=30)).strftime("%Y-%m-%d")
 
-        from app.domain.entities import TenantTheme, BusinessHours
+        from app.domain.entities import TenantTheme, BusinessHours, Staff, StaffShift
         tenant = Tenant(
             id=new_id,
             slug=request.slug.strip().lower(),
@@ -1251,7 +1282,55 @@ class CreateTenantUseCase:
         )
 
         saved = self.tenant_repo.save(tenant)
+
+        # Cria profissional gestor padrão para habilitar agenda imediata
+        if self.staff_repo:
+            default_staff = Staff(
+                id=f"stf-{uuid.uuid4().hex[:8]}",
+                tenant_id=saved.id,
+                name=f"Gestor ({saved.name})",
+                role="Gestor e Responsável",
+                bio=f"Responsável pelo atendimento no estabelecimento {saved.name}.",
+                avatar_url=saved.logo_url,
+                phone=saved.phone,
+                email=saved.email,
+                rating=5.0,
+                total_reviews=0,
+                specialty_service_ids=[],
+                shifts=[
+                    StaffShift(
+                        day_of_week=d,
+                        start_time="09:00",
+                        end_time="19:00",
+                        lunch_start="12:00",
+                        lunch_end="13:00"
+                    )
+                    for d in [0, 1, 2, 3, 4, 5]
+                ],
+                blocked_slots=[]
+            )
+            self.staff_repo.save_staff(default_staff)
+
+        # Dispara e-mail de boas-vindas e instrução de login via Google para o parceiro
+        if self.email_service:
+            try:
+                self.email_service.send_partner_welcome_email(saved)
+            except Exception:
+                pass
+
         return map_tenant_to_dto(saved)
+
+
+class SendPartnerWelcomeEmailUseCase:
+    def __init__(self, tenant_repo: ITenantRepository, email_service: IEmailService):
+        self.tenant_repo = tenant_repo
+        self.email_service = email_service
+
+    def execute(self, slug: str) -> bool:
+        tenant = self.tenant_repo.get_by_slug(slug)
+        if not tenant:
+            raise TenantNotFoundException(f"Estabelecimento '{slug}' não encontrado.")
+        return self.email_service.send_partner_welcome_email(tenant)
 
 
 # ==============================================================================

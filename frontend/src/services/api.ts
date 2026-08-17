@@ -375,6 +375,12 @@ export const api = {
     });
   },
 
+  async sendPartnerWelcomeEmail(slug: string): Promise<{ success: boolean; message: string }> {
+    return fetchJSON<{ success: boolean; message: string }>(`/super-admin/tenants/${slug}/send-welcome-email`, {
+      method: 'POST',
+    });
+  },
+
   // ============================================================================
   // 6. Autenticação RBAC e Google One Tap (/auth)
   // ============================================================================

@@ -20,7 +20,7 @@ from app.application.use_cases import (
     UpdateStaffProfileUseCase, CreateStaffUseCase, DeleteStaffUseCase, BlockStaffSlotUseCase,
     GetTenantDashboardMetricsUseCase, CreateServiceUseCase, UpdateServiceUseCase, DeleteServiceUseCase,
     CreateCategoryUseCase, DeleteCategoryUseCase, UpdateTenantSettingsUseCase, UpdateTenantThemeUseCase,
-    GetSuperAdminOverviewUseCase, CreateTenantUseCase,
+    GetSuperAdminOverviewUseCase, CreateTenantUseCase, SendPartnerWelcomeEmailUseCase,
     AuthenticateGoogleUserUseCase, DemoLoginUseCase,
     CreatePixPaymentUseCase, GetPaymentStatusUseCase, ConfirmPaymentUseCase
 )
@@ -40,7 +40,7 @@ from app.interfaces.api.deps import (
     create_service_use_case, update_service_use_case, delete_service_use_case,
     create_category_use_case, delete_category_use_case,
     update_tenant_settings_use_case, update_tenant_theme_use_case,
-    get_super_admin_overview_use_case, create_tenant_use_case,
+    get_super_admin_overview_use_case, create_tenant_use_case, send_partner_welcome_email_use_case,
     authenticate_google_user_use_case, demo_login_use_case,
     create_pix_payment_use_case, get_payment_status_use_case, confirm_payment_use_case
 )
@@ -502,6 +502,24 @@ def create_tenant(
         return use_case.execute(request)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.post(
+    "/super-admin/tenants/{slug}/send-welcome-email",
+    summary="Reenviar E-mail de Boas-vindas e Acesso ao Parceiro",
+    description="Dispara novamente o e-mail de credenciamento com instruções de login via Google."
+)
+def send_partner_welcome_email(
+    slug: str = Path(..., description="Slug do parceiro credenciado"),
+    use_case: SendPartnerWelcomeEmailUseCase = Depends(send_partner_welcome_email_use_case)
+):
+    try:
+        success = use_case.execute(slug)
+        return {"success": success, "message": f"E-mail de acesso enviado com sucesso para o parceiro '{slug}'."}
+    except TenantNotFoundException as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 # ==============================================================================

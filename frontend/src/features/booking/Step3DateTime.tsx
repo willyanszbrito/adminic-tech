@@ -172,7 +172,7 @@ export const Step3DateTime: React.FC<Step3DateTimeProps> = ({
                 ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
                 : 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30'
             }`}>
-              {availability.available_slots} horarios livres
+              {availability.available_slots} horários livres
             </span>
           )}
         </div>
@@ -186,14 +186,14 @@ export const Step3DateTime: React.FC<Step3DateTimeProps> = ({
         ) : !availability || availability.slots.length === 0 ? (
           <div className="py-12 text-center text-slate-500 dark:text-slate-400 space-y-3">
             <AlertCircle className="w-10 h-10 text-rose-500/80 mx-auto" />
-            <p className="text-sm font-semibold text-slate-900 dark:text-white">Nenhum horario disponivel para esta data</p>
+            <p className="text-sm font-semibold text-slate-900 dark:text-white">Nenhum horário disponível para esta data</p>
             <p className="text-xs max-w-sm mx-auto">
-              O estabelecimento pode estar fechado neste dia ou todos os horarios ja foram preenchidos. Por favor, escolha outra data acima.
+              O estabelecimento pode estar fechado neste dia ou todos os horários já foram preenchidos. Por favor, escolha outra data acima.
             </p>
           </div>
         ) : (
           <div className="space-y-6">
-            {renderSlotGroup('Manha', Sunrise, morningSlots)}
+            {renderSlotGroup('Manhã', Sunrise, morningSlots)}
             {renderSlotGroup('Tarde', Sun, afternoonSlots)}
             {renderSlotGroup('Noite', Sunset, eveningSlots)}
           </div>
