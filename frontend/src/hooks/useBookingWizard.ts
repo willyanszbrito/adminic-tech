@@ -64,7 +64,7 @@ export function useBookingWizard() {
     }
 
     // 4. Default fallback tenant
-    return 'barbearia-vintage';
+    return 'barbearia-campelo';
   };
 
   const [slug, setSlug] = useState<string>(getInitialSlug());
