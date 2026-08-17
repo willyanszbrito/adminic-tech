@@ -1,0 +1,10 @@
+{
+  "name": "adminic-tech",
+  "compatibility_date": "2026-08-17",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "single-page-application"
+  }
+}
