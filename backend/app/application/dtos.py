@@ -178,9 +178,9 @@ class CreateAppointmentRequestDTO(BaseModel):
     staff_id: Optional[str] = Field(None, description="ID do colaborador ou nulo para Qualquer Especialista")
     appointment_date: str = Field(..., description="Data do agendamento (YYYY-MM-DD)", examples=["2026-08-17"])
     start_time: str = Field(..., description="Horário de início (HH:MM)", examples=["14:30"])
-    customer_name: str = Field(..., min_length=3, description="Nome completo do cliente", examples=["Valerius Maximus da Silva"])
-    customer_phone: str = Field(..., min_length=8, description="Telefone de contato", examples=["(11) 98765-4321"])
-    customer_email: EmailStr = Field(..., description="E-mail obrigatório", examples=["valerius.maximus@empresa.com.br"])
+    customer_name: str = Field(..., min_length=3, description="Nome completo do cliente", examples=["Carlos Eduardo Mendes"])
+    customer_phone: str = Field(..., min_length=8, description="Telefone de contato", examples=["(92) 98489-9955"])
+    customer_email: EmailStr = Field(..., description="E-mail obrigatório", examples=["cliente@exemplo.com"])
     notes: Optional[str] = Field(None, description="Observações especiais")
     payment_method: Optional[str] = Field("venue", description="Forma de pagamento: 'pix' para pagamento online instantâneo ou 'venue' para pagar no local")
 

@@ -222,7 +222,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     required
                     value={partnerEmail}
                     onChange={(e) => setPartnerEmail(e.target.value)}
-                    placeholder="seu.email@empresa.com.br"
+                    placeholder="seuemail@exemplo.com"
                     className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all"
                   />
                 </div>

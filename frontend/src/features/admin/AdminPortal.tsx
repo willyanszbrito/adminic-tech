@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { Tenant, DashboardMetrics, Service, ServiceCategory, Staff } from '../../types';
 import { api } from '../../services/api';
+import { StaffEmergencyCancelModal } from '../../components/booking/StaffEmergencyCancelModal';
 import {
   TrendingUp,
   DollarSign,
@@ -29,7 +30,8 @@ import {
   Upload,
   Image as ImageIcon,
   X,
-  Tag
+  Tag,
+  AlertTriangle
 } from 'lucide-react';
 
 export interface AdminPortalProps {
@@ -102,11 +104,24 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [primaryColor, setPrimaryColor] = useState(tenant.theme.primary_color);
   const [secondaryColor, setSecondaryColor] = useState(tenant.theme.secondary_color);
   const [accentColor, setAccentColor] = useState(tenant.theme.accent_color);
-  const [badgeText, setBadgeText] = useState(tenant.theme.badge_text);
+  const [badgeText, setBadgeText] = useState(tenant.theme.badge_text || '');
+  const [selectedAppointmentForCancel, setSelectedAppointmentForCancel] = useState<any | null>(null);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleConfirmCancelAppointment = async (voucherCode: string) => {
+    try {
+      await api.cancelAppointment(tenant.slug, voucherCode);
+      setSuccessMessage(`Atendimento (${voucherCode}) cancelado com sucesso. O cliente pode ser estornado em 100% ou reagendado.`);
+      onRefreshTenant();
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Erro ao cancelar atendimento.');
+      throw err;
+    }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, target: 'logo' | 'banner' | 'service' | 'staff') => {
     const file = e.target.files?.[0];
@@ -570,32 +585,52 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     <th className="pb-3 font-semibold">Profissional</th>
                     <th className="pb-3 font-semibold">Valor</th>
                     <th className="pb-3 font-semibold">Status</th>
+                    <th className="pb-3 font-semibold text-right">Ação</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-black/5 dark:divide-white/5">
                   {metrics?.recent_appointments && metrics.recent_appointments.length > 0 ? (
-                    metrics.recent_appointments.map((apt) => (
-                      <tr key={apt.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                        <td className="py-3 font-mono font-bold text-brand-primary">{apt.voucher_code}</td>
-                        <td className="py-3 font-medium text-slate-900 dark:text-white">{apt.customer_name}</td>
-                        <td className="py-3">{apt.appointment_date} às {apt.start_time}</td>
-                        <td className="py-3">{apt.service?.name || (apt as any).service_name || 'Serviço'}</td>
-                        <td className="py-3">{apt.staff?.name || (apt as any).staff_name || 'Profissional'}</td>
-                        <td className="py-3 font-semibold">R$ {apt.price.toFixed(2)}</td>
-                        <td className="py-3">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            apt.status === 'confirmed'
-                              ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                              : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
-                          }`}>
-                            {apt.status === 'confirmed' ? 'Confirmado' : apt.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
+                    metrics.recent_appointments.map((apt) => {
+                      const isConfirmed = apt.status === 'confirmed';
+                      return (
+                        <tr key={apt.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                          <td className="py-3 font-mono font-bold text-brand-primary">{apt.voucher_code}</td>
+                          <td className="py-3 font-medium text-slate-900 dark:text-white">{apt.customer_name}</td>
+                          <td className="py-3">{apt.appointment_date} às {apt.start_time}</td>
+                          <td className="py-3">{apt.service?.name || (apt as any).service_name || 'Serviço'}</td>
+                          <td className="py-3">{apt.staff?.name || (apt as any).staff_name || 'Profissional'}</td>
+                          <td className="py-3 font-semibold">R$ {apt.price.toFixed(2)}</td>
+                          <td className="py-3">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              isConfirmed
+                                ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                                : 'bg-rose-500/15 text-rose-600 dark:text-rose-400'
+                            }`}>
+                              {isConfirmed ? 'Confirmado' : 'Cancelado'}
+                            </span>
+                          </td>
+                          <td className="py-3 text-right">
+                            {isConfirmed ? (
+                              <button
+                                onClick={() => {
+                                  setSelectedAppointmentForCancel(apt);
+                                  setIsCancelModalOpen(true);
+                                }}
+                                className="px-2.5 py-1 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-[11px] font-semibold flex items-center gap-1 ml-auto cursor-pointer transition-colors"
+                              >
+                                <AlertTriangle className="w-3 h-3" />
+                                <span>Imprevisto</span>
+                              </button>
+                            ) : (
+                              <span className="text-[11px] text-slate-400 italic">Cancelado</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
-                      <td colSpan={7} className="py-8 text-center text-slate-500">
+                      <td colSpan={8} className="py-8 text-center text-slate-500">
                         Nenhum agendamento registrado recentemente.
                       </td>
                     </tr>
@@ -1615,6 +1650,16 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           </form>
         </div>
       )}
+
+      {/* Emergency Cancellation Modal with WhatsApp and Email Templates */}
+      <StaffEmergencyCancelModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        appointment={selectedAppointmentForCancel}
+        tenant={tenant}
+        staffName={selectedAppointmentForCancel?.staff?.name || selectedAppointmentForCancel?.staff_name || 'Profissional'}
+        onConfirmCancel={handleConfirmCancelAppointment}
+      />
     </div>
   );
 };

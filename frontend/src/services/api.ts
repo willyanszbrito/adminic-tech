@@ -16,6 +16,8 @@ import {
 } from '../types';
 import { MOCK_TENANTS, MOCK_CATALOGS, MOCK_STAFF } from './mockData';
 
+import { normalizeTenantSlug } from './domainHelper';
+
 const isBrowser = typeof window !== 'undefined';
 const isLocalhost = isBrowser && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
@@ -92,7 +94,8 @@ export const api = {
     }
   },
 
-  async getTenant(slug: string): Promise<Tenant> {
+  async getTenant(rawSlug: string): Promise<Tenant> {
+    const slug = normalizeTenantSlug(rawSlug);
     try {
       return await fetchJSON<Tenant>(`/tenants/${slug}`);
     } catch (e) {
@@ -103,7 +106,8 @@ export const api = {
     }
   },
 
-  async getCatalog(slug: string): Promise<CatalogResponse> {
+  async getCatalog(rawSlug: string): Promise<CatalogResponse> {
+    const slug = normalizeTenantSlug(rawSlug);
     try {
       return await fetchJSON<CatalogResponse>(`/tenants/${slug}/services`);
     } catch (e) {
@@ -112,7 +116,8 @@ export const api = {
     }
   },
 
-  async getStaff(slug: string, serviceId?: string): Promise<Staff[]> {
+  async getStaff(rawSlug: string, serviceId?: string): Promise<Staff[]> {
+    const slug = normalizeTenantSlug(rawSlug);
     try {
       const query = serviceId ? `?service_id=${encodeURIComponent(serviceId)}` : '';
       return await fetchJSON<Staff[]>(`/tenants/${slug}/staff${query}`);

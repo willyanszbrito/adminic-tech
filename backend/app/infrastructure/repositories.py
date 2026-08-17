@@ -128,25 +128,6 @@ class InMemoryStaffRepository(IStaffRepository):
 class InMemoryAppointmentRepository(IAppointmentRepository):
     def __init__(self):
         self._appointments: Dict[str, Appointment] = {}
-        # Preload model appointment for demonstration
-        demo_appt = Appointment(
-            id="apt-demo-seed-1",
-            tenant_id="tnt-barbearia-campelo",
-            voucher_code="ADM-DEMO1",
-            service_id="srv-campelo-corte",
-            staff_id="stf-julio-sousa",
-            appointment_date="2026-08-18",
-            start_time="14:00",
-            end_time="14:30",
-            customer_name="Valerius Maximus",
-            customer_phone="(92) 98888-7777",
-            customer_email="valerius.maximus@empresa.com.br",
-            notes="Cliente preferencial",
-            status="confirmed",
-            price=30.00,
-            created_at=datetime.now(timezone.utc)
-        )
-        self._appointments[demo_appt.id] = demo_appt
 
     def get_appointments_for_staff_and_date(self, tenant_id: str, staff_id: str, appointment_date: str) -> List[Appointment]:
         return [

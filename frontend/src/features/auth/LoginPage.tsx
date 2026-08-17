@@ -42,7 +42,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     if (window.google?.accounts?.id) {
       triggerGoogleOneTap();
     } else {
-      loginDemo('usuario.google@empresa.com.br', selectedRole, 'Usuário Google Autenticado', tenant?.slug);
+      loginDemo('gestor@adminic.com.br', selectedRole, 'Usuário Gestor', tenant?.slug);
     }
   };
 

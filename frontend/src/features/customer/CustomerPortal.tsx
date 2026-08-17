@@ -25,7 +25,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
   tenant,
   onNavigateToBooking,
 }) => {
-  const [emailInput, setEmailInput] = useState('valerius.maximus@empresa.com.br');
+  const [emailInput, setEmailInput] = useState('');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -135,7 +135,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
                 required
                 value={emailInput}
                 onChange={(e) => setEmailInput(e.target.value)}
-                placeholder="Informe seu e-mail corporativo cadastrado (ex: seuemail@empresa.com.br)"
+                placeholder="Informe seu e-mail cadastrado (ex: seuemail@exemplo.com)"
                 className="w-full glass-input pl-10 pr-4 py-3 rounded-2xl text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none"
               />
             </div>

@@ -217,6 +217,10 @@ export const MOCK_CATALOGS: Record<string, CatalogResponse> = {
   }
 };
 
+MOCK_CATALOGS['campelo'] = MOCK_CATALOGS['barbearia-campelo'];
+MOCK_CATALOGS['segredosdocorte'] = MOCK_CATALOGS['segredos-do-corte'];
+MOCK_CATALOGS['segredos'] = MOCK_CATALOGS['segredos-do-corte'];
+
 export const MOCK_STAFF: Record<string, Staff[]> = {
   'barbearia-campelo': [
     {
@@ -278,3 +282,8 @@ export const MOCK_STAFF: Record<string, Staff[]> = {
     }
   ]
 };
+
+MOCK_STAFF['campelo'] = MOCK_STAFF['barbearia-campelo'];
+MOCK_STAFF['segredosdocorte'] = MOCK_STAFF['segredos-do-corte'];
+MOCK_STAFF['segredos'] = MOCK_STAFF['segredos-do-corte'];
+

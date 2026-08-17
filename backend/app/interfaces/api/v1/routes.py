@@ -204,8 +204,8 @@ def cancel_appointment(
     description="Retorna todos os agendamentos vinculados ao e-mail informado para acompanhamento, reagendamento ou cancelamento."
 )
 def get_customer_appointments(
-    slug: str = Path(..., description="Slug do parceiro", examples=["barbearia-vintage"]),
-    email: str = Query(..., description="E-mail do titular do agendamento", examples=["valerius.maximus@empresa.com.br"]),
+    slug: str = Path(..., description="Slug do parceiro", examples=["barbearia-campelo"]),
+    email: str = Query(..., description="E-mail do titular do agendamento", examples=["cliente@exemplo.com"]),
     use_case: GetCustomerAppointmentsUseCase = Depends(get_customer_appointments_use_case)
 ):
     try:

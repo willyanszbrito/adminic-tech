@@ -56,43 +56,48 @@ const AppContent: React.FC = () => {
     setThemeMode((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  // 2. Initial Portal View: Landing page default for root, direct booking for subdomains/slugs
+  // 2. Initial Portal View: Preserves active session / view across page reloads
   const getInitialView = (): PortalView | 'landing' => {
     if (typeof window === 'undefined') return 'landing';
 
-    // Se for subdomínio dedicado de um parceiro (ex: campelo.adminic.com.br ou segredosdocorte.adminic.com.br)
-    if (isDedicated) {
-      const params = new URLSearchParams(window.location.search);
-      const viewParam = params.get('view') as PortalView;
-      if (viewParam && ['booking', 'customer', 'staff', 'admin'].includes(viewParam)) {
-        return viewParam;
-      }
-      return 'booking';
-    }
-
+    // 1. Query parameter ?view=... (explicit parameter in URL)
     const params = new URLSearchParams(window.location.search);
     const viewParam = params.get('view') as PortalView | 'landing';
     if (viewParam && ['landing', 'booking', 'customer', 'staff', 'admin', 'super-admin'].includes(viewParam)) {
+      if (isDedicated && viewParam === 'landing') return 'booking';
       return viewParam;
     }
 
+    // 2. URL Pathname (e.g. /meus-agendamentos, /colaborador, /gestao, /admin, /super-admin)
     const path = window.location.pathname.toLowerCase().replace(/^\/+|\/+$/g, '');
     if (path.includes('meus-agendamentos') || path.includes('cliente')) return 'customer';
     if (path.includes('colaborador') || path.includes('staff')) return 'staff';
     if (path.includes('gestao') || (path.includes('admin') && !path.includes('super-admin'))) return 'admin';
     if (path.includes('super-admin')) return 'super-admin';
 
-    // Se houver um slug de parceiro na URL (ex: /barbearia-campelo)
-    if (path && !['meus-agendamentos', 'cliente', 'colaborador', 'staff', 'gestao', 'admin', 'super-admin'].includes(path)) {
+    // 3. Persistent Storage (maintains view on page refresh F5)
+    try {
+      const savedView = sessionStorage.getItem('adminic_active_view') || localStorage.getItem('adminic_active_view');
+      if (savedView && ['landing', 'booking', 'customer', 'staff', 'admin', 'super-admin'].includes(savedView)) {
+        if (isDedicated && savedView === 'landing') return 'booking';
+        return savedView as PortalView | 'landing';
+      }
+    } catch {}
+
+    // 4. Dedicated partner subdomain default
+    if (isDedicated) {
       return 'booking';
     }
 
-    // Se houver query param explícito de parceiro
+    // 5. If there is a partner slug in path or query
+    if (path && !['meus-agendamentos', 'cliente', 'colaborador', 'staff', 'gestao', 'admin', 'super-admin'].includes(path)) {
+      return 'booking';
+    }
     if (params.get('slug') || params.get('tenant')) {
       return 'booking';
     }
 
-    // Padrão: Landing Page Institucional / Comercial da IA Adminic
+    // Default: Landing Page Institucional
     return 'landing';
   };
 
@@ -111,16 +116,18 @@ const AppContent: React.FC = () => {
   }, [isDedicated, wizard.tenant]);
 
   const handleSelectView = (view: PortalView | 'landing') => {
-    if (isDedicated && view === 'landing') {
-      setCurrentView('booking');
-      return;
-    }
-    setCurrentView(view);
+    const targetView = (isDedicated && view === 'landing') ? 'booking' : view;
+    setCurrentView(targetView);
+    try {
+      sessionStorage.setItem('adminic_active_view', targetView);
+      localStorage.setItem('adminic_active_view', targetView);
+    } catch {}
+
     const url = new URL(window.location.href);
-    if (view === 'landing') {
+    if (targetView === 'landing') {
       url.searchParams.delete('view');
     } else {
-      url.searchParams.set('view', view);
+      url.searchParams.set('view', targetView);
     }
     window.history.pushState({}, '', url.toString());
   };
@@ -130,8 +137,8 @@ const AppContent: React.FC = () => {
     handleSelectView('booking');
   };
 
-  // Render Loading Spinner
-  if (wizard.isLoading && currentView === 'booking') {
+  // Render Loading Spinner while tenant data is loading
+  if (wizard.isLoading && !wizard.tenant) {
     return <LoadingSpinner slug={wizard.slug} />;
   }
 
@@ -166,7 +173,14 @@ const AppContent: React.FC = () => {
     );
   }
 
-  const tenant = wizard.tenant || (wizard.allTenants.length > 0 ? wizard.allTenants[0] : MOCK_TENANTS[0]);
+  const targetSlug = wizard.slug;
+  const fallbackTenant = 
+    wizard.allTenants.find(t => t.slug === targetSlug) || 
+    MOCK_TENANTS.find(t => t.slug === targetSlug) || 
+    wizard.allTenants[0] || 
+    MOCK_TENANTS[0];
+
+  const tenant = wizard.tenant || fallbackTenant;
 
   return (
     <div className="min-h-screen relative selection:bg-brand-primary/30 selection:text-brand-primary pb-20">

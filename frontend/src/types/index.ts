@@ -177,7 +177,9 @@ export interface Appointment {
   id: string;
   tenant_slug: string;
   voucher_code: string;
+  service_id?: string;
   service: Service;
+  staff_id?: string;
   staff: Staff;
   appointment_date: string;
   start_time: string;

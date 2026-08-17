@@ -10,6 +10,7 @@ import {
   WizardStep,
 } from '../types';
 import { api } from '../services/api';
+import { isDedicatedSubdomain, getDedicatedSubdomainSlug, normalizeTenantSlug } from '../services/domainHelper';
 
 const RESERVED_SYSTEM_ROUTES = [
   'meus-agendamentos',
@@ -27,60 +28,54 @@ const RESERVED_SYSTEM_ROUTES = [
 
 export function useBookingWizard() {
   const getInitialSlug = (): string => {
-    // 0. Check custom partner subdomain (e.g. campelo.adminic.com.br or segredos.adminic.com.br)
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname.toLowerCase();
-      if (hostname.endsWith('.adminic.com.br') || hostname.endsWith('.adminic.tech')) {
-        const subdomain = hostname.split('.')[0];
-        if (!['ia', 'api', 'app', 'admin', 'www', 'mail', 'webmail'].includes(subdomain)) {
-          if (subdomain === 'campelo' || subdomain === 'barbearia-campelo') {
-            sessionStorage.setItem('adminic_active_tenant', 'barbearia-campelo');
-            return 'barbearia-campelo';
-          }
-          if (subdomain === 'segredos' || subdomain === 'segredosdocorte' || subdomain === 'segredos-do-corte') {
-            sessionStorage.setItem('adminic_active_tenant', 'segredos-do-corte');
-            return 'segredos-do-corte';
-          }
-          sessionStorage.setItem('adminic_active_tenant', subdomain);
-          return subdomain;
-        }
+    // 0. Dedicated Subdomain: Top priority, strict isolation (e.g. campelo.adminic.com.br or segredosdocorte.adminic.com.br)
+    if (isDedicatedSubdomain()) {
+      const dedicated = getDedicatedSubdomainSlug();
+      if (dedicated) {
+        sessionStorage.setItem('adminic_active_tenant', dedicated);
+        return dedicated;
       }
     }
 
     // 1. Check query param ?tenant=... or ?slug=...
-    const params = new URLSearchParams(window.location.search);
-    const tenantParam = params.get('tenant') || params.get('slug');
-    if (tenantParam) {
-      sessionStorage.setItem('adminic_active_tenant', tenantParam);
-      return tenantParam;
-    }
-
-    // 2. Parse URL pathname
-    const pathParts = window.location.pathname.replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
-
-    if (pathParts.length > 0) {
-      const firstSegment = pathParts[0].toLowerCase();
-
-      // If the first segment is a partner slug (e.g. /clinica-dermatologia or /barbearia-vintage)
-      if (!RESERVED_SYSTEM_ROUTES.includes(firstSegment) && !firstSegment.includes('.')) {
-        sessionStorage.setItem('adminic_active_tenant', firstSegment);
-        return firstSegment;
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tenantParam = params.get('tenant') || params.get('slug');
+      if (tenantParam) {
+        const norm = normalizeTenantSlug(tenantParam);
+        sessionStorage.setItem('adminic_active_tenant', norm);
+        return norm;
       }
 
-      // If the first segment is a reserved portal (e.g. /meus-agendamentos/clinica-dermatologia)
-      if (pathParts.length > 1) {
-        const secondSegment = pathParts[1].toLowerCase();
-        if (!RESERVED_SYSTEM_ROUTES.includes(secondSegment)) {
-          sessionStorage.setItem('adminic_active_tenant', secondSegment);
-          return secondSegment;
+      // 2. Parse URL pathname
+      const pathParts = window.location.pathname.replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
+
+      if (pathParts.length > 0) {
+        const firstSegment = pathParts[0].toLowerCase();
+
+        // If the first segment is a partner slug (e.g. /segredos-do-corte or /barbearia-campelo)
+        if (!RESERVED_SYSTEM_ROUTES.includes(firstSegment) && !firstSegment.includes('.')) {
+          const norm = normalizeTenantSlug(firstSegment);
+          sessionStorage.setItem('adminic_active_tenant', norm);
+          return norm;
+        }
+
+        // If the first segment is a reserved portal (e.g. /meus-agendamentos/segredos-do-corte)
+        if (pathParts.length > 1) {
+          const secondSegment = pathParts[1].toLowerCase();
+          if (!RESERVED_SYSTEM_ROUTES.includes(secondSegment)) {
+            const norm = normalizeTenantSlug(secondSegment);
+            sessionStorage.setItem('adminic_active_tenant', norm);
+            return norm;
+          }
         }
       }
-    }
 
-    // 3. Check persistent storage from previous session
-    const saved = sessionStorage.getItem('adminic_active_tenant');
-    if (saved && saved.trim() !== '') {
-      return saved;
+      // 3. Check persistent storage from previous session
+      const saved = sessionStorage.getItem('adminic_active_tenant');
+      if (saved && saved.trim() !== '') {
+        return normalizeTenantSlug(saved);
+      }
     }
 
     // 4. Default fallback tenant

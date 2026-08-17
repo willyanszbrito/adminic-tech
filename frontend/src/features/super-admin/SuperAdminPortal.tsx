@@ -521,7 +521,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                 <input
                   type="email"
                   required
-                  placeholder="contato@empresa.com.br"
+                  placeholder="contato@estabelecimento.com"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-amber-400"
