@@ -1,0 +1,14 @@
+Instrução para IA: Sempre que novos arquivos, funções ou dependências forem adicionados ou alterados nesta pasta, atualize este Leia-me.txt analisando hashes e metadados para manter a documentação sincronizada.
+
+# Camada de Infraestrutura (Infrastructure Layer)
+Diretório: backend/app/infrastructure
+
+## Finalidade
+Implementa adaptadores para persistência, mensageria e serviços de terceiros conforme as interfaces do domínio:
+- repositories.py: Implementação em memória (InMemoryTenantRepository, InMemoryCatalogRepository, InMemoryStaffRepository, InMemoryAppointmentRepository e InMemoryPaymentRepository) com persistência atômica, busca de agendamentos, atualização de colaboradores, cálculo de métricas e controle de pagamentos. Facilmente substituível por PostgreSQL / SQLAlchemy em produção.
+- mercadopago_gateway.py: Gateway oficial do Mercado Pago para pagamentos PIX instantâneos (Sandbox e Produção real de R$ 0,01 para homologação). Gera payload EMV Copia e Cola, QR Code dinâmico em Base64, links de checkout e validação de Webhooks.
+- whatsapp_service.py: Serviço de mensageria via WhatsApp integrado diretamente à API oficial Meta WhatsApp Business (Graph API v25.0), enviando confirmações completas com links para o cliente e alertas técnicos para o profissional.
+- email_service.py: Serviço de e-mails transacionais via Gmail SMTP (adminicbr@gmail.com) com disparo de vouchers corporativos estilizados em HTML com 1 clique para Google Agenda.
+- seed_data.py: Carga inicial de dados corporativos com 6 estabelecimentos parceiros completos (Aura Barber Club, Veritas Clínica Dermatológica, Studio Elegance Estética e Beleza, Apex Detail Studio Automotivo, Barbearia Campelo e Segredos do Corte), contemplando acentuação gramatical rigorosa em Língua Portuguesa e parâmetros de Trial/PIX real.
+- notification_service.py: Gerador de payloads de comunicação (E-mail, WhatsApp Direct Links e URLs do Google Agenda).
+

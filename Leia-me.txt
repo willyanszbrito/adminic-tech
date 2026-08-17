@@ -1,0 +1,31 @@
+Instrução para IA: Sempre que novos arquivos, funções ou dependências forem adicionados ou alterados nesta pasta, atualize este Leia-me.txt analisando hashes e metadados para manter a documentação sincronizada.
+
+# Adminic Smart Booking - Plataforma Multi-Tenant de Agendamento Inteligente
+
+## 1. Visão Geral da Arquitetura
+A plataforma Adminic é uma solução ágil, desacoplada e multi-tenant para prestadores de serviços, baseada em Clean Architecture e Domain-Driven Design (DDD).
+
+- Frontend Web: Acessível via `ia.adminic.com.br/:slug_parceiro`
+- API Central: Centralizada no subdomínio `api.adminic.com.br`
+- Zero Hardcode: 100% dos dados (identidade visual, catálogo de serviços, profissionais, horários e métricas) são consumidos dinamicamente da API.
+- Gramática e Acentuação: Rigoroso padrão culto da Língua Portuguesa (Brasil) em todos os textos da interface, esquemas e dados.
+
+## 2. Portais e Rotas Disponíveis
+
+| Portal / Perfil | Rota / URL Frontend | Endpoint Base da API | Finalidade Principal |
+| :--- | :--- | :--- | :--- |
+| **Agendamento Público** | `http://localhost:3000/?view=booking` ou `/:slug` | `/api/v1/tenants/{slug}/...` | Fluxo de reserva para clientes em 5 etapas progressivas com confirmação imediata e voucher. |
+| **Portal do Cliente** | `http://localhost:3000/?view=customer` ou `/meus-agendamentos` | `/api/v1/tenants/{slug}/customer/appointments` | Autoatendimento para consulta de reservas por e-mail, reagendamento autônomo e cancelamento. |
+| **Painel do Colaborador** | `http://localhost:3000/?view=staff` ou `/colaborador` | `/api/v1/tenants/{slug}/staff/{id}/...` | Gestão de perfil profissional, jornada e registro de bloqueios de horário na agenda. |
+| **Gestão do Parceiro** | `http://localhost:3000/?view=admin` ou `/gestao` | `/api/v1/tenants/{slug}/admin/...` | Dashboard de faturamento, ocupação, gestão do catálogo de serviços e editor de identidade visual. |
+| **Super Administrador** | `http://localhost:3000/?view=super-admin` ou `/super-admin` | `/api/v1/super-admin/...` | Visão executiva global, controle de trials de 30 dias, credenciamento e impersonação direta. |
+
+## 3. Contratos e Documentação da API
+- Swagger UI Interativo: `http://localhost:8000/docs`
+- Redoc: `http://localhost:8000/redoc`
+- Especificação JSON: `http://localhost:8000/openapi.json`
+- Especificação YAML: `http://localhost:8000/openapi.yaml`
+
+## 4. Testes Automatizados
+- Backend: 19 testes de integração e regras de negócio com 100% de aprovação (`python -m pytest tests -v`).
+- Frontend: Build de produção TypeScript e Vite validado com 0 erros (`npm run build`).

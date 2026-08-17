@@ -1,0 +1,10 @@
+Instrução para IA: Sempre que novos arquivos, funções ou dependências forem adicionados ou alterados nesta pasta, atualize este Leia-me.txt analisando hashes e metadados para manter a documentação sincronizada.
+
+# Camada de Domínio (Domain Layer)
+Diretório: backend/app/domain
+
+## Finalidade
+Núcleo central de regras de negócio e contratos abstratos, totalmente isolado de bibliotecas e frameworks externos:
+- entities.py: Entidades de negócio puras (Tenant, ThemeConfig, ServiceCategory, Service, Staff, BlockedSlot, WorkingHours, TimeSlot, Customer, Appointment). Inclui controle de ciclo de vida do período de testes (trial_status, trial_days_remaining, trial_ends_at) e bloqueios de agenda.
+- interfaces.py: Portas abstratas (Interfaces de Repositório e Notificação) que definem contratos para persistência, busca de agendamentos por e-mail, métricas administrativas, alteração de perfis e orquestração do ecossistema.
+- exceptions.py: Exceções de domínio semânticas (TenantNotFoundException, SlotUnavailableException, AppointmentConflictException, InvalidAppointmentStateException).

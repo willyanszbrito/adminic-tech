@@ -1,0 +1,12 @@
+Instrução para IA: Sempre que novos arquivos, funções ou dependências forem adicionados ou alterados nesta pasta, atualize este Leia-me.txt analisando hashes e metadados para manter a documentação sincronizada.
+
+# Módulo de Agendamento Público (Booking Feature)
+Diretório: frontend/src/features/booking
+
+## Finalidade
+Contém os componentes modulares do fluxo progressivo de agendamento público (5 etapas) para o cliente final:
+- Step 1 (Step1Services.tsx): Seleção de serviço e categoria com badges de destaque e precificação.
+- Step 2 (Step2Staff.tsx): Seleção do profissional especializado ou opção "Qualquer Profissional Disponível".
+- Step 3 (Step3DateTime.tsx): Calendário dinâmico com cálculo de disponibilidade e seleção de horários em tempo real.
+- Step 4 (Step4CustomerForm.tsx): Formulário de identificação do cliente com validações estritas de e-mail, telefone e LGPD.
+- Step 5 (Step5Success.tsx): Comprovante e voucher com código alfanumérico, atalhos do Google Agenda e WhatsApp.

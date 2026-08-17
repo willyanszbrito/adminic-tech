@@ -1,0 +1,12 @@
+Instrução para IA: Sempre que novos arquivos, funções ou dependências forem adicionados ou alterados nesta pasta, atualize este Leia-me.txt analisando hashes e metadados para manter a documentação sincronizada.
+
+# Módulo do Profissional / Colaborador (Staff Feature)
+Diretório: frontend/src/features/staff
+
+## Finalidade
+Permite ao colaborador gerenciar sua atuação, jornada e disponibilidade:
+- Seleção e impersonação do profissional autenticado.
+- Edição dos dados de perfil profissional (Nome, Cargo, Biografia e URL da Foto).
+- Visualização da reputação média e contagem de avaliações recebidas.
+- Bloqueio de horários na agenda para compromissos internos, intervalos ou capacitações.
+- Consulta da jornada semanal e turnos de atendimento configurados.

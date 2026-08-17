@@ -1,0 +1,17 @@
+Instrução para IA: Sempre que novos arquivos, funções ou dependências forem adicionados ou alterados nesta pasta, atualize este Leia-me.txt analisando hashes e metadados para manter a documentação sincronizada.
+
+# Frontend Web - Adminic Smart Booking
+Diretório: frontend
+
+## Arquitetura e Estrutura de Features
+Desenvolvido em React 18, TypeScript, Tailwind CSS e Lucide Icons, modularizado por contexto de atuação:
+- src/features/booking: Fluxo público progressivo de agendamento em 5 etapas.
+- src/features/customer: Portal de autoatendimento para o cliente consultar, reagendar ou cancelar reservas.
+- src/features/staff: Painel do profissional para edição de perfil, jornada e bloqueio de agenda.
+- src/features/admin: Painel do gestor com métricas de faturamento, gestão de catálogo e customização de cores/tema.
+- src/features/super-admin: Painel executivo global com métricas do ecossistema, controle de trials de 30 dias e impersonação de parceiros.
+- src/features/shared: Componentes universais (TopNav com alternador de portais e tema, LoadingSpinner reativo claro/escuro).
+
+## Temas e Acessibilidade
+- Modo Padrão: Modo Claro (Light Mode) sofisticado.
+- Detecção Automática: Respeita as preferências do sistema operacional do usuário (`prefers-color-scheme: dark`) e permite alternância manual via botão na barra superior.

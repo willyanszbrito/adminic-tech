@@ -1,0 +1,14 @@
+Instrução para IA: Sempre que novos arquivos, funções ou dependências forem adicionados ou alterados nesta pasta, atualize este Leia-me.txt analisando hashes e metadados para manter a documentação sincronizada.
+
+# Camada de Interfaces de Entrada / API (Interfaces Layer)
+Diretório: backend/app/interfaces
+
+## Finalidade
+Exposição dos endpoints REST e injeção de dependências:
+- api/v1/routes.py:
+  - Rotas Públicas: Catálogo, Disponibilidade de Horários, Criação e Cancelamento de Agendamentos.
+  - Rotas do Cliente Final: Consulta de agendamentos por e-mail e reagendamento autônomo.
+  - Rotas do Colaborador: Atualização de perfil profissional e bloqueio de agenda.
+  - Rotas do Gestor do Estabelecimento: Dashboard de métricas, criação de serviços e customização de identidade visual.
+  - Rotas do Super Administrador: Panorama global do ecossistema e credenciamento de novos parceiros com 30 dias de Trial.
+- api/deps.py: Provedores de injeção de dependência FastAPI (Depends) para orquestração limpa de casos de uso.

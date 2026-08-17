@@ -1,0 +1,12 @@
+Instrução para IA: Sempre que novos arquivos, funções ou dependências forem adicionados ou alterados nesta pasta, atualize este Leia-me.txt analisando hashes e metadados para manter a documentação sincronizada.
+
+# Módulo de Autoatendimento do Cliente (Customer Feature)
+Diretório: frontend/src/features/customer
+
+## Finalidade
+Permite ao cliente final consultar e gerenciar todos os seus agendamentos vinculados ao seu e-mail:
+- Consulta de reservas ativas e canceladas por endereço de e-mail.
+- Exibição de vouchers de confirmação, horários, profissional responsável e valor total.
+- Reagendamento autônomo com validação imediata de disponibilidade na API.
+- Cancelamento seguro de reservas respeitando as políticas do estabelecimento.
+- Acesso rápido à integração com Google Agenda e contato direto via WhatsApp.

@@ -1,0 +1,23 @@
+Instrução para IA: Sempre que novos arquivos, funções ou dependências forem adicionados ou alterados nesta pasta, atualize este Leia-me.txt analisando hashes e metadados para manter a documentação sincronizada.
+
+# Backend API - Adminic Smart Booking
+Diretório: backend
+
+## Arquitetura
+Desenvolvido em Python 3.10+ e FastAPI seguindo os princípios de Arquitetura Hexagonal (Ports & Adapters) e Domain-Driven Design (DDD):
+- app/domain: Entidades, Interfaces e Exceções puras de negócio.
+- app/application: Casos de uso e DTOs de validação.
+- app/infrastructure: Repositórios, seed de dados com acentuação rigorosa e gerador de integrações.
+- app/interfaces: Rotas REST e injeção de dependências.
+
+## Endpoints e Documentação da API
+- Swagger UI interativo: http://localhost:8000/docs
+- Redoc: http://localhost:8000/redoc
+- Especificação JSON: http://localhost:8000/openapi.json
+- Especificação YAML: http://localhost:8000/openapi.yaml
+
+## Execução dos Testes Automatizados
+```bash
+python -m pytest tests -v
+```
+Todos os 19 testes automatizados cobrem os fluxos do agendamento público, portal do cliente, portal do colaborador, gestão do gestor e super administrador.

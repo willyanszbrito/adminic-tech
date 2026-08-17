@@ -1,0 +1,11 @@
+Instrução para IA: Sempre que novos arquivos, funções ou dependências forem adicionados ou alterados nesta pasta, atualize este Leia-me.txt analisando hashes e metadados para manter a documentação sincronizada.
+
+# Módulo de Super Administrador Executivo (Super Admin Feature)
+Diretório: frontend/src/features/super-admin
+
+## Finalidade
+Centro de controle global para a equipe executiva da Adminic:
+- Monitoramento de Métricas Consolidadas: Total de Parceiros, Trials Ativos de 30 dias, Volume Financeiro Mensal do Ecossistema e Agendamentos Totais.
+- Listagem e Roster de Parceiros: Controle do período de testes com barra de progresso visual de dias restantes e data limite de expiração.
+- Acesso e Impersonação Direta: Botão para alternar instantaneamente o contexto da interface para qualquer parceiro credenciado.
+- Credenciamento de Novos Parceiros: Cadastro ágil de novas empresas com inicialização automática do período de Trial de 30 dias.

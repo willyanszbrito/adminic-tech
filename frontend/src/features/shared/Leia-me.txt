@@ -1,0 +1,10 @@
+Instrução para IA: Sempre que novos arquivos, funções ou dependências forem adicionados ou alterados nesta pasta, atualize este Leia-me.txt analisando hashes e metadados para manter a documentação sincronizada.
+
+# Módulo de Recursos Compartilhados (Shared Feature)
+Diretório: frontend/src/features/shared
+
+## Finalidade
+Reúne componentes, utilitários e contratos transversais consumidos por todos os portais da aplicação:
+- TopNav.tsx: Barra de navegação global com alternância entre portais (Agendamento Público, Meus Agendamentos, Colaborador, Gestão e Super Admin), seletor de tema claro/escuro e impersonação de parceiro.
+- LoadingSpinner.tsx: Componente de feedback de carregamento universal com suporte reativo e harmônico tanto no Modo Claro quanto no Modo Escuro.
+- Utilitários de formatação de moeda (BRL), cálculo de intervalos e manipulação de datas.

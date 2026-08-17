@@ -1,0 +1,24 @@
+Instrução para IA: Sempre que novos arquivos, funções ou dependências forem adicionados ou alterados nesta pasta, atualize este Leia-me.txt analisando hashes e metadados para manter a documentação sincronizada.
+
+# Camada de Aplicação (Application Layer)
+Diretório: backend/app/application
+
+## Finalidade
+Orquestra os fluxos de casos de uso do sistema, intermediando a camada de domínio e as interfaces de entrada:
+- use_cases.py:
+  - GetTenantBySlugUseCase: Consulta os dados completos do estabelecimento parceiro.
+  - ListAllTenantsUseCase: Lista todos os parceiros ativos para o seletor.
+  - GetTenantCatalogUseCase: Retorna categorias e serviços disponíveis.
+  - GetStaffAvailabilityUseCase: Calcula os slots livres de cada colaborador cruzando compromissos, intervalos e bloqueios.
+  - CreateAppointmentUseCase: Registra novo agendamento com verificação atômica de concorrência e geração de voucher.
+  - CancelAppointmentUseCase: Cancela agendamento existente e dispara notificações.
+  - GetCustomerAppointmentsUseCase: Consulta o histórico de agendamentos por e-mail do cliente.
+  - RescheduleAppointmentUseCase: Reagenda data e horário de uma reserva com validação de conflitos.
+  - UpdateStaffProfileUseCase: Atualiza informações cadastrais e apresentação do colaborador.
+  - BlockStaffSlotUseCase: Insere bloqueios temporários na agenda do profissional.
+  - GetTenantDashboardMetricsUseCase: Consolida métricas gerenciais do parceiro.
+  - CreateServiceUseCase: Adiciona novo serviço ao catálogo do estabelecimento.
+  - UpdateTenantThemeUseCase: Atualiza cores e selos de identidade visual do parceiro.
+  - GetSuperAdminOverviewUseCase: Consolida dados macro de todo o ecossistema Adminic.
+  - CreateTenantUseCase: Cadastra novo parceiro com 30 dias de Trial automático.
+- dtos.py: Schemas de transferência de dados e validação Pydantic com serialização rigorosa.

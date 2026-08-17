@@ -1,0 +1,30 @@
+# ==============================================================================
+# LEIA-ME - CONTEXTO E HISTÓRICO DE MUTAÇÕES DE ENGENHARIA
+# Módulo: Autenticação Segura Unificada (Google One Tap, OAuth 2.0 e Sessão RBAC)
+# Ecossistema: Plataforma de Agendamento Inteligente Multi-Tenant (Adminic)
+# ==============================================================================
+
+Última Atualização: 16 de Agosto de 2026
+Responsável: Inteligência Artificial Antigravity
+
+1. OBJETIVO DO MÓDULO:
+Prover uma camada de identificação e autorização robusta, amigável e segura para os 4 perfis de usuários do ecossistema Adminic:
+- Cliente Final (Customer): Acesso a agendamentos, cancelamentos e vouchers vinculados ao e-mail.
+- Colaborador (Staff): Acesso à agenda técnica individual, bloqueio de horários e atualização de perfil.
+- Gestor do Estabelecimento (Partner Admin): Controle do catálogo de serviços, métricas, faturamento e tema visual.
+- Super Administrador Global (Super Admin): Monitoramento de todos os parceiros credenciados e trials.
+
+2. INTEGRAÇÃO COM GOOGLE IDENTITY SERVICES (GIS):
+- SDK Carregado Dinamicamente: https://accounts.google.com/gsi/client
+- Google Client ID: 564423794141-eum30ivtuprbv8ikk8qi6b7gapgm6a2v.apps.googleusercontent.com
+- Google Project ID: adminic-smart-bookin
+- Mecanismo: Google One Tap automático em rotas protegidas + botão interativo "Continuar com o Google".
+- Validação Criptográfica: O token JWT retornado pelo Google é decodificado e validado pelo backend, emitindo uma sessão segura.
+
+3. ACESSO RÁPIDO DE DEMONSTRAÇÃO (HOMOLOGAÇÃO):
+Para validações ágeis em ambientes locais ou testes funcionais sem login Google, é disponibilizado o seletor rápido com 1 clique para os 4 papéis do sistema.
+
+4. DIRETRIZES DE ESTILO E SOBRIEDADE:
+- Estética sóbria e corporativa com glassmorphism, iluminação sutil e contraste impecável.
+- Ausência total de emojis em textos e documentações.
+- Linguagem formal com acentuação ortográfica rigorosa e substituição integral do caractere "&" pela conjunção "e".

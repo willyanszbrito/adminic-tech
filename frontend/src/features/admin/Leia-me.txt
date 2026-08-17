@@ -1,0 +1,10 @@
+Instrução para IA: Sempre que novos arquivos, funções ou dependências forem adicionados ou alterados nesta pasta, atualize este Leia-me.txt analisando hashes e metadados para manter a documentação sincronizada.
+
+# Módulo de Gestão do Parceiro / Dono do Estabelecimento (Admin Feature)
+Diretório: frontend/src/features/admin
+
+## Finalidade
+Dashboard gerencial para o gestor do estabelecimento parceiro:
+- Métricas e Indicadores Chave: Faturamento Mensal, Agendamentos Confirmados/Cancelados, Ticket Médio, Taxa de Ocupação da Agenda e Contador de dias restantes de Trial.
+- Gestão do Catálogo: Listagem de serviços ativos e cadastro de novos procedimentos com duração, valor e destaque promocional.
+- Identidade Visual e Customização de Tema: Editor dinâmico de cores primária, secundária, de destaque e badge com prévia em tempo real.
