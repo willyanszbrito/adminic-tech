@@ -1,6 +1,13 @@
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from enum import Enum
 from typing import List, Optional, Dict, Any
+
+class UserRole(str, Enum):
+    SUPER_ADMIN = "super_admin"
+    PARTNER_ADMIN = "partner_admin"
+    STAFF = "staff"
+    CUSTOMER = "customer"
 
 @dataclass
 class TenantTheme:

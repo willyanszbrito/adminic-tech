@@ -44,6 +44,10 @@ from app.interfaces.api.deps import (
     authenticate_google_user_use_case, demo_login_use_case,
     create_pix_payment_use_case, get_payment_status_use_case, confirm_payment_use_case
 )
+from app.core.security import (
+    get_current_user_optional, get_current_user_required,
+    require_roles, require_super_admin, sanitize_input_string
+)
 
 router = APIRouter()
 
@@ -205,7 +209,8 @@ def get_customer_appointments(
     use_case: GetCustomerAppointmentsUseCase = Depends(get_customer_appointments_use_case)
 ):
     try:
-        return use_case.execute(slug, email)
+        clean_email = sanitize_input_string(email).lower()
+        return use_case.execute(slug, clean_email)
     except TenantNotFoundException as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 

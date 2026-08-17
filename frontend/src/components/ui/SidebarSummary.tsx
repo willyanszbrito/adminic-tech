@@ -1,6 +1,7 @@
 import React from 'react';
 import { Service, Staff, WizardStep } from '../../types';
 import { Scissors, User, Calendar, Clock, ShieldCheck, ArrowRight } from 'lucide-react';
+import { abTesting, EXPERIMENTS } from '../../services/abTesting';
 
 interface SidebarSummaryProps {
   currentStep: WizardStep;
@@ -10,7 +11,7 @@ interface SidebarSummaryProps {
   selectedDate: string;
   selectedSlot: string;
   slotEndTime?: string;
-  paymentMethod?: 'pix' | 'venue';
+  paymentMethod?: string;
   onProceed: () => void;
   canProceed: boolean;
   isSubmitting?: boolean;
@@ -29,19 +30,21 @@ export const SidebarSummary: React.FC<SidebarSummaryProps> = ({
   canProceed,
   isSubmitting = false,
 }) => {
+  const ctaVariant = abTesting.getVariant(EXPERIMENTS.CTA_BOOKING_BUTTON);
+
   const getButtonText = () => {
     if (isSubmitting) return 'Confirmando agendamento...';
     switch (currentStep) {
       case 1:
         return 'Continuar para Profissional';
       case 2:
-        return 'Continuar para Data e Horario';
+        return 'Continuar para Data e Horário';
       case 3:
-        return 'Continuar para Identificacao';
+        return 'Continuar para Identificação';
       case 4:
-        return 'Finalizar e Confirmar Reserva';
+        return ctaVariant === 'variant_b' ? 'Garantir Meu Horário Exclusivo' : 'Finalizar e Confirmar Reserva';
       default:
-        return 'Avancar';
+        return 'Avançar';
     }
   };
 
@@ -76,7 +79,7 @@ export const SidebarSummary: React.FC<SidebarSummaryProps> = ({
             <Scissors className="w-4 h-4" />
           </div>
           <div className="flex-1 min-w-0">
-            <span className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-medium block">Servico</span>
+            <span className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-medium block">Serviço</span>
             {selectedService ? (
               <div>
                 <p className="font-semibold text-slate-900 dark:text-white truncate">{selectedService.name}</p>
@@ -87,7 +90,7 @@ export const SidebarSummary: React.FC<SidebarSummaryProps> = ({
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-slate-400 dark:text-slate-500 italic">Nenhum servico selecionado</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 italic">Nenhum serviço selecionado</p>
             )}
           </div>
         </div>
@@ -105,9 +108,9 @@ export const SidebarSummary: React.FC<SidebarSummaryProps> = ({
                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{selectedStaff.role}</p>
               </div>
             ) : isAnyStaff ? (
-              <p className="font-medium text-slate-800 dark:text-white text-xs">Primeiro profissional disponivel</p>
+              <p className="font-medium text-slate-800 dark:text-white text-xs">Primeiro profissional disponível</p>
             ) : (
-              <p className="text-xs text-slate-400 dark:text-slate-500 italic">Pendente de selecao</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 italic">Pendente de seleção</p>
             )}
           </div>
         </div>
@@ -118,17 +121,17 @@ export const SidebarSummary: React.FC<SidebarSummaryProps> = ({
             <Calendar className="w-4 h-4" />
           </div>
           <div className="flex-1 min-w-0">
-            <span className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-medium block">Data e Horario</span>
+            <span className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-medium block">Data e Horário</span>
             {selectedDate && selectedSlot ? (
               <div>
                 <p className="font-semibold text-slate-900 dark:text-white capitalize">{formatDateDisplay(selectedDate)}</p>
                 <p className="text-xs text-brand-primary font-medium flex items-center space-x-1 mt-0.5">
                   <Clock className="w-3.5 h-3.5" />
-                  <span>{selectedSlot} {slotEndTime ? `as ${slotEndTime}` : ''}</span>
+                  <span>{selectedSlot} {slotEndTime ? `às ${slotEndTime}` : ''}</span>
                 </p>
               </div>
             ) : (
-              <p className="text-xs text-slate-400 dark:text-slate-500 italic">Escolha o dia e horario</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 italic">Escolha o dia e horário</p>
             )}
           </div>
         </div>
@@ -172,7 +175,7 @@ export const SidebarSummary: React.FC<SidebarSummaryProps> = ({
         {/* Guarantee Banner */}
         <div className="mt-4 pt-3 border-t border-black/5 dark:border-white/5 flex items-center space-x-2 text-[11px] text-slate-500 dark:text-slate-400">
           <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span>Cancelamento gratuito ate 2 horas antes do horario agendado.</span>
+          <span>Cancelamento gratuito até 2 horas antes do horário agendado.</span>
         </div>
       </div>
     </div>

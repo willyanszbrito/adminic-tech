@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 import yaml
 from app.core.config import settings
 from app.core.auditoria import registrar_auditoria
+from app.core.rate_limit import RateLimitMiddleware
 from app.interfaces.api.v1.routes import router as api_v1_router
 from app.domain.exceptions import DomainException
 
@@ -20,6 +21,7 @@ API Central de Agendamento para parceiros, prestadores de serviços, clínicas e
 - Zero Hardcode: Identidade visual, cores, tipografia, catálogo e profissionais dinâmicos.
 - Cálculo de Disponibilidade em Tempo Real com bloqueio de sobreposições.
 - Trilha de Auditoria com Hash Criptográfico SHA-256 e RBAC Rigoroso.
+- Rate Limiting e Defesa Ativa OWASP Top 10.
     """,
     version="1.0.0",
     docs_url="/docs",
@@ -27,7 +29,10 @@ API Central de Agendamento para parceiros, prestadores de serviços, clínicas e
     openapi_url="/openapi.json"
 )
 
-# CORS Configuration
+# 1. Rate Limiting Middleware (OWASP Protection)
+app.add_middleware(RateLimitMiddleware)
+
+# 2. CORS Configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,

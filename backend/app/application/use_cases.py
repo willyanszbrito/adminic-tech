@@ -410,6 +410,12 @@ class CreateAppointmentUseCase:
         appt_id = f"apt-{uuid.uuid4().hex[:8]}"
         payment_method = request.payment_method or "venue"
 
+        from app.core.security import sanitize_input_string, sanitize_phone_number
+        clean_name = sanitize_input_string(request.customer_name)
+        clean_phone = sanitize_phone_number(request.customer_phone)
+        clean_email = sanitize_input_string(str(request.customer_email)).lower()
+        clean_notes = sanitize_input_string(request.notes) if request.notes else None
+
         appointment = Appointment(
             id=appt_id,
             tenant_id=tenant.id,
@@ -419,10 +425,10 @@ class CreateAppointmentUseCase:
             appointment_date=request.appointment_date,
             start_time=request.start_time,
             end_time=end_time_str,
-            customer_name=request.customer_name.strip(),
-            customer_phone=request.customer_phone.strip(),
-            customer_email=str(request.customer_email).strip().lower(),
-            notes=request.notes.strip() if request.notes else None,
+            customer_name=clean_name,
+            customer_phone=clean_phone,
+            customer_email=clean_email,
+            notes=clean_notes,
             status="confirmed",
             price=service.price,
             payment_method=payment_method,
@@ -1336,7 +1342,15 @@ class AuthenticateGoogleUserUseCase:
             staff_id=None
         )
 
-        token_secure = f"adm_sec_{uuid.uuid4().hex}"
+        from app.core.security import create_access_token
+        token_secure = create_access_token(
+            user_id=user_id,
+            email=email,
+            role=final_role,
+            name=name,
+            tenant_slug=tenant_slug,
+            staff_id=None
+        )
         return AuthResponseDTO(
             access_token=token_secure,
             token_type="bearer",
@@ -1354,6 +1368,7 @@ class DemoLoginUseCase:
         import uuid
         from app.domain.exceptions import DomainException
         from app.core.auditoria import registrar_auditoria
+        from app.core.security import create_access_token
 
         # Bloqueio total de Demo Login para Super Admin
         if request.role == "super_admin" or str(request.email).lower().strip() in SUPER_ADMIN_EMAILS:
@@ -1367,9 +1382,10 @@ class DemoLoginUseCase:
 
         name = request.name or request.email.split("@")[0].replace(".", " ").title()
         avatar = f"https://placehold.co/100x100/18181b/f59e0b?text={name[:2].upper()}"
+        user_id = f"usr-{uuid.uuid4().hex[:8]}"
 
         user_dto = UserDTO(
-            id=f"usr-{uuid.uuid4().hex[:8]}",
+            id=user_id,
             email=str(request.email),
             name=name,
             avatar_url=avatar,
@@ -1378,9 +1394,16 @@ class DemoLoginUseCase:
             staff_id=request.staff_id
         )
 
-        dummy_token = f"adminic_demo_{uuid.uuid4().hex}"
+        jwt_token = create_access_token(
+            user_id=user_id,
+            email=str(request.email),
+            role=request.role,
+            name=name,
+            tenant_slug=request.tenant_slug or "barbearia-campelo",
+            staff_id=request.staff_id
+        )
         return AuthResponseDTO(
-            access_token=dummy_token,
+            access_token=jwt_token,
             token_type="bearer",
             user=user_dto,
             message=f"Sessão iniciada como {request.role} ({name})."

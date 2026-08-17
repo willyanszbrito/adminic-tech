@@ -194,17 +194,27 @@ def test_auth_endpoints():
     assert g_data["user"]["email"] == "cliente.google@empresa.com.br"
     assert g_data["user"]["role"] == "customer"
 
-    # 2. Demo login (Super Admin)
+    # 2. Demo login (Partner Admin)
     demo_payload = {
-        "email": "diretoria@adminic.com.br",
-        "role": "super_admin",
-        "name": "Diretoria Executiva Adminic"
+        "email": "gestor@barbeariacampelo.com.br",
+        "role": "partner_admin",
+        "name": "Gestor Barbearia Campelo",
+        "tenant_slug": "barbearia-campelo"
     }
     d_res = client.post("/api/v1/auth/demo-login", json=demo_payload)
     assert d_res.status_code == 200
     d_data = d_res.json()
-    assert d_data["user"]["role"] == "super_admin"
-    assert d_data["user"]["name"] == "Diretoria Executiva Adminic"
+    assert d_data["user"]["role"] == "partner_admin"
+    assert d_data["user"]["name"] == "Gestor Barbearia Campelo"
+
+    # 3. Demo login para Super Admin deve ser estritamente bloqueado (Security Policy)
+    blocked_payload = {
+        "email": "diretoria@adminic.com.br",
+        "role": "super_admin",
+        "name": "Tentativa Não Autorizada"
+    }
+    b_res = client.post("/api/v1/auth/demo-login", json=blocked_payload)
+    assert b_res.status_code == 400
 
 
 def test_pix_payment_flow():
