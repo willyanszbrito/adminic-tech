@@ -29,24 +29,54 @@ const API_BASE_URL = getApiBaseUrl();
 
 async function fetchJSON<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(options?.headers || {}),
-  };
-
-  const response = await fetch(url, { ...options, headers });
-  if (!response.ok) {
-    let errorDetail = 'Falha na comunicação com a API central.';
+  
+  // Extrai token de sessão temporária se existir
+  let sessionToken: string | null = null;
+  if (isBrowser) {
     try {
-      const errData = await response.json();
-      errorDetail = errData.detail || errData.message || errorDetail;
+      sessionToken = sessionStorage.getItem('adminic_session_token');
     } catch {
-      // fallback
+      // Ignora erro de acesso a storage
     }
-    throw new Error(errorDetail);
   }
 
-  return response.json() as Promise<T>;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
+    ...((options?.headers as Record<string, string>) || {}),
+  };
+
+  // Timeout resiliente de 6 segundos para evitar travamento da UI em instâncias dormindo
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      signal: options?.signal || controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      let errorDetail = 'Falha na comunicação com o servidor central.';
+      try {
+        const errData = await response.json();
+        errorDetail = errData.detail || errData.message || errorDetail;
+      } catch {
+        // fallback
+      }
+      throw new Error(errorDetail);
+    }
+
+    return (await response.json()) as Promise<T>;
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error('Tempo limite de conexão excedido. Alternando para modo resiliente.');
+    }
+    throw err;
+  }
 }
 
 export const api = {

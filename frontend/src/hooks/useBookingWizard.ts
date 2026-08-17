@@ -257,6 +257,12 @@ export function useBookingWizard() {
     setSlug(newSlug);
     setIsSwitcherOpen(false);
     sessionStorage.setItem('adminic_active_tenant', newSlug);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('slug', newSlug);
+      window.history.pushState({}, '', url.toString());
+    }
+    loadTenantData(newSlug);
   };
 
   // Step jump

@@ -4,11 +4,16 @@ import json
 import uuid
 import hashlib
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Dict, Any, Union
-import pytz
 from fastapi import Request
+
+try:
+    from zoneinfo import ZoneInfo
+    TZ_MANAUS = ZoneInfo("America/Manaus")
+except Exception:
+    TZ_MANAUS = timezone.utc
 
 logger = logging.getLogger("AdminicAudit")
 
@@ -88,8 +93,7 @@ def registrar_auditoria(
                 user_agent = request.headers.get("User-Agent", "Desconhecido")
 
         # Timezone Manaus / Brasil
-        fuso_manaus = pytz.timezone("America/Manaus")
-        agora = datetime.now(pytz.utc).astimezone(fuso_manaus)
+        agora = datetime.now(TZ_MANAUS)
         
         rec_id = str(uuid.uuid4())
         ts = agora.isoformat()

@@ -8,6 +8,8 @@ import { TenantHeader } from './components/ui/TenantHeader';
 import { StepProgress } from './components/ui/StepProgress';
 import { SidebarSummary } from './components/ui/SidebarSummary';
 import { TenantSwitcherModal } from './components/ui/TenantSwitcherModal';
+import { RestrictedAccessView } from './components/ui/RestrictedAccessView';
+import { ProductLandingPage } from './features/landing/ProductLandingPage';
 import { Step1Services } from './features/booking/Step1Services';
 import { Step2Staff } from './features/booking/Step2Staff';
 import { Step3DateTime } from './features/booking/Step3DateTime';
@@ -19,11 +21,12 @@ import { AdminPortal } from './features/admin/AdminPortal';
 import { SuperAdminPortal } from './features/super-admin/SuperAdminPortal';
 import { LoginModal } from './features/auth/LoginModal';
 import { GlobalFooter } from './components/ui/GlobalFooter';
+import { MOCK_TENANTS } from './services/mockData';
 import { PortalView } from './types';
 import { Shield, ArrowLeft } from 'lucide-react';
 
 const AppContent: React.FC = () => {
-  // 1. Initial Theme Mode: Default Light, auto-detect OS preference
+  // 1. Initial Theme Mode
   const getInitialTheme = (): 'dark' | 'light' => {
     if (typeof window !== 'undefined' && window.matchMedia) {
       if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -34,7 +37,7 @@ const AppContent: React.FC = () => {
   };
 
   const [themeMode, setThemeMode] = useState<'dark' | 'light'>(getInitialTheme);
-  const { isLoginModalOpen, closeLoginModal, targetRoleForLogin } = useAuth();
+  const { user, isAuthenticated, isLoginModalOpen, openLoginModal, closeLoginModal, targetRoleForLogin } = useAuth();
 
   // Listen to OS theme changes
   useEffect(() => {
@@ -51,32 +54,48 @@ const AppContent: React.FC = () => {
     setThemeMode((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  // 2. Initial Portal View: Check URL path or query params
-  const getInitialView = (): PortalView => {
+  // 2. Initial Portal View: Landing page default for root, direct booking for slugs
+  const getInitialView = (): PortalView | 'landing' => {
+    if (typeof window === 'undefined') return 'landing';
     const params = new URLSearchParams(window.location.search);
-    const viewParam = params.get('view') as PortalView;
-    if (viewParam && ['booking', 'customer', 'staff', 'admin', 'super-admin'].includes(viewParam)) {
+    const viewParam = params.get('view') as PortalView | 'landing';
+    if (viewParam && ['landing', 'booking', 'customer', 'staff', 'admin', 'super-admin'].includes(viewParam)) {
       return viewParam;
     }
 
-    const path = window.location.pathname.toLowerCase();
+    const path = window.location.pathname.toLowerCase().replace(/^\/+|\/+$/g, '');
     if (path.includes('meus-agendamentos') || path.includes('cliente')) return 'customer';
     if (path.includes('colaborador') || path.includes('staff')) return 'staff';
-    if (path.includes('gestao') || path.includes('admin') && !path.includes('super-admin')) return 'admin';
+    if (path.includes('gestao') || (path.includes('admin') && !path.includes('super-admin'))) return 'admin';
     if (path.includes('super-admin')) return 'super-admin';
 
-    return 'booking';
+    // Se houver um slug de parceiro na URL (ex: /barbearia-campelo)
+    if (path && !['meus-agendamentos', 'cliente', 'colaborador', 'staff', 'gestao', 'admin', 'super-admin'].includes(path)) {
+      return 'booking';
+    }
+
+    // Se houver query param explícito de parceiro
+    if (params.get('slug') || params.get('tenant')) {
+      return 'booking';
+    }
+
+    // Padrão: Landing Page Institucional / Comercial da IA Adminic
+    return 'landing';
   };
 
-  const [currentView, setCurrentView] = useState<PortalView>(getInitialView);
+  const [currentView, setCurrentView] = useState<PortalView | 'landing'>(getInitialView);
 
   const wizard = useBookingWizard();
   useTenantTheme(wizard.tenant, themeMode);
 
-  const handleSelectView = (view: PortalView) => {
+  const handleSelectView = (view: PortalView | 'landing') => {
     setCurrentView(view);
     const url = new URL(window.location.href);
-    url.searchParams.set('view', view);
+    if (view === 'landing') {
+      url.searchParams.delete('view');
+    } else {
+      url.searchParams.set('view', view);
+    }
     window.history.pushState({}, '', url.toString());
   };
 
@@ -85,13 +104,13 @@ const AppContent: React.FC = () => {
     handleSelectView('booking');
   };
 
-  // Render Light/Dark Loading Spinner
-  if (wizard.isLoading) {
+  // Render Loading Spinner
+  if (wizard.isLoading && currentView === 'booking') {
     return <LoadingSpinner slug={wizard.slug} />;
   }
 
-  // Error / Not Found State
-  if (wizard.error && !wizard.tenant) {
+  // Error / Not Found State for Partner Page
+  if (wizard.error && !wizard.tenant && currentView === 'booking') {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-[#08080a] flex flex-col items-center justify-center p-6 text-center">
         <div className="max-w-md glass-panel rounded-3xl p-8 border border-rose-500/30 space-y-4">
@@ -100,14 +119,20 @@ const AppContent: React.FC = () => {
           </div>
           <h2 className="text-xl font-bold font-heading text-slate-900 dark:text-white">Estabelecimento Não Encontrado</h2>
           <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-            Não localizamos nenhum parceiro ativo com o identificador <span className="text-brand-primary font-mono font-bold">"{wizard.slug}"</span>.
+            Não foi possível carregar os dados do parceiro solicitado.
           </p>
-          <div className="pt-2">
+          <div className="pt-2 flex flex-col gap-2">
             <button
-              onClick={() => wizard.handleSwitchTenant('barbearia-vintage')}
-              className="w-full py-3 px-4 rounded-xl text-xs font-bold bg-brand-primary text-black hover:opacity-90 transition-opacity cursor-pointer"
+              onClick={() => wizard.handleSwitchTenant(wizard.slug || 'barbearia-campelo')}
+              className="w-full py-3 px-4 rounded-xl text-xs font-bold bg-amber-500 text-black hover:opacity-90 transition-opacity cursor-pointer"
             >
-              Abrir Aura Barber Club (Demonstração)
+              Tentar Novamente
+            </button>
+            <button
+              onClick={() => handleSelectView('landing')}
+              className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold glass-pill text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10"
+            >
+              Voltar para a Página Inicial
             </button>
           </div>
         </div>
@@ -115,7 +140,7 @@ const AppContent: React.FC = () => {
     );
   }
 
-  const tenant = wizard.tenant!;
+  const tenant = wizard.tenant || (wizard.allTenants.length > 0 ? wizard.allTenants[0] : MOCK_TENANTS[0]);
 
   return (
     <div className="min-h-screen relative selection:bg-brand-primary/30 selection:text-brand-primary pb-20">
@@ -123,7 +148,7 @@ const AppContent: React.FC = () => {
       <div className="ambient-glow" />
       <div className="ambient-glow-secondary" />
 
-      {/* Global Top Navbar with Portal Switcher */}
+      {/* Global Top Navbar with RBAC Switcher */}
       <TopNav
         currentView={currentView}
         onSelectView={handleSelectView}
@@ -135,9 +160,21 @@ const AppContent: React.FC = () => {
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 relative z-10">
-        {/* VIEW 1: PUBLIC BOOKING FLOW */}
+        {/* VIEW 0: INSTITUTIONAL & COMMERCIAL PRODUCT LANDING PAGE */}
+        {currentView === 'landing' && (
+          <ProductLandingPage
+            tenants={wizard.allTenants.length > 0 ? wizard.allTenants : MOCK_TENANTS}
+            onSelectTenant={(selectedSlug) => {
+              wizard.handleSwitchTenant(selectedSlug);
+              handleSelectView('booking');
+            }}
+            onOpenLogin={() => openLoginModal()}
+          />
+        )}
+
+        {/* VIEW 1: PUBLIC BOOKING FLOW (No login required for customers) */}
         {currentView === 'booking' && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-in fade-in duration-300">
             {/* Dynamic Tenant Profile Header */}
             <TenantHeader
               tenant={tenant}
@@ -161,17 +198,17 @@ const AppContent: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => wizard.handleStepClick((wizard.currentStep - 1) as any)}
-                      className="inline-flex items-center space-x-1.5 text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors cursor-pointer"
+                      className="inline-flex items-center space-x-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
                     >
-                      <ArrowLeft className="w-4 h-4" />
+                      <ArrowLeft className="w-3.5 h-3.5" />
                       <span>Voltar para etapa anterior</span>
                     </button>
                   )}
 
-                  {wizard.currentStep === 1 && wizard.catalog && (
+                  {wizard.currentStep === 1 && (
                     <Step1Services
-                      categories={wizard.catalog.categories}
-                      services={wizard.catalog.services}
+                      categories={wizard.catalog?.categories || []}
+                      services={wizard.catalog?.services || []}
                       selectedService={wizard.selectedService}
                       onSelectService={wizard.handleSelectService}
                     />
@@ -180,10 +217,10 @@ const AppContent: React.FC = () => {
                   {wizard.currentStep === 2 && (
                     <Step2Staff
                       staffList={wizard.staffList}
-                      selectedService={wizard.selectedService}
                       selectedStaff={wizard.selectedStaff}
                       isAnyStaff={wizard.isAnyStaff}
                       onSelectStaff={wizard.handleSelectStaff}
+                      selectedService={wizard.selectedService}
                     />
                   )}
 
@@ -192,9 +229,9 @@ const AppContent: React.FC = () => {
                       selectedDate={wizard.selectedDate}
                       onSelectDate={wizard.handleSelectDate}
                       availability={wizard.availability}
-                      isLoadingAvailability={wizard.isLoadingAvailability}
                       selectedSlot={wizard.selectedSlot}
                       onSelectSlot={wizard.handleSelectSlot}
+                      isLoadingAvailability={wizard.isLoadingAvailability}
                     />
                   )}
 
@@ -256,33 +293,60 @@ const AppContent: React.FC = () => {
           />
         )}
 
-        {/* VIEW 3: STAFF PORTAL */}
+        {/* VIEW 3: STAFF PORTAL (Protected Guard) */}
         {currentView === 'staff' && (
-          <StaffPortal
-            tenant={tenant}
-            staffList={wizard.staffList}
-            services={wizard.catalog?.services || []}
-            onRefreshStaff={() => wizard.handleSwitchTenant(tenant.slug)}
-          />
+          isAuthenticated && user && (user.role === 'staff' || user.role === 'partner_admin' || user.role === 'super_admin') ? (
+            <StaffPortal
+              tenant={tenant}
+              staffList={wizard.staffList}
+              services={wizard.catalog?.services || []}
+              onRefreshStaff={() => wizard.handleSwitchTenant(tenant.slug)}
+            />
+          ) : (
+            <RestrictedAccessView
+              moduleName="Portal do Colaborador"
+              requiredRoleName="Profissional ou Gestor Credenciado"
+              onOpenLogin={() => openLoginModal('staff')}
+              onGoHome={() => handleSelectView('landing')}
+            />
+          )
         )}
 
-        {/* VIEW 4: PARTNER ADMIN PORTAL */}
+        {/* VIEW 4: PARTNER ADMIN PORTAL (Protected Guard) */}
         {currentView === 'admin' && (
-          <AdminPortal
-            tenant={tenant}
-            categories={wizard.catalog?.categories || []}
-            services={wizard.catalog?.services || []}
-            staffList={wizard.staffList}
-            onRefreshTenant={() => wizard.handleSwitchTenant(tenant.slug)}
-          />
+          isAuthenticated && user && (user.role === 'partner_admin' || user.role === 'super_admin') ? (
+            <AdminPortal
+              tenant={tenant}
+              categories={wizard.catalog?.categories || []}
+              services={wizard.catalog?.services || []}
+              staffList={wizard.staffList}
+              onRefreshTenant={() => wizard.handleSwitchTenant(tenant.slug)}
+            />
+          ) : (
+            <RestrictedAccessView
+              moduleName="Gestão do Estabelecimento Parceiro"
+              requiredRoleName="Gestor / Administrador do Parceiro"
+              onOpenLogin={() => openLoginModal('partner_admin')}
+              onGoHome={() => handleSelectView('landing')}
+            />
+          )
         )}
 
-        {/* VIEW 5: SUPER ADMIN PORTAL */}
+        {/* VIEW 5: SUPER ADMIN PORTAL (Protected Guard) */}
         {currentView === 'super-admin' && (
-          <SuperAdminPortal
-            onImpersonateTenant={handleImpersonate}
-            onRefreshEcosystem={() => wizard.handleSwitchTenant(tenant.slug)}
-          />
+          isAuthenticated && user && user.role === 'super_admin' ? (
+            <SuperAdminPortal
+              onImpersonateTenant={handleImpersonate}
+              onRefreshEcosystem={() => wizard.handleSwitchTenant(tenant.slug)}
+            />
+          ) : (
+            <RestrictedAccessView
+              moduleName="Governança Global do Ecossistema"
+              requiredRoleName="Super Administrador Master"
+              onOpenLogin={() => openLoginModal('super_admin')}
+              onGoHome={() => handleSelectView('landing')}
+            />
+          )
         )}
       </main>
 
@@ -318,4 +382,3 @@ export const App: React.FC = () => {
 };
 
 export default App;
-

@@ -10,16 +10,16 @@ import {
   Sun,
   Moon,
   Layers,
-  Server,
   LogIn,
   LogOut,
   User,
-  ChevronDown
+  ChevronDown,
+  Home
 } from 'lucide-react';
 
 export interface TopNavProps {
-  currentView: PortalView;
-  onSelectView: (view: PortalView) => void;
+  currentView: PortalView | 'landing';
+  onSelectView: (view: PortalView | 'landing') => void;
   tenant: Tenant;
   themeMode: 'dark' | 'light';
   onToggleTheme: () => void;
@@ -48,13 +48,28 @@ export const TopNav: React.FC<TopNavProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const navItems = [
-    { id: 'booking' as PortalView, label: 'Agendamento Público', icon: Calendar },
-    { id: 'customer' as PortalView, label: 'Meus Agendamentos', icon: UserCheck },
-    { id: 'staff' as PortalView, label: 'Colaborador', icon: Briefcase },
-    { id: 'admin' as PortalView, label: 'Gestão do Parceiro', icon: LayoutDashboard },
-    { id: 'super-admin' as PortalView, label: 'Super Admin', icon: ShieldAlert },
-  ];
+  // RBAC Dinâmico: Apenas exibe rotas autorizadas conforme autenticação e papéis
+  const navItems = React.useMemo(() => {
+    const items: Array<{ id: PortalView | 'landing'; label: string; icon: any }> = [
+      { id: 'landing', label: 'Início', icon: Home },
+      { id: 'booking', label: `Agendar (${tenant.name})`, icon: Calendar },
+      { id: 'customer', label: 'Meus Agendamentos', icon: UserCheck },
+    ];
+
+    if (isAuthenticated && user) {
+      if (user.role === 'staff' || user.role === 'partner_admin' || user.role === 'super_admin') {
+        items.push({ id: 'staff', label: 'Colaborador', icon: Briefcase });
+      }
+      if (user.role === 'partner_admin' || user.role === 'super_admin') {
+        items.push({ id: 'admin', label: 'Gestão do Parceiro', icon: LayoutDashboard });
+      }
+      if (user.role === 'super_admin') {
+        items.push({ id: 'super-admin', label: 'Super Admin', icon: ShieldAlert });
+      }
+    }
+
+    return items;
+  }, [isAuthenticated, user, tenant.name]);
 
   const getRoleLabel = (role?: string) => {
     switch (role) {
@@ -81,21 +96,24 @@ export const TopNav: React.FC<TopNavProps> = ({
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         {/* Brand and Portal Identity */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-xl bg-brand-primary/20 text-brand-primary border border-brand-primary/40 flex items-center justify-center font-extrabold font-heading text-sm shadow-md">
+          <div 
+            onClick={() => onSelectView('landing')}
+            className="flex items-center space-x-3 cursor-pointer group"
+          >
+            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-500 border border-amber-500/40 flex items-center justify-center font-extrabold font-heading text-sm shadow-md group-hover:scale-105 transition-transform">
               A
             </div>
             <div>
               <div className="flex items-center space-x-1.5">
                 <span className="text-xs font-bold tracking-wider uppercase font-heading text-slate-900 dark:text-white">
-                  Adminic
+                  IA Adminic
                 </span>
                 <span className="text-[10px] px-1.5 py-0.2 rounded bg-black/5 dark:bg-white/10 text-slate-600 dark:text-slate-400 font-mono">
                   ia.adminic.com.br
                 </span>
               </div>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1">
-                Plataforma de Agendamento Multi-Tenant
+                Plataforma de Agendamento Inteligente
               </p>
             </div>
           </div>
@@ -112,7 +130,7 @@ export const TopNav: React.FC<TopNavProps> = ({
             {isAuthenticated ? (
               <button
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="p-1.5 rounded-xl border border-brand-primary/40"
+                className="p-1.5 rounded-xl border border-amber-500/40"
               >
                 <img
                   src={user?.avatar_url || 'https://placehold.co/100x100/3b82f6/ffffff?text=User'}
@@ -123,7 +141,7 @@ export const TopNav: React.FC<TopNavProps> = ({
             ) : (
               <button
                 onClick={() => openLoginModal()}
-                className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-brand-primary text-black flex items-center space-x-1"
+                className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-black flex items-center space-x-1"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>Entrar</span>
@@ -132,7 +150,7 @@ export const TopNav: React.FC<TopNavProps> = ({
           </div>
         </div>
 
-        {/* Center Portal Switcher Tabs */}
+        {/* Center Portal Switcher Tabs (Protected by RBAC) */}
         <nav className="flex items-center space-x-1 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -144,7 +162,7 @@ export const TopNav: React.FC<TopNavProps> = ({
                 onClick={() => onSelectView(item.id)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center space-x-1.5 cursor-pointer ${
                   isActive
-                    ? 'bg-brand-primary text-black shadow-md shadow-brand-primary/20 ring-1 ring-brand-primary/40'
+                    ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20 ring-1 ring-amber-500/40'
                     : 'glass-pill text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10'
                 }`}
               >
@@ -170,87 +188,115 @@ export const TopNav: React.FC<TopNavProps> = ({
           <button
             onClick={onOpenSwitcher}
             className="px-3 py-1.5 rounded-xl text-xs font-semibold glass-pill text-slate-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/15 border border-black/10 dark:border-white/10 transition-all flex items-center space-x-1.5 cursor-pointer"
+            title="Escolher outro estabelecimento parceiro"
           >
-            <Layers className="w-3.5 h-3.5 text-brand-primary" />
-            <span>Parceiro:</span>
-            <span className="font-mono text-brand-primary">{tenant.slug}</span>
+            <Layers className="w-3.5 h-3.5 text-amber-500" />
+            <span>Estabelecimento:</span>
+            <span className="font-mono text-amber-500 font-bold">{tenant.slug}</span>
           </button>
-
-          {/* Swagger API */}
-          <a
-            href="http://localhost:8000/docs"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-xl text-xs font-semibold glass-pill text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/15 border border-black/10 dark:border-white/10 transition-all"
-            title="Documentação OpenAPI Swagger"
-          >
-            <Server className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>API Docs</span>
-          </a>
 
           {/* Authentication Button or User Menu */}
           {isAuthenticated && user ? (
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="px-2.5 py-1.5 rounded-xl text-xs font-semibold glass-pill text-slate-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/15 border border-brand-primary/30 transition-all flex items-center space-x-2 cursor-pointer shadow-sm"
+                className="px-2.5 py-1.5 rounded-xl text-xs font-semibold glass-pill text-slate-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/15 border border-amber-500/30 transition-all flex items-center space-x-2 cursor-pointer shadow-sm"
               >
                 <img
                   src={user.avatar_url || 'https://placehold.co/100x100/3b82f6/ffffff?text=User'}
                   alt={user.name}
-                  className="w-5 h-5 rounded-lg object-cover"
+                  className="w-5 h-5 rounded-md object-cover border border-amber-500/40"
                 />
-                <span className="max-w-[100px] truncate font-medium">{user.name.split(' ')[0]}</span>
-                <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold border ${getRoleBadgeColor(user.role)}`}>
+                <span className="font-medium max-w-[100px] truncate">{user.name}</span>
+                <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold border ${getRoleBadgeColor(user.role)}`}>
                   {getRoleLabel(user.role)}
                 </span>
                 <ChevronDown className="w-3 h-3 text-slate-400" />
               </button>
 
-              {/* Dropdown Menu */}
+              {/* User Dropdown Menu */}
               {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-64 glass-panel bg-surface border border-surface-border rounded-2xl shadow-xl p-2 z-50 animate-in fade-in zoom-in-95">
-                  <div className="p-2 border-b border-surface-border mb-1">
-                    <p className="text-xs font-bold text-text-main truncate">{user.name}</p>
-                    <p className="text-[11px] text-text-muted truncate">{user.email}</p>
-                    <div className="mt-1.5">
-                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${getRoleBadgeColor(user.role)}`}>
-                        {getRoleLabel(user.role)}
-                      </span>
-                    </div>
+                <div className="absolute right-0 mt-2 w-56 glass-panel rounded-2xl p-2 border border-black/10 dark:border-white/15 shadow-2xl z-50 bg-white dark:bg-zinc-950 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="px-3 py-2 border-b border-black/5 dark:border-white/10">
+                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{user.name}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
                   </div>
 
-                  <button
-                    onClick={() => {
-                      setIsUserMenuOpen(false);
-                      openLoginModal();
-                    }}
-                    className="w-full text-left px-3 py-2 rounded-xl text-xs text-text-main hover:bg-surface-secondary flex items-center space-x-2 transition-colors cursor-pointer"
-                  >
-                    <User className="w-3.5 h-3.5 text-primary-500" />
-                    <span>Alternar Perfil</span>
-                  </button>
+                  <div className="py-1">
+                    {user.role === 'super_admin' && (
+                      <button
+                        onClick={() => {
+                          onSelectView('super-admin');
+                          setIsUserMenuOpen(false);
+                        }}
+                        className="w-full px-3 py-2 text-left text-xs font-medium rounded-xl hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-2 text-purple-600 dark:text-purple-400"
+                      >
+                        <ShieldAlert className="w-3.5 h-3.5" />
+                        <span>Painel Super Admin</span>
+                      </button>
+                    )}
 
-                  <button
-                    onClick={() => {
-                      setIsUserMenuOpen(false);
-                      logout();
-                    }}
-                    className="w-full text-left px-3 py-2 rounded-xl text-xs text-red-500 hover:bg-red-500/10 flex items-center space-x-2 transition-colors cursor-pointer"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>Sair da Conta</span>
-                  </button>
+                    {(user.role === 'partner_admin' || user.role === 'super_admin') && (
+                      <button
+                        onClick={() => {
+                          onSelectView('admin');
+                          setIsUserMenuOpen(false);
+                        }}
+                        className="w-full px-3 py-2 text-left text-xs font-medium rounded-xl hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-2 text-amber-600 dark:text-amber-400"
+                      >
+                        <LayoutDashboard className="w-3.5 h-3.5" />
+                        <span>Gestão do Parceiro</span>
+                      </button>
+                    )}
+
+                    {(user.role === 'staff' || user.role === 'partner_admin' || user.role === 'super_admin') && (
+                      <button
+                        onClick={() => {
+                          onSelectView('staff');
+                          setIsUserMenuOpen(false);
+                        }}
+                        className="w-full px-3 py-2 text-left text-xs font-medium rounded-xl hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-2 text-emerald-600 dark:text-emerald-400"
+                      >
+                        <Briefcase className="w-3.5 h-3.5" />
+                        <span>Minha Agenda</span>
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        onSelectView('customer');
+                        setIsUserMenuOpen(false);
+                      }}
+                      className="w-full px-3 py-2 text-left text-xs font-medium rounded-xl hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-2 text-slate-700 dark:text-slate-300"
+                    >
+                      <User className="w-3.5 h-3.5" />
+                      <span>Meus Agendamentos</span>
+                    </button>
+                  </div>
+
+                  <div className="pt-1 border-t border-black/5 dark:border-white/10">
+                    <button
+                      onClick={() => {
+                        logout();
+                        setIsUserMenuOpen(false);
+                        onSelectView('landing');
+                      }}
+                      className="w-full px-3 py-2 text-left text-xs font-medium rounded-xl hover:bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center space-x-2 transition-colors cursor-pointer"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Encerrar Sessão</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           ) : (
             <button
               onClick={() => openLoginModal()}
-              className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-brand-primary text-black hover:opacity-90 transition-all flex items-center space-x-1.5 shadow-md shadow-brand-primary/20 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-black shadow-md shadow-amber-500/20 transition-all flex items-center space-x-1.5 cursor-pointer active:scale-95"
             >
               <LogIn className="w-3.5 h-3.5" />
-              <span>Entrar</span>
+              <span>Acessar Portal</span>
             </button>
           )}
         </div>
@@ -258,4 +304,3 @@ export const TopNav: React.FC<TopNavProps> = ({
     </header>
   );
 };
-

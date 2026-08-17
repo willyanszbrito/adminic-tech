@@ -10,23 +10,12 @@ from app.interfaces.api.v1.routes import router as api_v1_router
 from app.domain.exceptions import DomainException
 
 app = FastAPI(
-    title="Adminic Smart Booking API (Multi-Tenant)",
-    description="""
-# Ecossistema Adminic - Plataforma de Agendamento Multi-Tenant
-
-API Central de Agendamento para parceiros, prestadores de serviços, clínicas e serviços especializados.
-
-## Recursos Principais:
-- Isolamento Lógico Multi-Tenant via rota base (/api/v1/tenants/:slug/...).
-- Zero Hardcode: Identidade visual, cores, tipografia, catálogo e profissionais dinâmicos.
-- Cálculo de Disponibilidade em Tempo Real com bloqueio de sobreposições.
-- Trilha de Auditoria com Hash Criptográfico SHA-256 e RBAC Rigoroso.
-- Rate Limiting e Defesa Ativa OWASP Top 10.
-    """,
+    title="Adminic Smart Booking API",
+    description="Plataforma de Agendamento Inteligente Multi-Tenant - Ecossistema Adminic",
     version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/openapi.json"
+    docs_url="/docs" if settings.ENVIRONMENT != "production" else None,
+    redoc_url="/redoc" if settings.ENVIRONMENT != "production" else None,
+    openapi_url="/openapi.json" if settings.ENVIRONMENT != "production" else None
 )
 
 # 1. Rate Limiting Middleware (OWASP Protection)
@@ -143,15 +132,11 @@ def health_check():
         "app_domain": settings.APP_DOMAIN
     }
 
-@app.get("/", tags=["Health e Status"], summary="Status e Redirecionamento da API")
+@app.get("/", tags=["Health e Status"], summary="Status da API")
 def root():
     return {
-        "message": "Adminic Smart Booking API is running.",
-        "documentation": "/docs",
-        "redoc": "/redoc",
-        "openapi_json": "/openapi.json",
-        "openapi_yaml": "/openapi.yaml",
-        "health": "/health"
+        "status": "online",
+        "service": "Adminic Smart Booking API"
     }
 
 @app.exception_handler(DomainException)

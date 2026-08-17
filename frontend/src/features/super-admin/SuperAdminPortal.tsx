@@ -56,7 +56,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [auditFilter, setAuditFilter] = useState('');
 
-  const isSuperAdminAuthorized = isAuthenticated && user?.email?.toLowerCase().trim() === 'willyanszbrito@gmail.com';
+  const isSuperAdminAuthorized = isAuthenticated && user?.role === 'super_admin';
 
   const loadOverview = async () => {
     setIsLoading(true);
@@ -127,7 +127,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     }
   };
 
-  // 1. Tela de Bloqueio de Acesso se não for willyanszbrito@gmail.com
+  // 1. Tela de Bloqueio de Acesso se não for Super Admin
   if (!isSuperAdminAuthorized) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center animate-fade-in">
@@ -141,7 +141,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               Acesso Restrito à Governança Central
             </h2>
             <p className="text-xs text-slate-400 leading-relaxed">
-              O portal <strong>Super Admin</strong> é exclusivo e restrito para o e-mail oficial <code className="text-amber-400 font-mono">willyanszbrito@gmail.com</code>.
+              O portal <strong>Super Admin</strong> é exclusivo para administradores autenticados com credenciais validadas no backend.
             </p>
           </div>
 
@@ -155,7 +155,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
             onClick={() => openLoginModal('super_admin')}
             className="w-full py-3.5 px-6 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm transition-all shadow-lg shadow-amber-500/20 cursor-pointer"
           >
-            Autenticar com Google (willyanszbrito@gmail.com)
+            Autenticar com Google
           </button>
         </div>
       </div>
@@ -183,7 +183,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
             <div className="flex items-center space-x-2">
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center space-x-1">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Super Administrador • willyanszbrito@gmail.com</span>
+                <span>Super Administrador Master • {user?.email}</span>
               </span>
               <span className="text-xs text-slate-500 font-mono">ia.adminic.com.br</span>
             </div>
