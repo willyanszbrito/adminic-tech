@@ -24,6 +24,7 @@ import { GlobalFooter } from './components/ui/GlobalFooter';
 import { MOCK_TENANTS } from './services/mockData';
 import { PortalView } from './types';
 import { Shield, ArrowLeft } from 'lucide-react';
+import { isDedicatedSubdomain } from './services/domainHelper';
 
 const AppContent: React.FC = () => {
   // 1. Initial Theme Mode
@@ -38,6 +39,7 @@ const AppContent: React.FC = () => {
 
   const [themeMode, setThemeMode] = useState<'dark' | 'light'>(getInitialTheme);
   const { user, isAuthenticated, isLoginModalOpen, openLoginModal, closeLoginModal, targetRoleForLogin } = useAuth();
+  const isDedicated = isDedicatedSubdomain();
 
   // Listen to OS theme changes
   useEffect(() => {
@@ -54,9 +56,20 @@ const AppContent: React.FC = () => {
     setThemeMode((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  // 2. Initial Portal View: Landing page default for root, direct booking for slugs
+  // 2. Initial Portal View: Landing page default for root, direct booking for subdomains/slugs
   const getInitialView = (): PortalView | 'landing' => {
     if (typeof window === 'undefined') return 'landing';
+
+    // Se for subdomínio dedicado de um parceiro (ex: campelo.adminic.com.br ou segredosdocorte.adminic.com.br)
+    if (isDedicated) {
+      const params = new URLSearchParams(window.location.search);
+      const viewParam = params.get('view') as PortalView;
+      if (viewParam && ['booking', 'customer', 'staff', 'admin'].includes(viewParam)) {
+        return viewParam;
+      }
+      return 'booking';
+    }
+
     const params = new URLSearchParams(window.location.search);
     const viewParam = params.get('view') as PortalView | 'landing';
     if (viewParam && ['landing', 'booking', 'customer', 'staff', 'admin', 'super-admin'].includes(viewParam)) {
@@ -68,15 +81,6 @@ const AppContent: React.FC = () => {
     if (path.includes('colaborador') || path.includes('staff')) return 'staff';
     if (path.includes('gestao') || (path.includes('admin') && !path.includes('super-admin'))) return 'admin';
     if (path.includes('super-admin')) return 'super-admin';
-
-    // Se for subdomínio dedicado de um parceiro (ex: campelo.adminic.com.br ou segredos.adminic.com.br)
-    const hostname = window.location.hostname.toLowerCase();
-    if (hostname.endsWith('.adminic.com.br') || hostname.endsWith('.adminic.tech')) {
-      const subdomain = hostname.split('.')[0];
-      if (!['ia', 'api', 'app', 'admin', 'www', 'mail', 'webmail'].includes(subdomain)) {
-        return 'booking';
-      }
-    }
 
     // Se houver um slug de parceiro na URL (ex: /barbearia-campelo)
     if (path && !['meus-agendamentos', 'cliente', 'colaborador', 'staff', 'gestao', 'admin', 'super-admin'].includes(path)) {
@@ -97,7 +101,20 @@ const AppContent: React.FC = () => {
   const wizard = useBookingWizard();
   useTenantTheme(wizard.tenant, themeMode);
 
+  // Dynamic Title per subdomain
+  useEffect(() => {
+    if (isDedicated && wizard.tenant) {
+      document.title = `${wizard.tenant.name} | Agendamento Online`;
+    } else {
+      document.title = 'IA Adminic | Plataforma de Agendamento Inteligente';
+    }
+  }, [isDedicated, wizard.tenant]);
+
   const handleSelectView = (view: PortalView | 'landing') => {
+    if (isDedicated && view === 'landing') {
+      setCurrentView('booking');
+      return;
+    }
     setCurrentView(view);
     const url = new URL(window.location.href);
     if (view === 'landing') {
@@ -359,14 +376,16 @@ const AppContent: React.FC = () => {
         )}
       </main>
 
-      {/* Multi-Tenant Switcher Modal */}
-      <TenantSwitcherModal
-        isOpen={wizard.isSwitcherOpen}
-        onClose={() => wizard.setIsSwitcherOpen(false)}
-        tenants={wizard.allTenants}
-        currentSlug={wizard.slug}
-        onSelectTenant={wizard.handleSwitchTenant}
-      />
+      {/* Multi-Tenant Switcher Modal - Only accessible on central portal */}
+      {!isDedicated && (
+        <TenantSwitcherModal
+          isOpen={wizard.isSwitcherOpen}
+          onClose={() => wizard.setIsSwitcherOpen(false)}
+          tenants={wizard.allTenants}
+          currentSlug={wizard.slug}
+          onSelectTenant={wizard.handleSwitchTenant}
+        />
+      )}
 
       {/* Unified Google One Tap & Auth Modal */}
       <LoginModal

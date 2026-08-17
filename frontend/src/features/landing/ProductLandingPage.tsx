@@ -2,8 +2,9 @@ import React from 'react';
 import { Tenant } from '../../types';
 import { 
   Sparkles, Calendar, MessageSquare, ShieldCheck, 
-  ArrowRight, CheckCircle2, Building2, Lock, ChevronRight
+  ArrowRight, CheckCircle2, Building2, Lock, ExternalLink
 } from 'lucide-react';
+import { getPartnerSubdomainUrl } from '../../services/domainHelper';
 
 interface ProductLandingPageProps {
   tenants: Tenant[];
@@ -16,6 +17,13 @@ export const ProductLandingPage: React.FC<ProductLandingPageProps> = ({
   onSelectTenant,
   onOpenLogin,
 }) => {
+  const handlePartnerClick = (slug: string) => {
+    if (typeof window !== 'undefined' && window.location.hostname.includes('adminic.com.br')) {
+      window.location.href = getPartnerSubdomainUrl(slug);
+    } else {
+      onSelectTenant(slug);
+    }
+  };
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#08080a] text-slate-900 dark:text-slate-100 transition-colors duration-300">
       {/* Background Decorative Glows */}
@@ -174,7 +182,7 @@ export const ProductLandingPage: React.FC<ProductLandingPageProps> = ({
             {tenants.map((t) => (
               <div
                 key={t.id}
-                onClick={() => onSelectTenant(t.slug)}
+                onClick={() => handlePartnerClick(t.slug)}
                 className="group glass-panel rounded-3xl overflow-hidden border border-black/10 dark:border-white/10 hover:border-amber-500/50 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-amber-500/10 flex flex-col justify-between"
               >
                 <div>
@@ -240,7 +248,7 @@ export const ProductLandingPage: React.FC<ProductLandingPageProps> = ({
                 <div className="p-5 pt-0">
                   <div className="w-full py-3 px-4 rounded-xl bg-amber-500/10 group-hover:bg-amber-500 text-amber-600 dark:text-amber-400 group-hover:text-black font-semibold text-xs flex items-center justify-center space-x-2 transition-all">
                     <span>Agendar neste Estabelecimento</span>
-                    <ChevronRight className="w-4 h-4" />
+                    <ExternalLink className="w-4 h-4" />
                   </div>
                 </div>
               </div>

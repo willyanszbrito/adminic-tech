@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { PortalView, Tenant } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { isDedicatedSubdomain } from '../../services/domainHelper';
 import {
   Calendar,
   UserCheck,
@@ -37,6 +38,7 @@ export const TopNav: React.FC<TopNavProps> = ({
   const { user, isAuthenticated, logout, openLoginModal } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
+  const isDedicated = isDedicatedSubdomain();
 
   React.useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -48,28 +50,35 @@ export const TopNav: React.FC<TopNavProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // RBAC Dinâmico: Apenas exibe rotas autorizadas conforme autenticação e papéis
+  // RBAC Dinâmico e Isolamento White-Label por Subdomínio
   const navItems = React.useMemo(() => {
-    const items: Array<{ id: PortalView | 'landing'; label: string; icon: any }> = [
-      { id: 'landing', label: 'Início', icon: Home },
-      { id: 'booking', label: `Agendar (${tenant.name})`, icon: Calendar },
-      { id: 'customer', label: 'Meus Agendamentos', icon: UserCheck },
-    ];
+    const items: Array<{ id: PortalView | 'landing'; label: string; icon: any }> = [];
+
+    // Se estiver no portal central (ia.adminic.com.br), exibe a aba Início
+    if (!isDedicated) {
+      items.push({ id: 'landing', label: 'Início', icon: Home });
+      items.push({ id: 'booking', label: `Agendar (${tenant.name})`, icon: Calendar });
+    } else {
+      // No subdomínio exclusivo da barbearia (ex: campelo.adminic.com.br), exibe apenas a experiência da barbearia
+      items.push({ id: 'booking', label: 'Agendar Horário', icon: Calendar });
+    }
+
+    items.push({ id: 'customer', label: 'Meus Agendamentos', icon: UserCheck });
 
     if (isAuthenticated && user) {
       if (user.role === 'staff' || user.role === 'partner_admin' || user.role === 'super_admin') {
         items.push({ id: 'staff', label: 'Colaborador', icon: Briefcase });
       }
       if (user.role === 'partner_admin' || user.role === 'super_admin') {
-        items.push({ id: 'admin', label: 'Gestão do Parceiro', icon: LayoutDashboard });
+        items.push({ id: 'admin', label: 'Gestão', icon: LayoutDashboard });
       }
-      if (user.role === 'super_admin') {
+      if (user.role === 'super_admin' && !isDedicated) {
         items.push({ id: 'super-admin', label: 'Super Admin', icon: ShieldAlert });
       }
     }
 
     return items;
-  }, [isAuthenticated, user, tenant.name]);
+  }, [isAuthenticated, user, tenant.name, isDedicated]);
 
   const getRoleLabel = (role?: string) => {
     switch (role) {
@@ -97,23 +106,34 @@ export const TopNav: React.FC<TopNavProps> = ({
         {/* Brand and Portal Identity */}
         <div className="flex items-center justify-between">
           <div 
-            onClick={() => onSelectView('landing')}
+            onClick={() => onSelectView(isDedicated ? 'booking' : 'landing')}
             className="flex items-center space-x-3 cursor-pointer group"
           >
-            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-500 border border-amber-500/40 flex items-center justify-center font-extrabold font-heading text-sm shadow-md group-hover:scale-105 transition-transform">
-              A
-            </div>
+            {isDedicated && tenant.logo_url ? (
+              <img 
+                src={tenant.logo_url} 
+                alt={tenant.name} 
+                className="w-8 h-8 rounded-xl object-cover border border-amber-500/40 shadow-md group-hover:scale-105 transition-transform"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = `https://placehold.co/100x100/18181b/${tenant.theme.primary_color.replace('#', '')}?text=${encodeURIComponent(tenant.name.charAt(0))}`;
+                }}
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-500 border border-amber-500/40 flex items-center justify-center font-extrabold font-heading text-sm shadow-md group-hover:scale-105 transition-transform">
+                {isDedicated ? tenant.name.charAt(0) : 'A'}
+              </div>
+            )}
             <div>
               <div className="flex items-center space-x-1.5">
                 <span className="text-xs font-bold tracking-wider uppercase font-heading text-slate-900 dark:text-white">
-                  IA Adminic
+                  {isDedicated ? tenant.name : 'IA Adminic'}
                 </span>
                 <span className="text-[10px] px-1.5 py-0.2 rounded bg-black/5 dark:bg-white/10 text-slate-600 dark:text-slate-400 font-mono">
-                  ia.adminic.com.br
+                  {typeof window !== 'undefined' ? window.location.hostname : 'adminic.com.br'}
                 </span>
               </div>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1">
-                Plataforma de Agendamento Inteligente
+                {isDedicated ? (tenant.slogan || 'Agendamento Online Exclusivo') : 'Plataforma de Agendamento Inteligente'}
               </p>
             </div>
           </div>
@@ -184,16 +204,18 @@ export const TopNav: React.FC<TopNavProps> = ({
             {themeMode === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
           </button>
 
-          {/* Partner Selector */}
-          <button
-            onClick={onOpenSwitcher}
-            className="px-3 py-1.5 rounded-xl text-xs font-semibold glass-pill text-slate-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/15 border border-black/10 dark:border-white/10 transition-all flex items-center space-x-1.5 cursor-pointer"
-            title="Escolher outro estabelecimento parceiro"
-          >
-            <Layers className="w-3.5 h-3.5 text-amber-500" />
-            <span>Estabelecimento:</span>
-            <span className="font-mono text-amber-500 font-bold">{tenant.slug}</span>
-          </button>
+          {/* Partner Selector - Only displayed on central portal */}
+          {!isDedicated && (
+            <button
+              onClick={onOpenSwitcher}
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold glass-pill text-slate-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/15 border border-black/10 dark:border-white/10 transition-all flex items-center space-x-1.5 cursor-pointer"
+              title="Escolher outro estabelecimento parceiro"
+            >
+              <Layers className="w-3.5 h-3.5 text-amber-500" />
+              <span>Estabelecimento:</span>
+              <span className="font-mono text-amber-500 font-bold">{tenant.slug}</span>
+            </button>
+          )}
 
           {/* Authentication Button or User Menu */}
           {isAuthenticated && user ? (

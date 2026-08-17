@@ -1,13 +1,15 @@
 import React from 'react';
 import { Tenant } from '../../types';
 import { ShieldCheck, MapPin, MessageCircle, Instagram, Phone, Layers } from 'lucide-react';
+import { isDedicatedSubdomain } from '../../services/domainHelper';
 
 interface TenantHeaderProps {
   tenant: Tenant;
-  onOpenSwitcher: () => void;
+  onOpenSwitcher?: () => void;
 }
 
 export const TenantHeader: React.FC<TenantHeaderProps> = ({ tenant, onOpenSwitcher }) => {
+  const isDedicated = isDedicatedSubdomain();
   const isOpenToday = () => {
     const today = new Date().getDay();
     const weekday = today === 0 ? 6 : today - 1;
@@ -28,17 +30,19 @@ export const TenantHeader: React.FC<TenantHeaderProps> = ({ tenant, onOpenSwitch
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#08080a] via-[#08080a]/60 to-transparent" />
         
-        {/* Floating Switcher & Badge */}
-        <div className="absolute top-4 right-4 flex items-center space-x-2">
-          <button
-            onClick={onOpenSwitcher}
-            className="px-3.5 py-1.5 rounded-full text-xs font-semibold glass-pill text-white hover:bg-white/20 border border-white/20 shadow-lg transition-all flex items-center space-x-1.5 cursor-pointer"
-            title="Alternar entre empresas parceiras para demonstracao"
-          >
-            <Layers className="w-3.5 h-3.5 text-brand-primary" />
-            <span>Trocar Empresa</span>
-          </button>
-        </div>
+        {/* Floating Top Bar: Only on central portal */}
+        {!isDedicated && onOpenSwitcher && (
+          <div className="absolute top-4 right-4 flex items-center space-x-2">
+            <button
+              onClick={onOpenSwitcher}
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold glass-pill text-white hover:bg-white/20 border border-white/20 shadow-lg transition-all flex items-center space-x-1.5 cursor-pointer"
+              title="Alternar entre parceiros (Disponível apenas no Portal Central)"
+            >
+              <Layers className="w-3.5 h-3.5 text-brand-primary" />
+              <span>Ver Outros Parceiros</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Profile Details Container */}
