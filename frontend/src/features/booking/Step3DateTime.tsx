@@ -66,7 +66,7 @@ export const Step3DateTime: React.FC<Step3DateTimeProps> = ({
           <span className="text-[10px] text-slate-500 font-normal">({slots.filter(s => s.is_available).length} livres)</span>
         </div>
 
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5">
+        <div className="grid grid-cols-3 min-[420px]:grid-cols-4 sm:grid-cols-4 md:grid-cols-6 gap-2 sm:gap-2.5">
           {slots.map((slot) => {
             const isSelected = selectedSlot === slot.start_time;
             if (slot.is_available) {
@@ -75,14 +75,14 @@ export const Step3DateTime: React.FC<Step3DateTimeProps> = ({
                   key={slot.start_time}
                   type="button"
                   onClick={() => onSelectSlot(slot)}
-                  className={`py-2.5 px-2 rounded-xl text-xs font-semibold text-center transition-all ${
+                  className={`py-2.5 px-1.5 sm:px-2 rounded-xl text-xs font-semibold text-center transition-all touch-target ${
                     isSelected
                       ? 'bg-brand-primary text-black font-bold shadow-lg shadow-brand-primary/30 ring-2 ring-brand-primary/50 scale-105'
                       : 'glass-card text-slate-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/15 hover:border-brand-primary/50'
                   }`}
                 >
-                  <span className="block text-sm">{slot.start_time}</span>
-                  <span className="text-[10px] opacity-70 block font-normal mt-0.5">ate {slot.end_time}</span>
+                  <span className="block text-xs sm:text-sm">{slot.start_time}</span>
+                  <span className="text-[9px] sm:text-[10px] opacity-70 block font-normal mt-0.5">até {slot.end_time}</span>
                 </button>
               );
             }
@@ -90,11 +90,11 @@ export const Step3DateTime: React.FC<Step3DateTimeProps> = ({
             return (
               <div
                 key={slot.start_time}
-                title={slot.reason || 'Horario Indisponivel'}
-                className="py-2.5 px-2 rounded-xl text-xs font-medium text-center bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 text-zinc-400 dark:text-zinc-600 cursor-not-allowed opacity-50 select-none"
+                title={slot.reason || 'Horário Indisponível'}
+                className="py-2.5 px-1.5 sm:px-2 rounded-xl text-xs font-medium text-center bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 text-zinc-400 dark:text-zinc-600 cursor-not-allowed opacity-50 select-none"
               >
-                <span className="block text-sm line-through">{slot.start_time}</span>
-                <span className="text-[9px] block text-zinc-500 mt-0.5 truncate">{slot.reason || 'Ocupado'}</span>
+                <span className="block text-xs sm:text-sm line-through">{slot.start_time}</span>
+                <span className="text-[8px] sm:text-[9px] block text-zinc-500 mt-0.5 truncate">{slot.reason || 'Ocupado'}</span>
               </div>
             );
           })}
@@ -104,12 +104,12 @@ export const Step3DateTime: React.FC<Step3DateTimeProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Date Picker Strip */}
-      <div className="glass-panel rounded-3xl p-5 space-y-3">
-        <div className="flex items-center justify-between">
+      <div className="glass-panel rounded-3xl p-4 sm:p-5 space-y-3">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center space-x-2">
-            <CalendarIcon className="w-4 h-4 text-brand-primary" />
+            <CalendarIcon className="w-4 h-4 text-brand-primary shrink-0" />
             <h2 className="text-sm font-bold font-heading text-slate-900 dark:text-white">Selecione a Data</h2>
           </div>
           <input
@@ -117,12 +117,12 @@ export const Step3DateTime: React.FC<Step3DateTimeProps> = ({
             value={selectedDate}
             min={new Date().toISOString().split('T')[0]}
             onChange={(e) => e.target.value && onSelectDate(e.target.value)}
-            className="glass-input text-xs px-3 py-1.5 rounded-xl text-slate-800 dark:text-slate-200 cursor-pointer focus:outline-none"
+            className="glass-input text-xs px-2.5 py-1.5 rounded-xl text-slate-800 dark:text-slate-200 cursor-pointer focus:outline-none"
           />
         </div>
 
         {/* 14-day Horizontal Scroll Strip */}
-        <div className="flex items-center space-x-2.5 overflow-x-auto pb-2 scrollbar-none pt-1">
+        <div className="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-none pt-1 -mx-1 px-1">
           {dateOptions.map((item) => {
             const isSelected = selectedDate === item.iso;
             return (
@@ -130,19 +130,19 @@ export const Step3DateTime: React.FC<Step3DateTimeProps> = ({
                 key={item.iso}
                 type="button"
                 onClick={() => onSelectDate(item.iso)}
-                className={`flex-shrink-0 w-16 py-3 rounded-2xl flex flex-col items-center justify-center transition-all ${
+                className={`flex-shrink-0 w-14 sm:w-16 py-2.5 sm:py-3 rounded-2xl flex flex-col items-center justify-center transition-all touch-target ${
                   isSelected
                     ? 'bg-brand-primary text-black font-bold shadow-lg shadow-brand-primary/25 ring-2 ring-brand-primary/40 scale-105'
                     : 'glass-card text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10'
                 }`}
               >
-                <span className="text-[10px] uppercase font-bold tracking-wider opacity-80">
+                <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider opacity-80">
                   {item.isToday ? 'Hoje' : item.weekday}
                 </span>
-                <span className="text-lg font-extrabold my-0.5 font-heading">
+                <span className="text-base sm:text-lg font-extrabold my-0.5 font-heading">
                   {item.dayNum}
                 </span>
-                <span className="text-[10px] opacity-75 capitalize">
+                <span className="text-[9px] sm:text-[10px] opacity-75 capitalize">
                   {item.month}
                 </span>
               </button>
@@ -152,7 +152,7 @@ export const Step3DateTime: React.FC<Step3DateTimeProps> = ({
       </div>
 
       {/* Slots Section */}
-      <div className="glass-panel rounded-3xl p-6 space-y-6">
+      <div className="glass-panel rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-6">
         <div className="flex items-center justify-between pb-4 border-b border-black/10 dark:border-white/10">
           <div>
             <h3 className="text-base font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">

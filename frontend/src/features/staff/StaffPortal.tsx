@@ -162,16 +162,16 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       {/* Top Header & Collaborator Switcher */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
+      <div className="glass-panel rounded-3xl p-4 sm:p-8 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
+          <div className="min-w-0">
             <div className="flex items-center space-x-2">
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brand-primary/15 text-brand-primary border border-brand-primary/30">
                 Área do Colaborador
               </span>
-              <span className="text-xs text-slate-500">• {tenant.name}</span>
+              <span className="text-xs text-slate-500 truncate">• {tenant.name}</span>
             </div>
-            <h2 className="text-2xl font-extrabold font-heading text-slate-900 dark:text-white mt-1">
+            <h2 className="text-xl sm:text-2xl font-extrabold font-heading text-slate-900 dark:text-white mt-1">
               Painel do Profissional e Gestão de Perfil
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
@@ -180,12 +180,12 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
           </div>
 
           {/* Switch Collaborator Selector */}
-          <div className="flex items-center space-x-2 bg-black/5 dark:bg-white/5 p-2 rounded-2xl border border-black/10 dark:border-white/10">
-            <User className="w-4 h-4 text-brand-primary" />
+          <div className="flex items-center space-x-2 bg-black/5 dark:bg-white/5 p-2.5 rounded-2xl border border-black/10 dark:border-white/10 w-full sm:w-auto shrink-0">
+            <User className="w-4 h-4 text-brand-primary shrink-0" />
             <select
               value={selectedStaffId}
               onChange={(e) => handleStaffChange(e.target.value)}
-              className="bg-transparent text-xs font-semibold text-slate-900 dark:text-white focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-semibold text-slate-900 dark:text-white focus:outline-none cursor-pointer w-full"
             >
               {staffList.map((s: Staff) => (
                 <option key={s.id} value={s.id} className="bg-white dark:bg-zinc-900 text-slate-900 dark:text-white">

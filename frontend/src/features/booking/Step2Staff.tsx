@@ -19,53 +19,53 @@ export const Step2Staff: React.FC<Step2StaffProps> = ({
   onSelectStaff,
 }) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Informative Header */}
-      <div className="glass-panel rounded-2xl p-4 flex items-center justify-between">
-        <div>
-          <h2 className="text-sm font-bold font-heading text-slate-900 dark:text-white">
+      <div className="glass-panel rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-sm font-bold font-heading text-slate-900 dark:text-white truncate">
             Escolha o Especialista
           </h2>
-          <p className="text-xs text-slate-600 dark:text-slate-300">
+          <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-1">
             {selectedService
-              ? `Profissionais qualificados para ${selectedService.name}`
-              : 'Selecione quem ira realizar o seu atendimento'}
+              ? `Profissionais para ${selectedService.name}`
+              : 'Selecione quem irá realizar seu atendimento'}
           </p>
         </div>
-        <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-slate-700 dark:text-slate-300">
-          {staffList.length} disponiveis
+        <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-slate-700 dark:text-slate-300 shrink-0">
+          {staffList.length} disponíveis
         </span>
       </div>
 
       {/* Staff Options Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
         {/* Option: Any Staff Member */}
         <SpotlightCard
           isActive={isAnyStaff}
           onClick={() => onSelectStaff(null, true)}
-          className="flex flex-col justify-between group border-dashed"
+          className="flex flex-col justify-between group border-dashed p-4 sm:p-5"
         >
-          <div className="flex items-start space-x-4">
-            <div className="w-16 h-16 rounded-2xl bg-brand-primary/10 border border-brand-primary/30 flex items-center justify-center text-brand-primary shrink-0">
-              <Users className="w-8 h-8" />
+          <div className="flex items-start space-x-3.5 sm:space-x-4">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-brand-primary/10 border border-brand-primary/30 flex items-center justify-center text-brand-primary shrink-0">
+              <Users className="w-7 h-7 sm:w-8 sm:h-8" />
             </div>
-            <div className="space-y-1">
-              <div className="flex items-center space-x-2">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-brand-primary transition-colors font-heading">
+            <div className="space-y-1 min-w-0 flex-1">
+              <div className="flex items-center space-x-2 flex-wrap">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-brand-primary transition-colors font-heading truncate">
                   Qualquer Profissional
                 </h3>
                 <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-                  Mais Rapido
+                  Mais Rápido
                 </span>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Opcao recomendada para encontrar o horario mais proximo com qualquer membro qualificado da equipe.
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2">
+                Encontra o horário mais próximo com qualquer membro qualificado da equipe.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-4 mt-4 border-t border-black/10 dark:border-white/10">
-            <span className="text-xs text-slate-500 dark:text-slate-400">Atribuicao automatica</span>
+          <div className="flex items-center justify-between pt-3.5 sm:pt-4 mt-3 sm:mt-4 border-t border-black/10 dark:border-white/10">
+            <span className="text-xs text-slate-500 dark:text-slate-400">Atribuição automática</span>
             <div
               className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
                 isAnyStaff
@@ -86,13 +86,13 @@ export const Step2Staff: React.FC<Step2StaffProps> = ({
               key={staff.id}
               isActive={isSelected}
               onClick={() => onSelectStaff(staff, false)}
-              className="flex flex-col justify-between group"
+              className="flex flex-col justify-between group p-4 sm:p-5"
             >
               <div>
-                <div className="flex items-start space-x-4">
+                <div className="flex items-start space-x-3.5 sm:space-x-4">
                   {/* Avatar */}
                   <div className="relative shrink-0">
-                    <div className="w-16 h-16 rounded-2xl overflow-hidden border border-black/10 dark:border-white/15 bg-zinc-200 dark:bg-zinc-900 shadow-md">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden border border-black/10 dark:border-white/15 bg-zinc-200 dark:bg-zinc-900 shadow-md">
                       <img
                         src={staff.avatar_url || `https://placehold.co/150x150/18181b/f59e0b?text=${encodeURIComponent(staff.name.charAt(0))}`}
                         alt={staff.name}
@@ -114,7 +114,7 @@ export const Step2Staff: React.FC<Step2StaffProps> = ({
                       {staff.name}
                     </h3>
                     <p className="text-xs text-brand-primary font-medium flex items-center space-x-1">
-                      <Award className="w-3 h-3" />
+                      <Award className="w-3 h-3 shrink-0" />
                       <span className="truncate">{staff.role}</span>
                     </p>
                     <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mt-1 leading-relaxed">
@@ -125,9 +125,9 @@ export const Step2Staff: React.FC<Step2StaffProps> = ({
               </div>
 
               {/* Card Footer */}
-              <div className="flex items-center justify-between pt-4 mt-4 border-t border-black/10 dark:border-white/10">
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {staff.total_reviews} avaliacoes verificadas
+              <div className="flex items-center justify-between pt-3.5 sm:pt-4 mt-3 sm:mt-4 border-t border-black/10 dark:border-white/10">
+                <span className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
+                  {staff.total_reviews} avaliações
                 </span>
 
                 <div

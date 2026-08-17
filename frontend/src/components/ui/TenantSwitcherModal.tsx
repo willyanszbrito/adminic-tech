@@ -30,32 +30,32 @@ export const TenantSwitcherModal: React.FC<TenantSwitcherModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl glass-panel rounded-3xl p-6 sm:p-8 border border-black/10 dark:border-white/15 shadow-2xl overflow-hidden bg-white dark:bg-zinc-950">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-xl glass-panel rounded-3xl p-4 sm:p-8 border border-black/10 dark:border-white/15 shadow-2xl overflow-hidden bg-white dark:bg-zinc-950 max-h-[85vh] flex flex-col">
         {/* Ambient Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-brand-glow rounded-full blur-3xl pointer-events-none opacity-30" />
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between pb-5 border-b border-black/10 dark:border-white/10 relative z-10">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-brand-primary/20 text-brand-primary flex items-center justify-center border border-brand-primary/30">
+        <div className="flex items-center justify-between pb-4 sm:pb-5 border-b border-black/10 dark:border-white/10 relative z-10 shrink-0">
+          <div className="flex items-center space-x-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-brand-primary/20 text-brand-primary flex items-center justify-center border border-brand-primary/30 shrink-0">
               <Layers className="w-5 h-5" />
             </div>
-            <div>
-              <h2 className="text-lg font-bold font-heading text-slate-900 dark:text-white">Simulador Multi-Tenant</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Alterne entre empresas parceiras cadastradas no ecossistema</p>
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-lg font-bold font-heading text-slate-900 dark:text-white truncate">Simulador Multi-Tenant</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">Alterne entre empresas parceiras cadastradas</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer touch-target flex items-center justify-center shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Partners Grid */}
-        <div className="py-5 space-y-3 relative z-10 max-h-[60vh] overflow-y-auto pr-1">
+        <div className="py-4 space-y-2.5 relative z-10 overflow-y-auto pr-1 flex-1">
           {tenants.map((t) => {
             const isSelected = t.slug === currentSlug;
             return (

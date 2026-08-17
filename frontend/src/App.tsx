@@ -23,7 +23,7 @@ import { LoginModal } from './features/auth/LoginModal';
 import { GlobalFooter } from './components/ui/GlobalFooter';
 import { MOCK_TENANTS } from './services/mockData';
 import { PortalView } from './types';
-import { Shield, ArrowLeft } from 'lucide-react';
+import { Shield, ArrowLeft, ArrowRight } from 'lucide-react';
 import { isDedicatedSubdomain } from './services/domainHelper';
 
 const AppContent: React.FC = () => {
@@ -185,7 +185,7 @@ const AppContent: React.FC = () => {
       />
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 relative z-10">
+      <main className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-24 sm:pb-28 lg:pb-12 relative z-10">
         {/* VIEW 0: INSTITUTIONAL & COMMERCIAL PRODUCT LANDING PAGE */}
         {currentView === 'landing' && (
           <ProductLandingPage
@@ -218,13 +218,13 @@ const AppContent: React.FC = () => {
 
             {/* Wizard Main Grid */}
             {wizard.currentStep < 5 ? (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                <div className="lg:col-span-8 space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+                <div className="lg:col-span-8 space-y-4 sm:space-y-6">
                   {wizard.currentStep > 1 && (
                     <button
                       type="button"
                       onClick={() => wizard.handleStepClick((wizard.currentStep - 1) as any)}
-                      className="inline-flex items-center space-x-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                      className="inline-flex items-center space-x-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer py-1 touch-target"
                     >
                       <ArrowLeft className="w-3.5 h-3.5" />
                       <span>Voltar para etapa anterior</span>
@@ -280,7 +280,7 @@ const AppContent: React.FC = () => {
                   )}
                 </div>
 
-                {/* Right Sticky Sidebar */}
+                {/* Right Sticky Sidebar (Desktop & Tablet) */}
                 <div className="lg:col-span-4">
                   <SidebarSummary
                     currentStep={wizard.currentStep}
@@ -295,6 +295,40 @@ const AppContent: React.FC = () => {
                     canProceed={wizard.canProceed()}
                     isSubmitting={wizard.isSubmitting}
                   />
+                </div>
+
+                {/* Mobile Floating Sticky Bottom Bar */}
+                <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-t border-black/10 dark:border-white/15 z-30 shadow-2xl flex items-center justify-between gap-3 animate-in slide-in-from-bottom duration-300">
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block truncate">
+                      {wizard.selectedService ? wizard.selectedService.name : `Etapa ${wizard.currentStep} de 4`}
+                    </span>
+                    <span className="text-sm sm:text-base font-extrabold font-heading text-slate-900 dark:text-white">
+                      R$ {wizard.selectedService ? wizard.selectedService.price.toFixed(2) : '0,00'}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={!wizard.canProceed() || wizard.isSubmitting}
+                    onClick={wizard.handleProceed}
+                    className={`py-2.5 px-5 rounded-xl font-bold text-xs sm:text-sm flex items-center space-x-1.5 transition-all shadow-lg touch-target shrink-0 ${
+                      wizard.canProceed() && !wizard.isSubmitting
+                        ? 'bg-brand-primary text-black hover:opacity-95 active:scale-95 shadow-brand-primary/25 cursor-pointer'
+                        : 'bg-black/5 dark:bg-white/10 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-black/5 dark:border-white/5'
+                    }`}
+                  >
+                    <span>
+                      {wizard.currentStep === 1
+                        ? 'Escolher Profissional'
+                        : wizard.currentStep === 2
+                        ? 'Escolher Horário'
+                        : wizard.currentStep === 3
+                        ? 'Seus Dados'
+                        : 'Confirmar'}
+                    </span>
+                    <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+                  </button>
                 </div>
               </div>
             ) : (

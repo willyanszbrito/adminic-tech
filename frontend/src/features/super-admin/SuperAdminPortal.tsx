@@ -355,8 +355,8 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h3 className="text-lg font-bold font-heading text-white flex items-center gap-2">
-                <FileCheck2 className="w-5 h-5 text-amber-400" />
+              <h3 className="text-base sm:text-lg font-bold font-heading text-white flex items-center gap-2">
+                <FileCheck2 className="w-5 h-5 text-amber-400 shrink-0" />
                 <span>Trilha de Auditoria Digital Imutável (SHA-256)</span>
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
@@ -364,21 +364,21 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="relative">
+            <div className="flex items-center gap-2.5 w-full sm:w-auto">
+              <div className="relative flex-1 sm:flex-none">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Filtrar por ação, IP ou hash..."
                   value={auditFilter}
                   onChange={(e) => setAuditFilter(e.target.value)}
-                  className="pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 w-64"
+                  className="pl-9 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 w-full sm:w-64"
                 />
               </div>
               <button
                 onClick={loadAuditLogs}
                 disabled={isLoadingAudit}
-                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
+                className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer touch-target shrink-0 flex items-center justify-center"
                 title="Atualizar Logs"
               >
                 <RefreshCw className={`w-4 h-4 ${isLoadingAudit ? 'animate-spin' : ''}`} />
@@ -395,8 +395,8 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               Nenhum registro de auditoria encontrado para o filtro aplicado.
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto -mx-1 px-1 scrollbar-none">
+              <table className="w-full text-left text-xs min-w-[680px]">
                 <thead>
                   <tr className="border-b border-slate-800 text-slate-400 font-semibold">
                     <th className="pb-3 pr-4">Data e Hora (Manaus)</th>

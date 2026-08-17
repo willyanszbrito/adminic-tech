@@ -309,15 +309,15 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
                 )}
 
                 {/* Action Buttons */}
-                <div className="pt-4 border-t border-black/10 dark:border-white/10 flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center space-x-2">
+                <div className="pt-4 border-t border-black/10 dark:border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                  <div className="flex items-center gap-2">
                     <a
                       href={appt.whatsapp_direct_link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600/25 transition-all"
+                      className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-emerald-600/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600/25 transition-all touch-target"
                     >
-                      <MessageCircle className="w-3.5 h-3.5" />
+                      <MessageCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>WhatsApp</span>
                     </a>
 
@@ -325,15 +325,15 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
                       href={appt.google_calendar_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold glass-pill text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/15"
+                      className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold glass-pill text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/15 touch-target"
                     >
-                      <Calendar className="w-3.5 h-3.5 text-brand-primary" />
+                      <Calendar className="w-3.5 h-3.5 text-brand-primary shrink-0" />
                       <span>Google Agenda</span>
                     </a>
                   </div>
 
                   {isConfirmed && (
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => {
@@ -341,18 +341,18 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
                           setNewDate(appt.appointment_date);
                           setNewTime(appt.start_time);
                         }}
-                        className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold glass-pill text-slate-800 dark:text-white hover:bg-black/5 dark:hover:bg-white/15 cursor-pointer"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold glass-pill text-slate-800 dark:text-white hover:bg-black/5 dark:hover:bg-white/15 cursor-pointer touch-target"
                       >
-                        <RotateCcw className="w-3.5 h-3.5 text-brand-primary" />
+                        <RotateCcw className="w-3.5 h-3.5 text-brand-primary shrink-0" />
                         <span>Reagendar</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => handleCancel(appt.voucher_code)}
-                        className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 hover:bg-rose-500/25 transition-all cursor-pointer"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 hover:bg-rose-500/25 transition-all cursor-pointer touch-target"
                       >
-                        <XCircle className="w-3.5 h-3.5" />
+                        <XCircle className="w-3.5 h-3.5 shrink-0" />
                         <span>Cancelar</span>
                       </button>
                     </div>

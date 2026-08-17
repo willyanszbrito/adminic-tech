@@ -414,65 +414,65 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center space-x-2 pt-3 border-t border-black/10 dark:border-white/10 overflow-x-auto pb-1">
+        <div className="flex items-center space-x-2 pt-3 border-t border-black/10 dark:border-white/10 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
           <button
             onClick={() => setActiveTab('metrics')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 touch-target ${
               activeTab === 'metrics'
                 ? 'bg-brand-primary text-black shadow-md shadow-brand-primary/20'
                 : 'glass-pill text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10'
             }`}
           >
-            <TrendingUp className="w-3.5 h-3.5" />
-            <span>Métricas e Desempenho</span>
+            <TrendingUp className="w-3.5 h-3.5 shrink-0" />
+            <span>Métricas</span>
           </button>
 
           <button
             onClick={() => setActiveTab('catalog')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 touch-target ${
               activeTab === 'catalog'
                 ? 'bg-brand-primary text-black shadow-md shadow-brand-primary/20'
                 : 'glass-pill text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10'
             }`}
           >
-            <Scissors className="w-3.5 h-3.5" />
-            <span>Catálogo e Serviços ({services.length})</span>
+            <Scissors className="w-3.5 h-3.5 shrink-0" />
+            <span>Catálogo ({services.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('staff')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 touch-target ${
               activeTab === 'staff'
                 ? 'bg-brand-primary text-black shadow-md shadow-brand-primary/20'
                 : 'glass-pill text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10'
             }`}
           >
-            <Users className="w-3.5 h-3.5" />
-            <span>Equipe e Colaboradores ({staffList.length})</span>
+            <Users className="w-3.5 h-3.5 shrink-0" />
+            <span>Equipe ({staffList.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('pix')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 touch-target ${
               activeTab === 'pix'
                 ? 'bg-brand-primary text-black shadow-md shadow-brand-primary/20'
                 : 'glass-pill text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10'
             }`}
           >
-            <QrCode className="w-3.5 h-3.5" />
-            <span>PIX Instantâneo (Adminic Pay)</span>
+            <QrCode className="w-3.5 h-3.5 shrink-0" />
+            <span>PIX Instantâneo</span>
           </button>
 
           <button
             onClick={() => setActiveTab('settings')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 touch-target ${
               activeTab === 'settings'
                 ? 'bg-brand-primary text-black shadow-md shadow-brand-primary/20'
                 : 'glass-pill text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10'
             }`}
           >
-            <Store className="w-3.5 h-3.5" />
-            <span>Dados da Empresa e Tema</span>
+            <Store className="w-3.5 h-3.5 shrink-0" />
+            <span>Empresa & Tema</span>
           </button>
         </div>
       </div>
@@ -553,14 +553,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           </div>
 
           {/* Recent Appointments Table */}
-          <div className="glass-panel p-6 rounded-3xl border border-black/10 dark:border-white/10 space-y-4">
+          <div className="glass-panel p-4 sm:p-6 rounded-3xl border border-black/10 dark:border-white/10 space-y-4">
             <h3 className="text-sm font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">
-              <Clock className="w-4 h-4 text-brand-primary" />
+              <Clock className="w-4 h-4 text-brand-primary shrink-0" />
               <span>Agendamentos Recentes</span>
             </h3>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto -mx-1 px-1 scrollbar-none">
+              <table className="w-full text-left text-xs min-w-[620px]">
                 <thead>
                   <tr className="border-b border-black/10 dark:border-white/10 text-slate-500">
                     <th className="pb-3 font-semibold">Código</th>

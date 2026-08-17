@@ -34,55 +34,55 @@ export const ProductLandingPage: React.FC<ProductLandingPageProps> = ({
 
       <div className="relative z-10">
         {/* Hero Section */}
-        <section className="pt-24 pb-16 sm:pt-32 sm:pb-20 px-4 sm:px-6 max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-semibold uppercase tracking-wider mb-6 animate-pulse">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Ecossistema Inteligente de Agendamento</span>
+        <section className="pt-12 pb-12 sm:pt-28 sm:pb-20 px-3.5 sm:px-6 max-w-7xl mx-auto text-center">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-semibold uppercase tracking-wider mb-5 animate-pulse">
+            <Sparkles className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Ecossistema Inteligente de Agendamento</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-extrabold font-heading tracking-tight text-slate-900 dark:text-white max-w-4xl mx-auto leading-tight">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold font-heading tracking-tight text-slate-900 dark:text-white max-w-4xl mx-auto leading-tight">
             Gestão e Agendamento de Alta Performance com <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600">Inteligência Real</span>
           </h1>
 
-          <p className="mt-6 text-base sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-4 sm:mt-6 text-sm sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
             Plataforma corporativa multi-tenant que conecta clientes a estabelecimentos de excelência com confirmação instantânea no WhatsApp, pagamentos automatizados e segurança de dados.
           </p>
 
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <a
               href="#parceiros"
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-base flex items-center justify-center space-x-2 shadow-xl shadow-amber-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm sm:text-base flex items-center justify-center space-x-2 shadow-xl shadow-amber-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] touch-target"
             >
               <span>Ver Estabelecimentos Parceiros</span>
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
             </a>
 
             <button
               onClick={onOpenLogin}
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl glass-panel border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/10 text-slate-900 dark:text-white font-semibold text-base flex items-center justify-center space-x-2 transition-all"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl glass-panel border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/10 text-slate-900 dark:text-white font-semibold text-sm sm:text-base flex items-center justify-center space-x-2 transition-all touch-target"
             >
-              <Lock className="w-4 h-4 text-amber-500" />
+              <Lock className="w-4 h-4 text-amber-500 shrink-0" />
               <span>Acessar Portal do Parceiro</span>
             </button>
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            <div className="glass-panel p-5 rounded-2xl border border-black/10 dark:border-white/10 text-center">
-              <span className="block text-2xl sm:text-3xl font-extrabold font-heading text-amber-500">100%</span>
-              <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 block">Tempo Real</span>
+          <div className="mt-12 sm:mt-16 grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 max-w-4xl mx-auto">
+            <div className="glass-panel p-3.5 sm:p-5 rounded-2xl border border-black/10 dark:border-white/10 text-center">
+              <span className="block text-xl sm:text-3xl font-extrabold font-heading text-amber-500">100%</span>
+              <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1 block">Tempo Real</span>
             </div>
-            <div className="glass-panel p-5 rounded-2xl border border-black/10 dark:border-white/10 text-center">
-              <span className="block text-2xl sm:text-3xl font-extrabold font-heading text-slate-900 dark:text-white">Meta API</span>
-              <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 block">WhatsApp Oficial</span>
+            <div className="glass-panel p-3.5 sm:p-5 rounded-2xl border border-black/10 dark:border-white/10 text-center">
+              <span className="block text-xl sm:text-3xl font-extrabold font-heading text-slate-900 dark:text-white">Meta API</span>
+              <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1 block">WhatsApp Oficial</span>
             </div>
-            <div className="glass-panel p-5 rounded-2xl border border-black/10 dark:border-white/10 text-center">
-              <span className="block text-2xl sm:text-3xl font-extrabold font-heading text-emerald-500">Adminic Pay</span>
-              <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 block">PIX Automatizado</span>
+            <div className="glass-panel p-3.5 sm:p-5 rounded-2xl border border-black/10 dark:border-white/10 text-center">
+              <span className="block text-xl sm:text-3xl font-extrabold font-heading text-emerald-500">Adminic Pay</span>
+              <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1 block">PIX Automatizado</span>
             </div>
-            <div className="glass-panel p-5 rounded-2xl border border-black/10 dark:border-white/10 text-center">
-              <span className="block text-2xl sm:text-3xl font-extrabold font-heading text-slate-900 dark:text-white">SHA-256</span>
-              <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 block">Trilha de Auditoria</span>
+            <div className="glass-panel p-3.5 sm:p-5 rounded-2xl border border-black/10 dark:border-white/10 text-center">
+              <span className="block text-xl sm:text-3xl font-extrabold font-heading text-slate-900 dark:text-white">SHA-256</span>
+              <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1 block">Trilha de Auditoria</span>
             </div>
           </div>
         </section>

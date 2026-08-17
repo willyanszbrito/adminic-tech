@@ -371,14 +371,14 @@ export const Step5Success: React.FC<Step5SuccessProps> = ({
         </div>
 
         {/* Action Shortcuts */}
-        <div className="p-6 bg-black/[0.01] dark:bg-white/[0.02] flex flex-wrap items-center justify-center gap-3">
+        <div className="p-4 sm:p-6 bg-black/[0.01] dark:bg-white/[0.02] flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-2.5 sm:gap-3">
           <a
             href={appointment.whatsapp_direct_link}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-emerald-600/20 dark:bg-emerald-600/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 hover:bg-emerald-600/30 transition-all shadow-md"
+            className="inline-flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 rounded-xl text-xs font-semibold bg-emerald-600/20 dark:bg-emerald-600/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 hover:bg-emerald-600/30 transition-all shadow-md touch-target"
           >
-            <MessageCircle className="w-4 h-4" />
+            <MessageCircle className="w-4 h-4 shrink-0" />
             <span>Notificar no WhatsApp</span>
           </a>
 
@@ -386,30 +386,30 @@ export const Step5Success: React.FC<Step5SuccessProps> = ({
             href={appointment.google_calendar_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold glass-pill text-slate-800 dark:text-white hover:bg-black/5 dark:hover:bg-white/15 border border-black/10 dark:border-white/15 transition-all"
+            className="inline-flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 rounded-xl text-xs font-semibold glass-pill text-slate-800 dark:text-white hover:bg-black/5 dark:hover:bg-white/15 border border-black/10 dark:border-white/15 transition-all touch-target"
           >
-            <Calendar className="w-4 h-4 text-brand-primary" />
+            <Calendar className="w-4 h-4 text-brand-primary shrink-0" />
             <span>Google Agenda</span>
           </a>
 
           <button
             onClick={() => window.print()}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold glass-pill text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/15 border border-black/10 dark:border-white/15 transition-all"
+            className="inline-flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 rounded-xl text-xs font-semibold glass-pill text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/15 border border-black/10 dark:border-white/15 transition-all touch-target"
           >
-            <Printer className="w-4 h-4" />
+            <Printer className="w-4 h-4 shrink-0" />
             <span>Imprimir Comprovante</span>
           </button>
         </div>
       </div>
 
       {/* Bottom Action */}
-      <div className="text-center pt-4">
+      <div className="text-center pt-3 sm:pt-4">
         <button
           type="button"
           onClick={onNewBooking}
-          className="inline-flex items-center space-x-2 px-6 py-3 rounded-2xl text-xs font-bold bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-slate-800 dark:text-white border border-black/10 dark:border-white/15 transition-all hover:scale-105"
+          className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-3.5 rounded-2xl text-xs font-bold bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-slate-800 dark:text-white border border-black/10 dark:border-white/15 transition-all hover:scale-105 touch-target"
         >
-          <RotateCcw className="w-4 h-4 text-brand-primary" />
+          <RotateCcw className="w-4 h-4 text-brand-primary shrink-0" />
           <span>Realizar Novo Agendamento</span>
         </button>
       </div>

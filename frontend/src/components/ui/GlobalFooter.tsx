@@ -16,24 +16,24 @@ export const GlobalFooter: React.FC = () => {
             <span className="font-medium text-slate-700 dark:text-slate-300">© 2026 Adminic Tecnologia • Plataforma de Agendamento Inteligente</span>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 text-slate-500 dark:text-slate-400">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-slate-500 dark:text-slate-400">
             <button
               onClick={() => setIsTermsOpen(true)}
-              className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center gap-1 cursor-pointer underline-offset-4 hover:underline"
+              className="hover:text-amber-600 dark:hover:text-amber-400 transition-colors flex items-center gap-1 cursor-pointer underline-offset-4 hover:underline py-1 touch-target"
             >
               <FileText className="w-3.5 h-3.5" />
               <span>Termos de Uso</span>
             </button>
-            <span>•</span>
+            <span className="hidden sm:inline">•</span>
             <button
               onClick={() => setIsPrivacyOpen(true)}
-              className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1 cursor-pointer underline-offset-4 hover:underline"
+              className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1 cursor-pointer underline-offset-4 hover:underline py-1 touch-target"
             >
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Política de Privacidade (LGPD)</span>
             </button>
-            <span>•</span>
-            <span className="flex items-center gap-1 text-slate-400 dark:text-slate-500">
+            <span className="hidden sm:inline">•</span>
+            <span className="flex items-center gap-1 text-slate-400 dark:text-slate-500 py-1">
               <Lock className="w-3.5 h-3.5" />
               <span>Conexão Segura</span>
             </span>

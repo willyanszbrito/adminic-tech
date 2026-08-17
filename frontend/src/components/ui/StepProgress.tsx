@@ -22,23 +22,48 @@ export const StepProgress: React.FC<StepProgressProps> = ({
   maxStepReached,
 }) => {
   return (
-    <div className="w-full glass-panel rounded-2xl p-4 sm:p-5 mb-8">
+    <div className="w-full glass-panel rounded-2xl p-3.5 sm:p-5 mb-6 sm:mb-8">
       {/* Mobile Step Bar */}
-      <div className="flex sm:hidden items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-xl bg-brand-primary/20 text-brand-primary border border-brand-primary/40 flex items-center justify-center font-bold text-sm">
+      <div className="flex sm:hidden items-center justify-between gap-3">
+        <div className="flex items-center space-x-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-brand-primary/20 text-brand-primary border border-brand-primary/40 flex items-center justify-center font-bold text-xs shrink-0">
             {currentStep}
           </div>
-          <div>
-            <span className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-medium">Etapa {currentStep} de 5</span>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{steps[currentStep - 1].label}</h3>
+          <div className="min-w-0">
+            <span className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-medium block">
+              Etapa {currentStep} de 5
+            </span>
+            <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+              {steps[currentStep - 1].label}
+            </h3>
           </div>
         </div>
-        <div className="w-24 bg-black/10 dark:bg-white/10 rounded-full h-2 overflow-hidden">
-          <div
-            className="bg-brand-primary h-full transition-all duration-300"
-            style={{ width: `${(currentStep / 5) * 100}%` }}
-          />
+
+        {/* Clickable Mobile Mini Steps */}
+        <div className="flex items-center space-x-1.5 shrink-0">
+          {steps.slice(0, 4).map((s) => {
+            const isCompleted = currentStep > s.step;
+            const isCurrent = currentStep === s.step;
+            const isClickable = s.step <= maxStepReached && s.step !== 5;
+            return (
+              <button
+                key={s.step}
+                type="button"
+                disabled={!isClickable}
+                onClick={() => isClickable && onStepClick(s.step)}
+                className={`w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-bold transition-all touch-target ${
+                  isCurrent
+                    ? 'bg-brand-primary text-black ring-2 ring-brand-primary/40 shadow-sm'
+                    : isCompleted
+                    ? 'bg-brand-primary/20 text-brand-primary'
+                    : 'bg-black/5 dark:bg-white/10 text-slate-400'
+                }`}
+                title={`Etapa ${s.step}: ${s.label}`}
+              >
+                {isCompleted ? '✓' : s.step}
+              </button>
+            );
+          })}
         </div>
       </div>
 
