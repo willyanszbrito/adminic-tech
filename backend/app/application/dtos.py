@@ -438,6 +438,7 @@ class DemoLoginRequestDTO(BaseModel):
     tenant_slug: Optional[str] = Field(None, description="Slug do parceiro")
     staff_id: Optional[str] = Field(None, description="ID do colaborador se aplicável")
     name: Optional[str] = Field(None, description="Nome do usuário")
+    access_key: Optional[str] = Field(None, description="Chave de acesso corporativa / PIN")
 
 
 class UserDTO(BaseModel):

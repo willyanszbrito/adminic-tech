@@ -421,7 +421,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             }`}
           >
             <Store className="w-3.5 h-3.5" />
-            <span>Dados da Empresa & Tema</span>
+            <span>Dados da Empresa e Tema</span>
           </button>
         </div>
       </div>

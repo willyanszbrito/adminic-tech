@@ -115,7 +115,7 @@ export const ProductLandingPage: React.FC<ProductLandingPageProps> = ({
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center border border-emerald-500/20">
                 <MessageSquare className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Notificações WhatsApp & Agenda</h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Notificações WhatsApp e Agenda</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
                 Disparo instantâneo de comprovante com QR Code e link direto para adicionar ao Google Calendar do cliente.
               </p>
@@ -135,7 +135,7 @@ export const ProductLandingPage: React.FC<ProductLandingPageProps> = ({
               <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center border border-blue-500/20">
                 <ShieldCheck className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Segurança Enterprise & LGPD</h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Segurança Enterprise e LGPD</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
                 Controle rigoroso de acesso com autenticação JWT, Rate Limiting contra ataques DoS e trilha de auditoria imutável.
               </p>

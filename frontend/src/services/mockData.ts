@@ -82,47 +82,6 @@ export const MOCK_TENANTS: Tenant[] = [
       lunch_break_start: '12:00',
       lunch_break_end: '13:00'
     }
-  },
-  {
-    id: 'tnt-aura-barber',
-    slug: 'barbearia-vintage',
-    name: 'Aura Barber Club',
-    slogan: 'Excelência em Visagismo, Barbearia Clássica e Estilo Masculino',
-    description: 'Ambiente corporativo e sofisticado com atendimento sob medida, profissionais especializados e estrutura de alto padrão para executivos e cavalheiros exigentes.',
-    category: 'barbearia',
-    logo_url: 'https://placehold.co/200x200/18181b/f59e0b?text=Aura+Barber',
-    banner_url: 'https://placehold.co/1200x400/18181b/f59e0b?text=Aura+Barber+Club+Executive',
-    phone: '(11) 3456-7890',
-    whatsapp: '5511999998888',
-    email: 'contato@aurabarber.com.br',
-    address: 'Avenida Paulista, 1842, Conjunto 401, Bela Vista, São Paulo - SP',
-    instagram: '@aurabarberclub',
-    is_active: true,
-    features: ['Wi-Fi Corporativo', 'Ar-Condicionado', 'Café Premium e Bebidas', 'Estacionamento Valet'],
-    plan_name: 'Plano Enterprise Pro',
-    trial_days_remaining: 26,
-    trial_status: 'active',
-    trial_ends_at: '2026-09-11',
-    monthly_revenue: 18450.0,
-    theme: {
-      primary_color: '#f59e0b',
-      secondary_color: '#18181b',
-      accent_color: '#d97706',
-      background_mode: 'dark',
-      surface_glass_opacity: 0.7,
-      glow_color: 'rgba(245, 158, 11, 0.25)',
-      font_heading: 'Outfit',
-      font_body: 'Inter',
-      badge_text: 'Parceiro Oficial Adminic'
-    },
-    business_hours: {
-      days_open: [0, 1, 2, 3, 4, 5],
-      open_time: '09:00',
-      close_time: '20:00',
-      slot_interval_minutes: 30,
-      lunch_break_start: '12:00',
-      lunch_break_end: '13:00'
-    }
   }
 ];
 
@@ -210,24 +169,47 @@ export const MOCK_CATALOGS: Record<string, CatalogResponse> = {
       }
     ]
   },
-  'barbearia-vintage': {
-    tenant_slug: 'barbearia-vintage',
-    total_services: 1,
+  'segredos-do-corte': {
+    tenant_slug: 'segredos-do-corte',
+    total_services: 3,
     categories: [
-      { id: 'cat-cabelo', tenant_id: 'tnt-aura-barber', name: 'Cabelo e Visagismo', icon: 'scissors', display_order: 1 },
-      { id: 'cat-barba', tenant_id: 'tnt-aura-barber', name: 'Barboterapia e Cuidados', icon: 'sparkles', display_order: 2 },
-      { id: 'cat-combos', tenant_id: 'tnt-aura-barber', name: 'Combos Corporativos', icon: 'crown', display_order: 3 }
+      { id: 'cat-segredos-cortes', tenant_id: 'tnt-segredos-do-corte', name: 'Cortes e Estilos', icon: 'scissors', display_order: 1 },
+      { id: 'cat-segredos-barba', tenant_id: 'tnt-segredos-do-corte', name: 'Barboterapia e Cuidados', icon: 'sparkles', display_order: 2 }
     ],
     services: [
       {
-        id: 'srv-corte-degrade',
-        tenant_id: 'tnt-aura-barber',
-        category_id: 'cat-cabelo',
-        name: 'Corte Degradê e Visagismo',
-        description: 'Corte de alta precisão com consultoria de estilo, lavagem especial e finalização.',
-        duration_minutes: 45,
-        price: 75.0,
-        image_url: 'https://placehold.co/400x300/18181b/f59e0b?text=Corte+Degrade',
+        id: 'srv-segredos-degrade',
+        tenant_id: 'tnt-segredos-do-corte',
+        category_id: 'cat-segredos-cortes',
+        name: 'Corte Degradê na Régua',
+        description: 'Degradê impecável (Skin Fade, Taper Fade ou Low Fade) com visagismo e finalização premium.',
+        duration_minutes: 35,
+        price: 35.0,
+        image_url: '/logos/logo_segredosdocorte.png',
+        is_featured: true,
+        is_active: true
+      },
+      {
+        id: 'srv-segredos-barba',
+        tenant_id: 'tnt-segredos-do-corte',
+        category_id: 'cat-segredos-barba',
+        name: 'Barba Desenhada e Modelada',
+        description: 'Barba desenhada com toalha quente, navalha descartável e hidratação com óleo essencial.',
+        duration_minutes: 25,
+        price: 20.0,
+        image_url: '/logos/logo_segredosdocorte.png',
+        is_featured: true,
+        is_active: true
+      },
+      {
+        id: 'srv-segredos-combo',
+        tenant_id: 'tnt-segredos-do-corte',
+        category_id: 'cat-segredos-cortes',
+        name: 'Combo Cabelo + Barba + Sobrancelha',
+        description: 'Visual completo e alinhado: corte estilizado, barboterapia e design de sobrancelha.',
+        duration_minutes: 55,
+        price: 55.0,
+        image_url: '/logos/logo_segredosdocorte.png',
         is_featured: true,
         is_active: true
       }
@@ -267,18 +249,24 @@ export const MOCK_STAFF: Record<string, Staff[]> = {
       blocked_slots: []
     }
   ],
-  'barbearia-vintage': [
+  'segredos-do-corte': [
     {
-      id: 'stf-marcus-barber',
-      tenant_id: 'tnt-aura-barber',
-      name: 'Marcus Aurelius Silva',
-      role: 'Master Barber e Consultor de Visagismo',
-      bio: 'Mais de 12 anos de experiência em cortes clássicos e visagismo.',
-      avatar_url: 'https://placehold.co/200x200/18181b/f59e0b?text=Marcus+Aurelius',
-      rating: 4.9,
-      total_reviews: 218,
+      id: 'stf-jefferson-mendonca',
+      tenant_id: 'tnt-segredos-do-corte',
+      name: 'Jefferson Mendonça (Jefinho)',
+      role: 'Master Barber e Fundador',
+      bio: 'Especialista renomado em degradês e cortes de alta precisão. Criador da Segredos do Corte.',
+      avatar_url: '/logos/logo_segredosdocorte.png',
+      phone: '(92) 98489-9955',
+      email: 'sofiaheufrosina@gmail.com',
+      rating: 5.0,
+      total_reviews: 187,
       is_active: true,
-      specialty_service_ids: ['srv-corte-degrade'],
+      specialty_service_ids: [
+        'srv-segredos-degrade',
+        'srv-segredos-barba',
+        'srv-segredos-combo'
+      ],
       shifts: [0, 1, 2, 3, 4, 5].map(i => ({
         day_of_week: i,
         start_time: '09:00',

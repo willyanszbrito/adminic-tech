@@ -131,19 +131,19 @@ class InMemoryAppointmentRepository(IAppointmentRepository):
         # Preload model appointment for demonstration
         demo_appt = Appointment(
             id="apt-demo-seed-1",
-            tenant_id="tnt-aura-barber",
+            tenant_id="tnt-barbearia-campelo",
             voucher_code="ADM-DEMO1",
-            service_id="srv-corte-degrade",
-            staff_id="stf-marcus-barber",
+            service_id="srv-campelo-corte",
+            staff_id="stf-julio-sousa",
             appointment_date="2026-08-18",
             start_time="14:00",
-            end_time="14:45",
+            end_time="14:30",
             customer_name="Valerius Maximus",
-            customer_phone="(11) 98888-7777",
+            customer_phone="(92) 98888-7777",
             customer_email="valerius.maximus@empresa.com.br",
-            notes="Cliente preferencial corporativo",
+            notes="Cliente preferencial",
             status="confirmed",
-            price=75.00,
+            price=30.00,
             created_at=datetime.now(timezone.utc)
         )
         self._appointments[demo_appt.id] = demo_appt

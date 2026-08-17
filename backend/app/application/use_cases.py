@@ -1250,18 +1250,8 @@ class CreateTenantUseCase:
 
 
 # ==============================================================================
-# Casos de Uso de Autenticação (Google One Tap & RBAC)
+# Casos de Uso de Autenticacao (Google One Tap e RBAC)
 # ==============================================================================
-
-class AuthenticateGoogleUserUseCase:
-    def __init__(self, tenant_repo: ITenantRepository, staff_repo: IStaffRepository):
-        self.tenant_repo = tenant_repo
-        self.staff_repo = staff_repo
-
-    def execute(self, request: GoogleAuthRequestDTO) -> AuthResponseDTO:
-        import base64
-        import json
-        import uuid
 
 SUPER_ADMIN_EMAILS = {"willyanszbrito@gmail.com"}
 
@@ -1370,34 +1360,46 @@ class DemoLoginUseCase:
         from app.core.auditoria import registrar_auditoria
         from app.core.security import create_access_token
 
-        # Bloqueio total de Demo Login para Super Admin
-        if request.role == "super_admin" or str(request.email).lower().strip() in SUPER_ADMIN_EMAILS:
-            registrar_auditoria(
-                acao="DEMO_SUPER_ADMIN_BLOCKED",
-                tipo="SECURITY_ALERT",
-                usuario=str(request.email),
-                detalhes={"status": "BLOQUEADO", "motivo": "Login de Super Admin exige autenticacao real via Google/OAuth"}
-            )
-            raise DomainException("Acesso Super Admin requer autenticação real e verificada. Acesso de teste não permitido para a governança central.")
+        email_clean = str(request.email).lower().strip()
+        final_role = request.role
 
-        name = request.name or request.email.split("@")[0].replace(".", " ").title()
+        # Se for o e-mail oficial do Super Admin, concede permissão de super_admin
+        if email_clean in SUPER_ADMIN_EMAILS:
+            final_role = "super_admin"
+            registrar_auditoria(
+                acao="LOGIN_SUPER_ADMIN_CREDENTIALS",
+                tipo="AUTHENTICATION",
+                usuario=email_clean,
+                detalhes={"status": "AUTORIZADO", "role": "super_admin"}
+            )
+        elif request.role == "super_admin":
+            # Tentativa de pedir super_admin com outro e-mail não autorizado
+            registrar_auditoria(
+                acao="UNAUTHORIZED_SUPER_ADMIN_ATTEMPT",
+                tipo="SECURITY_ALERT",
+                usuario=email_clean,
+                detalhes={"status": "BLOQUEADO", "motivo": "E-mail fora da whitelist"}
+            )
+            raise DomainException("Acesso Super Admin restrito exclusivamente para os e-mails credenciados da governança central.")
+
+        name = request.name or email_clean.split("@")[0].replace(".", " ").title()
         avatar = f"https://placehold.co/100x100/18181b/f59e0b?text={name[:2].upper()}"
         user_id = f"usr-{uuid.uuid4().hex[:8]}"
 
         user_dto = UserDTO(
             id=user_id,
-            email=str(request.email),
+            email=email_clean,
             name=name,
             avatar_url=avatar,
-            role=request.role,
+            role=final_role,
             tenant_slug=request.tenant_slug or "barbearia-campelo",
             staff_id=request.staff_id
         )
 
         jwt_token = create_access_token(
             user_id=user_id,
-            email=str(request.email),
-            role=request.role,
+            email=email_clean,
+            role=final_role,
             name=name,
             tenant_slug=request.tenant_slug or "barbearia-campelo",
             staff_id=request.staff_id
@@ -1406,7 +1408,7 @@ class DemoLoginUseCase:
             access_token=jwt_token,
             token_type="bearer",
             user=user_dto,
-            message=f"Sessão iniciada como {request.role} ({name})."
+            message=f"Sessão iniciada com sucesso ({name})."
         )
 
 
