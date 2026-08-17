@@ -6,13 +6,13 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: adminic-api
     restart: always
     environment:
       - PORT=8000
       - ENVIRONMENT=production
       - APP_DOMAIN=ia.adminic.com.br
       - API_DOMAIN=api.adminic.com.br
+      - CORS_ORIGINS=["http://localhost:3000","http://127.0.0.1:3000","https://ia.adminic.com.br","https://campelo.adminic.com.br","https://segredos.adminic.com.br","https://segredosdocorte.adminic.com.br","*"]
       - DATABASE_URL=postgresql://adminic_user:${DB_PASSWORD:-adminic_secure_pass_2026}@postgres:5432/adminic_db
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-adminic_jwt_production_master_secret_2026}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-564423794141-eum30ivtuprbv8ikk8qi6b7gapgm6a2v.apps.googleusercontent.com}
@@ -30,8 +30,8 @@ services:
     depends_on:
       - postgres
       - redis
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -43,7 +43,6 @@ services:
   # 2. Database (PostgreSQL 16 Enterprise)
   postgres:
     image: postgres:16-alpine
-    container_name: adminic-postgres
     restart: always
     environment:
       POSTGRES_DB: adminic_db
@@ -51,20 +50,19 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-adminic_secure_pass_2026}
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     networks:
       - adminic-network
 
   # 3. Cache & Distributed Rate Limiting (Redis 7)
   redis:
     image: redis:7-alpine
-    container_name: adminic-redis
     restart: always
     volumes:
       - redis-data:/data
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
     networks:
       - adminic-network
 
