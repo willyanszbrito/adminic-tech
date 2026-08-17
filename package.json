@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "cd frontend && npm install && npm run build",
-    "deploy": "cd frontend && npm run build"
+    "build": "node build.js",
+    "deploy": "npx wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^3.114.0"
   }
 }
