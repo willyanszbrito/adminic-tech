@@ -1,0 +1,9 @@
+{
+  "name": "adminic-tech-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "deploy": "cd frontend && npm run build"
+  }
+}
