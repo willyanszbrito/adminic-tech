@@ -57,6 +57,7 @@ def map_tenant_to_dto(tenant: Tenant) -> TenantResponseDTO:
         description=tenant.description,
         category=tenant.category,
         logo_url=tenant.logo_url,
+        favicon_url=getattr(tenant, 'favicon_url', None),
         banner_url=tenant.banner_url,
         phone=tenant.phone,
         whatsapp=tenant.whatsapp,
@@ -1082,6 +1083,8 @@ class UpdateTenantSettingsUseCase:
             tenant.instagram = request.instagram
         if request.logo_url:
             tenant.logo_url = request.logo_url
+        if request.favicon_url is not None:
+            tenant.favicon_url = request.favicon_url
         if request.banner_url:
             tenant.banner_url = request.banner_url
         if request.pix_enabled is not None:

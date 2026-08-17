@@ -34,7 +34,17 @@ export function useTenantTheme(tenant: Tenant | null, themeMode: 'dark' | 'light
     // Update meta description
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) {
-      metaDesc.setAttribute('content', `${slogan} - Agende seu horario online no ${name}.`);
+      metaDesc.setAttribute('content', `${slogan} - Agende seu horário online em ${name}.`);
     }
+
+    // Update dynamic favicon to match partner logo or custom favicon
+    const faviconHref = tenant.favicon_url || tenant.logo_url || '/favicon.ico';
+    let faviconLink = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+    if (!faviconLink) {
+      faviconLink = document.createElement('link');
+      faviconLink.rel = 'icon';
+      document.getElementsByTagName('head')[0].appendChild(faviconLink);
+    }
+    faviconLink.href = faviconHref;
   }, [tenant]);
 }

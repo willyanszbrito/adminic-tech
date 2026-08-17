@@ -139,7 +139,7 @@ const AppContent: React.FC = () => {
 
   // Render Loading Spinner while tenant data is loading
   if (wizard.isLoading && !wizard.tenant) {
-    return <LoadingSpinner slug={wizard.slug} />;
+    return <LoadingSpinner message="Carregando" />;
   }
 
   // Error / Not Found State for Partner Page

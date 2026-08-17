@@ -44,9 +44,10 @@ class Tenant:
     whatsapp: str
     email: str
     address: str
-    instagram: Optional[str]
     theme: TenantTheme
     business_hours: BusinessHours
+    instagram: Optional[str] = None
+    favicon_url: Optional[str] = None
     is_active: bool = True
     features: List[str] = field(default_factory=lambda: ["Wi-Fi Corporativo", "Ar-Condicionado", "Café Cortesia", "Estacionamento Privativo"])
     # Configurações de Pagamento e PIX

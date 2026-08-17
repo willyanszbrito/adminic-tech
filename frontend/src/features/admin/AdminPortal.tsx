@@ -93,6 +93,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [address, setAddress] = useState(tenant.address);
   const [instagram, setInstagram] = useState(tenant.instagram || '');
   const [logoUrl, setLogoUrl] = useState(tenant.logo_url);
+  const [faviconUrl, setFaviconUrl] = useState(tenant.favicon_url || '');
   const [bannerUrl, setBannerUrl] = useState(tenant.banner_url || '');
   const [features, setFeatures] = useState<string[]>(
     tenant.features && tenant.features.length > 0
@@ -123,7 +124,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, target: 'logo' | 'banner' | 'service' | 'staff') => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, target: 'logo' | 'banner' | 'service' | 'staff' | 'favicon') => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
@@ -134,6 +135,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     reader.onload = (event) => {
       const base64 = event.target?.result as string;
       if (target === 'logo') setLogoUrl(base64);
+      else if (target === 'favicon') setFaviconUrl(base64);
       else if (target === 'banner') setBannerUrl(base64);
       else if (target === 'service') setServiceImageUrl(base64);
       else if (target === 'staff') setStaffAvatar(base64);
@@ -367,6 +369,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         address,
         instagram,
         logo_url: logoUrl,
+        favicon_url: faviconUrl || logoUrl,
         banner_url: bannerUrl,
         features: features,
         theme: {
@@ -409,10 +412,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </span>
                 <span className="text-xs font-mono text-slate-500">{tenant.slug}</span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold font-heading text-slate-900 dark:text-white mt-0.5">
+              <h2 className="text-xl sm:text-2xl font-extrabold font-heading text-slate-900 dark:text-white mt-1">
                 {name}
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
                 {slogan}
               </p>
             </div>
@@ -487,7 +490,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             }`}
           >
             <Store className="w-3.5 h-3.5 shrink-0" />
-            <span>Empresa & Tema</span>
+            <span>Empresa e Tema</span>
           </button>
         </div>
       </div>
@@ -803,20 +806,20 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 <Layers className="w-3.5 h-3.5 text-brand-primary" />
                 <span>Gerenciar Categorias de Serviços</span>
               </h4>
-              <form onSubmit={handleAddCategory} className="flex gap-2">
+              <form onSubmit={handleAddCategory} className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
                   placeholder="Nova categoria (ex: Barboterapia, Barba...)"
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
-                  className="flex-1 glass-input px-3 py-1.5 rounded-lg text-xs"
+                  className="flex-1 glass-input px-3.5 py-2.5 rounded-xl text-xs w-full"
                 />
                 <button
                   type="submit"
                   disabled={isSubmitting || !newCatName.trim()}
-                  className="px-3 py-1.5 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs hover:opacity-90 cursor-pointer"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs hover:opacity-90 cursor-pointer touch-target flex items-center justify-center shrink-0"
                 >
-                  + Criar
+                  + Criar Categoria
                 </button>
               </form>
 
@@ -948,7 +951,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   required
                   value={staffRole}
                   onChange={(e) => setStaffRole(e.target.value)}
-                  placeholder="ex: Master Barber & Barboterapia"
+                  placeholder="ex: Master Barber e Barboterapia"
                   className="w-full glass-input px-3 py-2 rounded-xl text-xs"
                 />
               </div>
@@ -1320,12 +1323,17 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
             {/* Logo do Estabelecimento */}
             <div className="p-5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
-                  <ShieldCheck className="w-4 h-4 text-brand-primary" />
-                  <span>Logotipo Oficial do Estabelecimento</span>
-                </label>
-                <label className="px-3 py-1.5 rounded-xl bg-brand-primary/20 text-brand-primary hover:bg-brand-primary/30 border border-brand-primary/40 text-xs font-bold cursor-pointer transition-all flex items-center space-x-1.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <label className="text-xs font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
+                    <ShieldCheck className="w-4 h-4 text-brand-primary" />
+                    <span>Logotipo Oficial do Estabelecimento</span>
+                  </label>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Exibido no topo do agendamento, comprovantes e vouchers.
+                  </p>
+                </div>
+                <label className="px-3 py-1.5 rounded-xl bg-brand-primary/20 text-brand-primary hover:bg-brand-primary/30 border border-brand-primary/40 text-xs font-bold cursor-pointer transition-all flex items-center justify-center space-x-1.5 touch-target self-start sm:self-auto">
                   <Upload className="w-3.5 h-3.5" />
                   <span>Fazer Upload da Logo</span>
                   <input
@@ -1357,6 +1365,56 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     value={logoUrl}
                     onChange={(e) => setLogoUrl(e.target.value)}
                     placeholder="/logos/logo_campelo.jpg ou https://..."
+                    className="w-full glass-input px-3 py-2 rounded-xl text-xs font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Ícone de Navegador (Favicon) */}
+            <div className="p-5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <label className="text-xs font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
+                    <Sparkles className="w-4 h-4 text-brand-primary" />
+                    <span>Ícone da Aba do Navegador (Favicon)</span>
+                  </label>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Por padrão utiliza o logotipo acima. Faça upload aqui caso deseje um ícone customizado.
+                  </p>
+                </div>
+                <label className="px-3 py-1.5 rounded-xl bg-black/10 dark:bg-white/10 hover:bg-black/15 dark:hover:bg-white/15 border border-black/15 dark:border-white/20 text-xs font-bold cursor-pointer transition-all flex items-center justify-center space-x-1.5 touch-target self-start sm:self-auto text-slate-900 dark:text-white">
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Upload do Favicon</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleImageUpload(e, 'favicon')}
+                  />
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-xl overflow-hidden bg-black/10 shrink-0 border border-black/10 dark:border-white/10 p-1 flex items-center justify-center">
+                  <img
+                    src={faviconUrl || logoUrl || tenant.logo_url}
+                    alt="Favicon"
+                    className="w-full h-full object-contain rounded-lg"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = `https://placehold.co/64x64/18181b/${primaryColor.replace('#', '')}?text=FAV`;
+                    }}
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <label className="block text-[11px] text-slate-500 mb-1">
+                    URL Customizada do Favicon:
+                  </label>
+                  <input
+                    type="text"
+                    value={faviconUrl}
+                    onChange={(e) => setFaviconUrl(e.target.value)}
+                    placeholder="Deixe em branco para usar o logo automaticamente ou cole a URL"
                     className="w-full glass-input px-3 py-2 rounded-xl text-xs font-mono"
                   />
                 </div>
@@ -1395,8 +1453,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 ))}
               </div>
 
-              {/* Campo para adicionar nova tag */}
-              <div className="flex items-center space-x-2 pt-2">
+              {/* Campo para adicionar nova tag - Responsivo */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2">
                 <input
                   type="text"
                   value={newFeatureInput}
@@ -1407,13 +1465,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       handleAddFeature();
                     }
                   }}
-                  placeholder="Digite um diferencial (ex: Sinuca & Bar) e clique em Adicionar"
-                  className="flex-1 glass-input px-3.5 py-2 rounded-xl text-xs"
+                  placeholder="Digite um diferencial (ex: Café e Bar) e clique em Adicionar"
+                  className="flex-1 glass-input px-3.5 py-2.5 rounded-xl text-xs w-full"
                 />
                 <button
                   type="button"
                   onClick={() => handleAddFeature()}
-                  className="px-4 py-2 rounded-xl bg-brand-primary text-black font-bold text-xs hover:opacity-90 transition-opacity cursor-pointer shrink-0"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-brand-primary text-black font-bold text-xs hover:opacity-90 transition-opacity cursor-pointer shrink-0 touch-target flex items-center justify-center"
                 >
                   + Adicionar
                 </button>
@@ -1429,9 +1487,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     'Ambiente Climatizado',
                     'Wi-Fi de Alta Velocidade',
                     'Café Cortesia',
-                    'Cerveja & Bar',
+                    'Cerveja e Bar',
                     'Atendimento com Hora Marcada',
-                    'Sinuca & Games',
+                    'Sinuca e Jogos',
                     'Estacionamento Grátis',
                     'Música Ambiente',
                     'Pagamento no PIX',

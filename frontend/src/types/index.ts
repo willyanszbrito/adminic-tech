@@ -27,6 +27,7 @@ export interface Tenant {
   description: string;
   category: string;
   logo_url: string;
+  favicon_url?: string;
   banner_url: string;
   phone: string;
   whatsapp: string;

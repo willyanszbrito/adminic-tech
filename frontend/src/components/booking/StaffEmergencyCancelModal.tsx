@@ -73,7 +73,7 @@ Por favor, responda a este e-mail ou entre em contato pelo nosso WhatsApp no nú
 Agradecemos imensamente pela compreensão e estamos à disposição para qualquer dúvida.
 
 Atenciosamente,
-${staffName} & Equipe ${tenant.name}
+${staffName} e Equipe ${tenant.name}
 Telefone / WhatsApp: ${barberShopPhone}`;
 
   const handleCopy = (text: string, type: 'whatsapp' | 'email') => {

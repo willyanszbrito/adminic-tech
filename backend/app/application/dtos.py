@@ -39,6 +39,7 @@ class TenantResponseDTO(BaseModel):
     description: str = Field(..., description="Descrição detalhada do estabelecimento")
     category: str = Field(..., description="Segmento de atuação", examples=["barbearia"])
     logo_url: str = Field(..., description="URL do logotipo oficial")
+    favicon_url: Optional[str] = Field(None, description="URL do favicon oficial do estabelecimento")
     banner_url: str = Field(..., description="URL do banner ou imagem de capa")
     phone: str = Field(..., description="Telefone fixo para contato", examples=["(11) 3456-7890"])
     whatsapp: str = Field(..., description="Número de WhatsApp com código do país", examples=["5511999998888"])
@@ -348,6 +349,7 @@ class UpdateTenantSettingsDTO(BaseModel):
     address: Optional[str] = None
     instagram: Optional[str] = None
     logo_url: Optional[str] = None
+    favicon_url: Optional[str] = None
     banner_url: Optional[str] = None
     pix_enabled: Optional[bool] = None
     pix_mode: Optional[str] = None # "production" | "test_penny"
