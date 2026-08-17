@@ -25,7 +25,11 @@ import {
   Sparkles,
   Phone,
   Mail,
-  MapPin
+  MapPin,
+  Upload,
+  Image as ImageIcon,
+  X,
+  Tag
 } from 'lucide-react';
 
 export interface AdminPortalProps {
@@ -77,7 +81,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [mpPixKey, setMpPixKey] = useState(tenant.mercadopago_pix_key || '');
   const [whatsappMsg, setWhatsappMsg] = useState(tenant.whatsapp_custom_message || '');
 
-  // General Settings & Theme State
+  // General Settings, Banner, Features & Theme State
   const [name, setName] = useState(tenant.name);
   const [slogan, setSlogan] = useState(tenant.slogan);
   const [description, setDescription] = useState(tenant.description);
@@ -87,6 +91,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [address, setAddress] = useState(tenant.address);
   const [instagram, setInstagram] = useState(tenant.instagram || '');
   const [logoUrl, setLogoUrl] = useState(tenant.logo_url);
+  const [bannerUrl, setBannerUrl] = useState(tenant.banner_url || '');
+  const [features, setFeatures] = useState<string[]>(
+    tenant.features && tenant.features.length > 0
+      ? tenant.features
+      : ['Ambiente Climatizado', 'Wi-Fi Gratuito', 'Música Ambiente', 'Atendimento Personalizado']
+  );
+  const [newFeatureInput, setNewFeatureInput] = useState('');
+
   const [primaryColor, setPrimaryColor] = useState(tenant.theme.primary_color);
   const [secondaryColor, setSecondaryColor] = useState(tenant.theme.secondary_color);
   const [accentColor, setAccentColor] = useState(tenant.theme.accent_color);
@@ -95,6 +107,43 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, target: 'logo' | 'banner' | 'service' | 'staff') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage('A imagem selecionada deve ter no máximo 5MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      if (target === 'logo') setLogoUrl(base64);
+      else if (target === 'banner') setBannerUrl(base64);
+      else if (target === 'service') setServiceImageUrl(base64);
+      else if (target === 'staff') setStaffAvatar(base64);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAddFeature = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = newFeatureInput.trim();
+    if (trimmed && !features.includes(trimmed)) {
+      setFeatures([...features, trimmed]);
+      setNewFeatureInput('');
+    }
+  };
+
+  const handleRemoveFeature = (featureToRemove: string) => {
+    setFeatures(features.filter((f) => f !== featureToRemove));
+  };
+
+  const handlePresetFeature = (preset: string) => {
+    if (!features.includes(preset)) {
+      setFeatures([...features, preset]);
+    }
+  };
 
   const loadMetrics = async () => {
     try {
@@ -285,7 +334,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     }
   };
 
-  // Handle Save General Info & Theme
+  // Handle Save General Info, Banner, Features & Theme
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -303,6 +352,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         address,
         instagram,
         logo_url: logoUrl,
+        banner_url: bannerUrl,
+        features: features,
         theme: {
           ...tenant.theme,
           primary_color: primaryColor,
@@ -311,52 +362,52 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           badge_text: badgeText,
         },
       });
-      setSuccessMessage('Dados cadastrais e tema atualizados com sucesso!');
+      setSuccessMessage('Dados cadastrais, fotos, comodidades e tema salvos com sucesso!');
       onRefreshTenant();
     } catch (err: any) {
-      setErrorMessage(err.message || 'Erro ao salvar informações da empresa.');
+      setErrorMessage(err.message || 'Erro ao salvar dados do estabelecimento.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
-      {/* Top Header */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brand-primary/15 text-brand-primary border border-brand-primary/30">
-                Painel do Parceiro / Gestor
-              </span>
-              <span className="text-xs text-slate-500">• {tenant.name}</span>
+    <div className="space-y-6">
+      {/* Header Container */}
+      <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-black/10 shrink-0 border-2 border-brand-primary/30 shadow-lg">
+              <img
+                src={logoUrl || tenant.logo_url}
+                alt={name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = `https://placehold.co/100x100/18181b/${primaryColor.replace('#', '')}?text=${encodeURIComponent(name.charAt(0))}`;
+                }}
+              />
             </div>
-            <h2 className="text-2xl font-extrabold font-heading text-slate-900 dark:text-white mt-1">
-              Central de Gestão e Configuração Completa
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
-              Gerencie faturamento, catálogo de preços, equipe, pagamentos PIX e identidade visual em tempo real.
-            </p>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-brand-primary/15 text-brand-primary border border-brand-primary/30">
+                  Painel do Gestor
+                </span>
+                <span className="text-xs font-mono text-slate-500">{tenant.slug}</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold font-heading text-slate-900 dark:text-white mt-0.5">
+                {name}
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {slogan}
+              </p>
+            </div>
           </div>
 
-          {/* Mode & Trial Status Badge */}
-          <div className="flex items-center space-x-3">
-            <div className={`p-3 rounded-2xl border text-right ${
-              pixMode === 'test_penny'
-                ? 'bg-amber-500/10 border-amber-500/30'
-                : 'bg-emerald-500/10 border-emerald-500/30'
-            }`}>
-              <span className="text-[10px] uppercase font-bold text-slate-500 block">Modo PIX Atual</span>
-              <span className={`text-xs font-bold ${pixMode === 'test_penny' ? 'text-amber-500' : 'text-emerald-500'}`}>
-                {pixMode === 'test_penny' ? '🧪 Teste Real (R$ 0,01)' : '💰 Produção (Valor Cheio)'}
-              </span>
-            </div>
-
-            <div className="p-3 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-right">
-              <span className="text-[10px] uppercase font-bold text-slate-500 block">Licença</span>
-              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                {tenant.trial_days_remaining} dias de Trial
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="px-3 py-1.5 rounded-xl glass-pill text-xs flex items-center space-x-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="font-semibold text-slate-700 dark:text-slate-300">
+                {tenant.plan_name} • {tenant.trial_days_remaining}d restantes
               </span>
             </div>
           </div>
@@ -448,147 +499,138 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         <div className="space-y-8">
           {/* KPI Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="glass-panel rounded-3xl p-6 space-y-2">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs font-semibold uppercase">Faturamento Mensal</span>
-                <DollarSign className="w-4 h-4 text-emerald-500" />
-              </div>
-              <p className="text-2xl font-black font-heading text-slate-900 dark:text-white">
-                R$ {(metrics?.monthly_revenue || tenant.monthly_revenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </p>
-              <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center space-x-1">
-                <TrendingUp className="w-3 h-3" />
-                <span>Crescimento estável no período</span>
-              </p>
-            </div>
-
-            <div className="glass-panel rounded-3xl p-6 space-y-2">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs font-semibold uppercase">Agendamentos</span>
+            <div className="glass-panel p-5 rounded-2xl border border-black/10 dark:border-white/10 space-y-2">
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                <span className="text-xs font-semibold">Total de Agendamentos</span>
                 <CalendarCheck className="w-4 h-4 text-brand-primary" />
               </div>
-              <p className="text-2xl font-black font-heading text-slate-900 dark:text-white">
-                {metrics?.confirmed_appointments || 0} confirmados
+              <p className="text-2xl font-bold font-heading text-slate-900 dark:text-white">
+                {metrics?.total_appointments ?? 0}
+              </p>
+              <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                {metrics?.confirmed_appointments ?? 0} confirmados
+              </p>
+            </div>
+
+            <div className="glass-panel p-5 rounded-2xl border border-black/10 dark:border-white/10 space-y-2">
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                <span className="text-xs font-semibold">Faturamento Estimado</span>
+                <DollarSign className="w-4 h-4 text-emerald-500" />
+              </div>
+              <p className="text-2xl font-bold font-heading text-emerald-600 dark:text-emerald-400">
+                R$ {(metrics?.monthly_revenue ?? tenant.monthly_revenue ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
               <p className="text-[11px] text-slate-500">
-                Total de {metrics?.total_appointments || 0} solicitações
+                Ticket Médio: R$ {(metrics?.average_ticket ?? 45).toFixed(2)}
               </p>
             </div>
 
-            <div className="glass-panel rounded-3xl p-6 space-y-2">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs font-semibold uppercase">Ticket Médio</span>
-                <TrendingUp className="w-4 h-4 text-amber-500" />
-              </div>
-              <p className="text-2xl font-black font-heading text-slate-900 dark:text-white">
-                R$ {(metrics?.average_ticket || 0).toFixed(2)}
-              </p>
-              <p className="text-[11px] text-slate-500">Por atendimento concluído</p>
-            </div>
-
-            <div className="glass-panel rounded-3xl p-6 space-y-2">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs font-semibold uppercase">Taxa de Ocupação</span>
+            <div className="glass-panel p-5 rounded-2xl border border-black/10 dark:border-white/10 space-y-2">
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                <span className="text-xs font-semibold">Taxa de Ocupação</span>
                 <Percent className="w-4 h-4 text-sky-500" />
               </div>
-              <p className="text-2xl font-black font-heading text-slate-900 dark:text-white">
-                {metrics?.occupancy_rate_percent || 85}%
+              <p className="text-2xl font-bold font-heading text-slate-900 dark:text-white">
+                {(metrics?.occupancy_rate_percent ?? 78).toFixed(1)}%
               </p>
-              <p className="text-[11px] text-sky-600 dark:text-sky-400 font-medium">Alta eficiência de agenda</p>
+              <p className="text-[11px] text-slate-500">
+                Horários mais procurados: 16h às 19h
+              </p>
+            </div>
+
+            <div className="glass-panel p-5 rounded-2xl border border-black/10 dark:border-white/10 space-y-2">
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                <span className="text-xs font-semibold">Status da Assinatura</span>
+                <ShieldCheck className="w-4 h-4 text-purple-500" />
+              </div>
+              <p className="text-2xl font-bold font-heading text-slate-900 dark:text-white">
+                {tenant.trial_days_remaining} dias
+              </p>
+              <p className="text-[11px] text-purple-600 dark:text-purple-400 font-medium">
+                {tenant.plan_name}
+              </p>
             </div>
           </div>
 
-          {/* Recent Bookings List */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
-            <h3 className="text-base font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">
+          {/* Recent Appointments Table */}
+          <div className="glass-panel p-6 rounded-3xl border border-black/10 dark:border-white/10 space-y-4">
+            <h3 className="text-sm font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">
               <Clock className="w-4 h-4 text-brand-primary" />
-              <span>Últimos Atendimentos Registrados</span>
+              <span>Agendamentos Recentes</span>
             </h3>
 
-            {metrics?.recent_appointments && metrics.recent_appointments.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-black/10 dark:border-white/10 text-slate-500">
-                      <th className="pb-3 font-semibold">Voucher</th>
-                      <th className="pb-3 font-semibold">Cliente</th>
-                      <th className="pb-3 font-semibold">Serviço</th>
-                      <th className="pb-3 font-semibold">Profissional</th>
-                      <th className="pb-3 font-semibold">Data / Hora</th>
-                      <th className="pb-3 font-semibold">Valor</th>
-                      <th className="pb-3 font-semibold">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-black/5 dark:divide-white/5">
-                    {metrics.recent_appointments.map((a: any) => (
-                      <tr key={a.voucher_code} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                        <td className="py-3 font-mono font-bold text-brand-primary">{a.voucher_code}</td>
-                        <td className="py-3 font-medium text-slate-900 dark:text-white">{a.customer_name}</td>
-                        <td className="py-3 text-slate-600 dark:text-slate-300">{a.service?.name || a.service_name || 'Serviço'}</td>
-                        <td className="py-3 text-slate-600 dark:text-slate-300">{a.staff?.name || a.staff_name || 'Profissional'}</td>
-                        <td className="py-3 text-slate-500">{a.appointment_date || a.date} às {a.start_time}</td>
-                        <td className="py-3 font-semibold text-slate-900 dark:text-white">R$ {Number(a.price).toFixed(2)}</td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-black/10 dark:border-white/10 text-slate-500">
+                    <th className="pb-3 font-semibold">Código</th>
+                    <th className="pb-3 font-semibold">Cliente</th>
+                    <th className="pb-3 font-semibold">Data / Hora</th>
+                    <th className="pb-3 font-semibold">Serviço</th>
+                    <th className="pb-3 font-semibold">Profissional</th>
+                    <th className="pb-3 font-semibold">Valor</th>
+                    <th className="pb-3 font-semibold">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-black/5 dark:divide-white/5">
+                  {metrics?.recent_appointments && metrics.recent_appointments.length > 0 ? (
+                    metrics.recent_appointments.map((apt) => (
+                      <tr key={apt.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                        <td className="py-3 font-mono font-bold text-brand-primary">{apt.voucher_code}</td>
+                        <td className="py-3 font-medium text-slate-900 dark:text-white">{apt.customer_name}</td>
+                        <td className="py-3">{apt.appointment_date} às {apt.start_time}</td>
+                        <td className="py-3">{apt.service?.name || (apt as any).service_name || 'Serviço'}</td>
+                        <td className="py-3">{apt.staff?.name || (apt as any).staff_name || 'Profissional'}</td>
+                        <td className="py-3 font-semibold">R$ {apt.price.toFixed(2)}</td>
                         <td className="py-3">
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            a.status === 'confirmed'
+                            apt.status === 'confirmed'
                               ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                              : 'bg-rose-500/15 text-rose-600 dark:text-rose-400'
+                              : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
                           }`}>
-                            {a.status === 'confirmed' ? 'Confirmado' : 'Cancelado'}
+                            {apt.status === 'confirmed' ? 'Confirmado' : apt.status}
                           </span>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className="text-xs text-slate-500 italic">Nenhum agendamento recente registrado ainda.</p>
-            )}
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className="py-8 text-center text-slate-500">
+                        Nenhum agendamento registrado recentemente.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 2: CATALOG & SERVICES MANAGEMENT */}
+      {/* TAB 2: CATALOG & SERVICES */}
       {/* ========================================================================= */}
       {activeTab === 'catalog' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Form: Add or Edit Service */}
-          <div className="lg:col-span-5 glass-panel rounded-3xl p-6 sm:p-7 space-y-5">
-            <div className="pb-3 border-b border-black/10 dark:border-white/10 flex items-center justify-between">
-              <h3 className="text-base font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">
-                <Plus className="w-4 h-4 text-brand-primary" />
-                <span>{isEditingService ? 'Editar Serviço' : 'Cadastrar Novo Serviço'}</span>
-              </h3>
-              {isEditingService && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsEditingService(null);
-                    setServiceName('');
-                    setServiceDescription('');
-                    setServiceImageUrl('');
-                  }}
-                  className="text-[11px] text-rose-500 font-semibold hover:underline"
-                >
-                  Cancelar Edição
-                </button>
-              )}
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Services Form */}
+          <div className="lg:col-span-5 glass-panel p-6 rounded-3xl space-y-4 border border-black/10 dark:border-white/10">
+            <h3 className="text-sm font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">
+              <Plus className="w-4 h-4 text-brand-primary" />
+              <span>{isEditingService ? 'Editar Procedimento' : 'Novo Serviço'}</span>
+            </h3>
 
-            <form onSubmit={handleSaveService} className="space-y-4">
+            <form onSubmit={handleSaveService} className="space-y-3.5">
               <div>
                 <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                  Nome do Serviço / Procedimento *
+                  Nome do Serviço *
                 </label>
                 <input
                   type="text"
                   required
                   value={serviceName}
                   onChange={(e) => setServiceName(e.target.value)}
-                  placeholder="Ex: Corte Degradê, Barboterapia..."
-                  className="w-full glass-input px-3 py-2 rounded-xl text-xs"
+                  placeholder="ex: Corte Degradê Navalhado"
+                  className="w-full glass-input px-3 py-2 rounded-xl text-xs font-semibold"
                 />
               </div>
 
@@ -644,13 +686,25 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
                   URL da Imagem / Foto
                 </label>
-                <input
-                  type="text"
-                  value={serviceImageUrl}
-                  onChange={(e) => setServiceImageUrl(e.target.value)}
-                  placeholder="/logos/logo_campelo.jpg ou https://..."
-                  className="w-full glass-input px-3 py-2 rounded-xl text-xs"
-                />
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={serviceImageUrl}
+                    onChange={(e) => setServiceImageUrl(e.target.value)}
+                    placeholder="https://... ou faça upload"
+                    className="w-full glass-input px-3 py-2 rounded-xl text-xs"
+                  />
+                  <label className="px-3 py-2 rounded-xl glass-pill text-xs font-semibold cursor-pointer shrink-0 hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-1">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleImageUpload(e, 'service')}
+                    />
+                  </label>
+                </div>
               </div>
 
               <div>
@@ -678,26 +732,46 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </span>
               </label>
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-2.5 rounded-xl text-xs font-bold bg-brand-primary text-black hover:opacity-90 shadow-md shadow-brand-primary/20 transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
-              >
-                {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                <span>{isEditingService ? 'Salvar Edição do Serviço' : 'Cadastrar Serviço'}</span>
-              </button>
+              <div className="flex items-center space-x-2 pt-2">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-brand-primary text-black hover:opacity-90 transition-opacity flex items-center justify-center space-x-1.5 cursor-pointer shadow-md shadow-brand-primary/20"
+                >
+                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span>{isEditingService ? 'Salvar Alterações' : 'Cadastrar Serviço'}</span>
+                </button>
+
+                {isEditingService && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsEditingService(null);
+                      setServiceName('');
+                      setServiceDescription('');
+                      setServicePrice(30);
+                      setServiceDuration(30);
+                      setServiceImageUrl('');
+                      setIsFeatured(false);
+                    }}
+                    className="px-3 py-2.5 rounded-xl text-xs font-semibold glass-pill text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10"
+                  >
+                    Cancelar
+                  </button>
+                )}
+              </div>
             </form>
 
             {/* Quick Add Category Section */}
             <div className="pt-4 border-t border-black/10 dark:border-white/10 space-y-3">
               <h4 className="text-xs font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
                 <Layers className="w-3.5 h-3.5 text-brand-primary" />
-                <span>Nova Categoria de Serviços</span>
+                <span>Gerenciar Categorias de Serviços</span>
               </h4>
               <form onSubmit={handleAddCategory} className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="Nome da categoria..."
+                  placeholder="Nova categoria (ex: Barboterapia, Barba...)"
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
                   className="flex-1 glass-input px-3 py-1.5 rounded-lg text-xs"
@@ -707,12 +781,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   disabled={isSubmitting || !newCatName.trim()}
                   className="px-3 py-1.5 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs hover:opacity-90 cursor-pointer"
                 >
-                  Criar
+                  + Criar
                 </button>
               </form>
 
               {/* List Categories with Delete */}
-              <div className="flex flex-wrap gap-1.5 pt-2">
+              <div className="flex flex-wrap gap-1.5 pt-1">
                 {categories.map((c) => (
                   <div
                     key={c.id}
@@ -723,7 +797,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <button
                         type="button"
                         onClick={() => handleDeleteCategory(c.id, c.name)}
-                        className="text-rose-500 hover:text-rose-700 font-bold"
+                        className="text-rose-500 hover:text-rose-700 font-bold ml-1"
                         title="Excluir Categoria"
                       >
                         ×
@@ -735,92 +809,87 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             </div>
           </div>
 
-          {/* Right List: Current Catalog Services */}
+          {/* Service List */}
           <div className="lg:col-span-7 space-y-4">
-            <div className="flex items-center justify-between pb-2">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">
-                Serviços Ativos no Estabelecimento ({services.length})
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold font-heading text-slate-900 dark:text-white">
+                Serviços Ativos ({services.length})
               </h3>
             </div>
 
             <div className="space-y-3">
-              {services.map((srv) => {
-                const cat = categories.find((c) => c.id === srv.category_id);
-                return (
-                  <div
-                    key={srv.id}
-                    className="glass-panel rounded-2xl p-4 flex items-center justify-between gap-4 hover:border-brand-primary/40 transition-colors"
-                  >
-                    <div className="flex items-center space-x-3 min-w-0">
-                      <div className="w-12 h-12 rounded-xl overflow-hidden bg-black/10 shrink-0 border border-black/5 dark:border-white/10">
-                        <img
-                          src={srv.image_url || tenant.logo_url}
-                          alt={srv.name}
-                          className="w-full h-full object-cover"
-                        />
+              {services.map((srv) => (
+                <div
+                  key={srv.id}
+                  className="glass-panel p-4 rounded-2xl border border-black/10 dark:border-white/10 flex items-center justify-between gap-4 hover:border-brand-primary/40 transition-all"
+                >
+                  <div className="flex items-center space-x-3.5 min-w-0">
+                    {srv.image_url ? (
+                      <img
+                        src={srv.image_url}
+                        alt={srv.name}
+                        className="w-12 h-12 rounded-xl object-cover shrink-0"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-xl bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0">
+                        <Scissors className="w-5 h-5" />
                       </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center space-x-2">
-                          <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate">
-                            {srv.name}
-                          </h4>
-                          {srv.is_featured && (
-                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-600 dark:text-amber-400">
-                              Destaque
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-slate-500 truncate">
-                          {cat?.name || 'Geral'} • {srv.duration_minutes} min •{' '}
-                          <span className="font-bold text-slate-900 dark:text-white font-mono">
-                            R$ {srv.price.toFixed(2)}
+                    )}
+                    <div className="min-w-0">
+                      <div className="flex items-center space-x-2">
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                          {srv.name}
+                        </h4>
+                        {srv.is_featured && (
+                          <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold">
+                            Destaque
                           </span>
-                        </p>
+                        )}
                       </div>
-                    </div>
-
-                    <div className="flex items-center space-x-1.5 shrink-0">
-                      <button
-                        onClick={() => handleEditServiceClick(srv)}
-                        title="Editar Serviço"
-                        className="p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-brand-primary/20 hover:text-brand-primary text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteService(srv.id, srv.name)}
-                        title="Excluir Serviço"
-                        className="p-2 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-rose-500/20 hover:text-rose-500 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                        {srv.duration_minutes} min • {srv.description}
+                      </p>
+                      <p className="text-xs font-extrabold text-brand-primary mt-0.5">
+                        R$ {srv.price.toFixed(2)}
+                      </p>
                     </div>
                   </div>
-                );
-              })}
+
+                  <div className="flex items-center space-x-1 shrink-0">
+                    <button
+                      onClick={() => handleEditServiceClick(srv)}
+                      className="p-2 rounded-lg text-slate-500 hover:text-brand-primary hover:bg-brand-primary/10 transition-colors"
+                      title="Editar"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteService(srv.id, srv.name)}
+                      className="p-2 rounded-lg text-slate-500 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+                      title="Excluir"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 3: STAFF & TEAM MANAGEMENT */}
+      {/* TAB 3: STAFF & TEAM */}
       {/* ========================================================================= */}
       {activeTab === 'staff' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Form: Add New Staff */}
-          <div className="lg:col-span-5 glass-panel rounded-3xl p-6 sm:p-7 space-y-5">
-            <div className="pb-3 border-b border-black/10 dark:border-white/10">
-              <h3 className="text-base font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">
-                <Users className="w-4 h-4 text-brand-primary" />
-                <span>Adicionar Barbeiro / Colaborador</span>
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Cadastre profissionais que poderão receber agendamentos online.
-              </p>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-5 glass-panel p-6 rounded-3xl space-y-4 border border-black/10 dark:border-white/10">
+            <h3 className="text-sm font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">
+              <Plus className="w-4 h-4 text-brand-primary" />
+              <span>Cadastrar Profissional / Barbeiro</span>
+            </h3>
 
-            <form onSubmit={handleAddStaff} className="space-y-4">
+            <form onSubmit={handleAddStaff} className="space-y-3.5">
               <div>
                 <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
                   Nome Completo *
@@ -830,21 +899,21 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   required
                   value={staffName}
                   onChange={(e) => setStaffName(e.target.value)}
-                  placeholder="Ex: Julio Sousa, Jefferson..."
-                  className="w-full glass-input px-3 py-2 rounded-xl text-xs"
+                  placeholder="ex: Julio Sousa"
+                  className="w-full glass-input px-3 py-2 rounded-xl text-xs font-semibold"
                 />
               </div>
 
               <div>
                 <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                  Cargo / Função *
+                  Especialidade / Cargo *
                 </label>
                 <input
                   type="text"
                   required
                   value={staffRole}
                   onChange={(e) => setStaffRole(e.target.value)}
-                  placeholder="Ex: Master Barber, Barbeiro Fundador"
+                  placeholder="ex: Master Barber & Barboterapia"
                   className="w-full glass-input px-3 py-2 rounded-xl text-xs"
                 />
               </div>
@@ -852,19 +921,19 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                    WhatsApp
+                    Telefone / WhatsApp
                   </label>
                   <input
                     type="text"
                     value={staffPhone}
                     onChange={(e) => setStaffPhone(e.target.value)}
-                    placeholder="(92) 99104-4930"
+                    placeholder="(92) 98489-9955"
                     className="w-full glass-input px-3 py-2 rounded-xl text-xs"
                   />
                 </div>
                 <div>
                   <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                    E-mail
+                    E-mail de Acesso
                   </label>
                   <input
                     type="email"
@@ -878,26 +947,38 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
               <div>
                 <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                  Foto de Perfil ou Avatar URL
+                  Foto / Avatar do Profissional
                 </label>
-                <input
-                  type="text"
-                  value={staffAvatar}
-                  onChange={(e) => setStaffAvatar(e.target.value)}
-                  placeholder="/logos/logo_campelo.jpg"
-                  className="w-full glass-input px-3 py-2 rounded-xl text-xs"
-                />
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={staffAvatar}
+                    onChange={(e) => setStaffAvatar(e.target.value)}
+                    placeholder="https://... ou faça upload"
+                    className="w-full glass-input px-3 py-2 rounded-xl text-xs"
+                  />
+                  <label className="px-3 py-2 rounded-xl glass-pill text-xs font-semibold cursor-pointer shrink-0 hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-1">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleImageUpload(e, 'staff')}
+                    />
+                  </label>
+                </div>
               </div>
 
               <div>
                 <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                  Biografia / Especialidades
+                  Biografia e Experiência
                 </label>
                 <textarea
                   rows={2}
                   value={staffBio}
                   onChange={(e) => setStaffBio(e.target.value)}
-                  placeholder="Resumo da experiência profissional..."
+                  placeholder="Mais de 10 anos de experiência em cortes clássicos e modernos..."
                   className="w-full glass-input px-3 py-2 rounded-xl text-xs resize-none"
                 />
               </div>
@@ -905,55 +986,56 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-2.5 rounded-xl text-xs font-bold bg-brand-primary text-black hover:opacity-90 shadow-md shadow-brand-primary/20 transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+                className="w-full py-2.5 rounded-xl text-xs font-bold bg-brand-primary text-black hover:opacity-90 transition-opacity flex items-center justify-center space-x-1.5 cursor-pointer shadow-md shadow-brand-primary/20"
               >
-                {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-                <span>Adicionar à Equipe</span>
+                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>Adicionar Profissional à Equipe</span>
               </button>
             </form>
           </div>
 
-          {/* Right List: Current Team */}
           <div className="lg:col-span-7 space-y-4">
-            <div className="flex items-center justify-between pb-2">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">
-                Profissionais Cadastrados ({staffList.length})
-              </h3>
-            </div>
+            <h3 className="text-sm font-bold font-heading text-slate-900 dark:text-white">
+              Equipe Cadastrada ({staffList.length})
+            </h3>
 
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {staffList.map((stf) => (
                 <div
                   key={stf.id}
-                  className="glass-panel rounded-2xl p-5 flex items-center justify-between gap-4"
+                  className="glass-panel p-4 rounded-2xl border border-black/10 dark:border-white/10 space-y-3 hover:border-brand-primary/40 transition-all flex flex-col justify-between"
                 >
-                  <div className="flex items-center space-x-3 min-w-0">
-                    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-black/10 shrink-0 border border-black/5 dark:border-white/10">
-                      <img
-                        src={stf.avatar_url || tenant.logo_url}
-                        alt={stf.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                  <div className="flex items-start space-x-3">
+                    <img
+                      src={stf.avatar_url}
+                      alt={stf.name}
+                      className="w-12 h-12 rounded-xl object-cover shrink-0 border border-black/10 dark:border-white/10"
+                    />
                     <div className="min-w-0">
-                      <h4 className="font-bold text-sm text-slate-900 dark:text-white">
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
                         {stf.name}
                       </h4>
-                      <p className="text-xs text-brand-primary font-medium">{stf.role}</p>
-                      <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                        {stf.phone || tenant.phone} • {stf.specialty_service_ids.length} serviços habilitados
+                      <p className="text-[11px] text-brand-primary font-semibold truncate">
+                        {stf.role}
+                      </p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
+                        {stf.bio}
                       </p>
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => handleDeleteStaff(stf.id, stf.name)}
-                    disabled={staffList.length <= 1}
-                    title={staffList.length <= 1 ? 'Não é possível excluir o único profissional' : 'Excluir'}
-                    className="p-2.5 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-rose-500/20 hover:text-rose-500 text-slate-600 dark:text-slate-300 transition-colors disabled:opacity-40 cursor-pointer"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center justify-between pt-2 border-t border-black/5 dark:border-white/5">
+                    <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                      ⭐ {stf.rating?.toFixed(1) || '5.0'} ({stf.total_reviews || 0} avaliações)
+                    </span>
+                    <button
+                      onClick={() => handleDeleteStaff(stf.id, stf.name)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+                      title="Excluir"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -962,35 +1044,28 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 4: PIX & MERCADO PAGO CONFIGURATION (R$ 0,01 PENNY MODE) */}
+      {/* TAB 4: PIX INSTANTÂNEO & MERCADO PAGO */}
       {/* ========================================================================= */}
       {activeTab === 'pix' && (
         <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 max-w-4xl mx-auto">
-          <div className="pb-4 border-b border-black/10 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h3 className="text-lg font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">
-                <QrCode className="w-5 h-5 text-emerald-500" />
-                <span>Integração de Pagamento PIX Instantâneo (Adminic Pay)</span>
-              </h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Configure as credenciais e escolha o modo de cobrança para validação real em produção ou valor integral.
-              </p>
-            </div>
-            <div className="flex items-center space-x-2 text-xs font-semibold px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-              <ShieldCheck className="w-4 h-4" />
-              <span>Chaves Criptografadas</span>
-            </div>
+          <div className="pb-4 border-b border-black/10 dark:border-white/10">
+            <h3 className="text-lg font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">
+              <QrCode className="w-5 h-5 text-emerald-500" />
+              <span>Configuração do PIX Instantâneo (Adminic Pay)</span>
+            </h3>
+            <p className="text-xs text-slate-500 mt-1">
+              Habilite o recebimento antecipado via PIX com geração automática de QR Code dinâmico do Mercado Pago.
+            </p>
           </div>
 
           <form onSubmit={handleSavePixSettings} className="space-y-6">
-            {/* PIX Enable Switch */}
-            <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-between">
+            <div className="flex items-center justify-between p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10">
               <div>
                 <h4 className="text-xs font-bold text-slate-900 dark:text-white">
-                  Habilitar Pagamento PIX na Tela de Agendamento
+                  Ativar Pagamento via PIX no Agendamento
                 </h4>
                 <p className="text-[11px] text-slate-500">
-                  Permite que os clientes paguem via PIX com QR Code dinâmico e Copia e Cola antes ou após a reserva.
+                  Quando ativo, os clientes podem pagar o agendamento na hora via QR Code PIX.
                 </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -1004,7 +1079,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               </label>
             </div>
 
-            {/* Mode Selector: Production vs 1 Cent Test Mode */}
             <div className="space-y-3">
               <label className="block text-xs font-bold text-slate-900 dark:text-white">
                 Modo de Operação do PIX:
@@ -1028,15 +1102,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         className="text-brand-primary focus:ring-brand-primary"
                       />
                       <span className="font-bold text-xs text-slate-900 dark:text-white">
-                        Modo Validação Real de Produção (R$ 0,01)
+                        Modo Validação Real (R$ 0,01)
                       </span>
                     </div>
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-600 dark:text-amber-400">
-                      Recomendado p/ Testes
+                      Ideal para Testes
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                    O QR Code oficial cobra apenas <strong>R$ 0,01 centavo</strong> no banco real do cliente para você testar todo o fluxo com custos mínimos antes de cobrar o valor real.
+                    O QR Code cobra <strong>R$ 0,01 centavo</strong> no banco real para validar todo o fluxo sem custos altos.
                   </p>
                 </label>
 
@@ -1058,7 +1132,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         className="text-emerald-500 focus:ring-emerald-500"
                       />
                       <span className="font-bold text-xs text-slate-900 dark:text-white">
-                        Modo Comercial Cheio (Valor Integral)
+                        Modo Comercial Cheio (Valor Real)
                       </span>
                     </div>
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
@@ -1066,17 +1140,16 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-600 dark:text-slate-300">
-                    Cobra o valor integral cadastrado de cada serviço (ex: R$ 30,00, R$ 70,00) diretamente na conta bancária do estabelecimento.
+                    Cobra o valor integral cadastrado de cada serviço diretamente na conta bancária do estabelecimento.
                   </p>
                 </label>
               </div>
             </div>
 
-            {/* Gateway API Keys */}
             <div className="space-y-4 pt-2">
               <h4 className="text-xs font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-brand-primary" />
-                <span>Credenciais do Gateway PIX</span>
+                <span>Credenciais do Gateway Mercado Pago</span>
               </h4>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1088,7 +1161,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     type="text"
                     value={mpPublicKey}
                     onChange={(e) => setMpPublicKey(e.target.value)}
-                    placeholder="APP_USR-2495fe9b-0ec9-4b6f-819c-..."
+                    placeholder="APP_USR-..."
                     className="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs font-mono"
                   />
                 </div>
@@ -1109,26 +1182,26 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
               <div>
                 <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                  Chave PIX do Estabelecimento (E-mail, Telefone, CNPJ ou Aleatória)
+                  Chave PIX do Estabelecimento
                 </label>
                 <input
                   type="text"
                   value={mpPixKey}
                   onChange={(e) => setMpPixKey(e.target.value)}
-                  placeholder="ex: contato@campelobarbearia.com.br ou 92991044930"
+                  placeholder="ex: 92991044930 ou contato@campelobarbearia.com.br"
                   className="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs"
                 />
               </div>
 
               <div>
                 <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                  Template de Notificação WhatsApp Personalizada
+                  Template de Notificação WhatsApp
                 </label>
                 <textarea
                   rows={2}
                   value={whatsappMsg}
                   onChange={(e) => setWhatsappMsg(e.target.value)}
-                  placeholder="Olá {cliente}! Seu agendamento de {servico} na Barbearia foi confirmado com sucesso para {data} às {hora}."
+                  placeholder="Olá {cliente}! Seu agendamento foi confirmado..."
                   className="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs resize-none"
                 />
               </div>
@@ -1147,41 +1220,203 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 5: GENERAL SETTINGS & THEME */}
+      {/* TAB 5: GENERAL SETTINGS, BANNER, FEATURES & THEME */}
       {/* ========================================================================= */}
       {activeTab === 'settings' && (
-        <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 max-w-4xl mx-auto">
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-8 max-w-4xl mx-auto">
           <div className="pb-4 border-b border-black/10 dark:border-white/10">
             <h3 className="text-lg font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">
               <Store className="w-5 h-5 text-brand-primary" />
-              <span>Dados Cadastrais, Contato e Identidade Visual</span>
+              <span>Dados da Barbearia, Banner, Comodidades e Tema</span>
             </h3>
             <p className="text-xs text-slate-500 mt-1">
-              Personalize o nome da barbearia, slogan, endereço, redes sociais e cores do tema.
+              Personalize o slogan, comodidades (Wi-Fi, Café, Ar), fotos de capa e logotipo, dados de contato e cores.
             </p>
           </div>
 
-          <form onSubmit={handleSaveSettings} className="space-y-5">
-            {/* Logo Preview & URL */}
-            <div className="flex items-center space-x-4 p-3 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10">
-              <div className="w-16 h-16 rounded-2xl overflow-hidden bg-black/10 shrink-0 border border-black/10 dark:border-white/10">
-                <img
-                  src={logoUrl || tenant.logo_url}
-                  alt={name}
-                  className="w-full h-full object-cover"
-                />
+          <form onSubmit={handleSaveSettings} className="space-y-6">
+            {/* Foto de Capa / Banner do Estabelecimento */}
+            <div className="p-5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
+                  <ImageIcon className="w-4 h-4 text-brand-primary" />
+                  <span>Banner / Foto de Fundo da Barbearia</span>
+                </label>
+                <label className="px-3 py-1.5 rounded-xl bg-brand-primary/20 text-brand-primary hover:bg-brand-primary/30 border border-brand-primary/40 text-xs font-bold cursor-pointer transition-all flex items-center space-x-1.5">
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Fazer Upload do Banner</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleImageUpload(e, 'banner')}
+                  />
+                </label>
               </div>
-              <div className="flex-1 min-w-0">
-                <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                  URL do Logotipo do Estabelecimento
+
+              {/* Preview do Banner */}
+              <div className="h-32 sm:h-44 w-full rounded-2xl overflow-hidden bg-zinc-900 relative border border-black/10 dark:border-white/10">
+                <img
+                  src={bannerUrl || tenant.banner_url}
+                  alt="Banner Preview"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://placehold.co/1200x400/18181b/${primaryColor.replace('#', '')}?text=${encodeURIComponent(name)}`;
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
+                  <span className="text-xs font-bold text-white drop-shadow">Pré-visualização do Banner</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] text-slate-500 mb-1">
+                  Ou digite a URL direta da imagem de fundo:
                 </label>
                 <input
                   type="text"
-                  value={logoUrl}
-                  onChange={(e) => setLogoUrl(e.target.value)}
-                  placeholder="/logos/logo_campelo.jpg ou link https://..."
-                  className="w-full glass-input px-3 py-1.5 rounded-xl text-xs"
+                  value={bannerUrl}
+                  onChange={(e) => setBannerUrl(e.target.value)}
+                  placeholder="https://... ou caminho local"
+                  className="w-full glass-input px-3 py-2 rounded-xl text-xs font-mono"
                 />
+              </div>
+            </div>
+
+            {/* Logo do Estabelecimento */}
+            <div className="p-5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
+                  <ShieldCheck className="w-4 h-4 text-brand-primary" />
+                  <span>Logotipo Oficial do Estabelecimento</span>
+                </label>
+                <label className="px-3 py-1.5 rounded-xl bg-brand-primary/20 text-brand-primary hover:bg-brand-primary/30 border border-brand-primary/40 text-xs font-bold cursor-pointer transition-all flex items-center space-x-1.5">
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Fazer Upload da Logo</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleImageUpload(e, 'logo')}
+                  />
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-black/10 shrink-0 border border-black/10 dark:border-white/10 p-0.5">
+                  <img
+                    src={logoUrl || tenant.logo_url}
+                    alt={name}
+                    className="w-full h-full object-cover rounded-xl"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = `https://placehold.co/100x100/18181b/${primaryColor.replace('#', '')}?text=${encodeURIComponent(name.charAt(0))}`;
+                    }}
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <label className="block text-[11px] text-slate-500 mb-1">
+                    URL do Logotipo:
+                  </label>
+                  <input
+                    type="text"
+                    value={logoUrl}
+                    onChange={(e) => setLogoUrl(e.target.value)}
+                    placeholder="/logos/logo_campelo.jpg ou https://..."
+                    className="w-full glass-input px-3 py-2 rounded-xl text-xs font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Diferenciais e Comodidades (Features) */}
+            <div className="p-5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 space-y-4">
+              <div>
+                <label className="text-xs font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
+                  <Tag className="w-4 h-4 text-brand-primary" />
+                  <span>Diferenciais e Comodidades da Barbearia</span>
+                </label>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Itens exibidos no rodapé do cabeçalho da sua página de agendamento.
+                </p>
+              </div>
+
+              {/* Lista de tags ativas com botão remover */}
+              <div className="flex flex-wrap items-center gap-2">
+                {features.map((feat, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-primary/15 text-slate-900 dark:text-white border border-brand-primary/30"
+                  >
+                    <span>• {feat}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFeature(feat)}
+                      className="w-4 h-4 rounded-full bg-black/10 dark:bg-white/10 hover:bg-rose-500 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                      title="Remover este diferencial"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+
+              {/* Campo para adicionar nova tag */}
+              <div className="flex items-center space-x-2 pt-2">
+                <input
+                  type="text"
+                  value={newFeatureInput}
+                  onChange={(e) => setNewFeatureInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddFeature();
+                    }
+                  }}
+                  placeholder="Digite um diferencial (ex: Sinuca & Bar) e clique em Adicionar"
+                  className="flex-1 glass-input px-3.5 py-2 rounded-xl text-xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleAddFeature()}
+                  className="px-4 py-2 rounded-xl bg-brand-primary text-black font-bold text-xs hover:opacity-90 transition-opacity cursor-pointer shrink-0"
+                >
+                  + Adicionar
+                </button>
+              </div>
+
+              {/* Sugestões de 1 clique */}
+              <div className="pt-2 border-t border-black/5 dark:border-white/5 space-y-1.5">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  Sugestões Rápidas (Clique para incluir):
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    'Ambiente Climatizado',
+                    'Wi-Fi de Alta Velocidade',
+                    'Café Cortesia',
+                    'Cerveja & Bar',
+                    'Atendimento com Hora Marcada',
+                    'Sinuca & Games',
+                    'Estacionamento Grátis',
+                    'Música Ambiente',
+                    'Pagamento no PIX',
+                    'TV e Futebol'
+                  ].map((preset, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handlePresetFeature(preset)}
+                      className={`text-[10px] px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                        features.includes(preset)
+                          ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/40 font-bold'
+                          : 'bg-black/5 dark:bg-white/5 text-slate-600 dark:text-slate-400 border-black/10 dark:border-white/10 hover:border-brand-primary hover:text-brand-primary'
+                      }`}
+                    >
+                      {features.includes(preset) ? '✓ ' : '+ '}
+                      {preset}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -1189,7 +1424,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                  Nome do Estabelecimento *
+                  Nome da Barbearia *
                 </label>
                 <input
                   type="text"
@@ -1201,13 +1436,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               </div>
               <div>
                 <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                  Slogan / Subtítulo *
+                  Slogan / Subtítulo da Barbearia *
                 </label>
                 <input
                   type="text"
                   required
                   value={slogan}
                   onChange={(e) => setSlogan(e.target.value)}
+                  placeholder="ex: A Arte do Degradê e Barboterapia de Alto Nível"
                   className="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs"
                 />
               </div>
@@ -1256,7 +1492,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                  Instagram
+                  Instagram Oficial
                 </label>
                 <input
                   type="text"
@@ -1275,7 +1511,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Av. Cosme Ferreira, 6340 - Zumbi dos Palmares, Manaus - AM"
+                  placeholder="Av. Cosme Ferreira, 6340 - Manaus - AM"
                   className="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs"
                 />
               </div>
@@ -1284,7 +1520,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             {/* Descrição */}
             <div>
               <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
-                Descrição e Apresentação da Barbearia
+                Descrição e Apresentação do Estabelecimento
               </label>
               <textarea
                 rows={2}
@@ -1374,7 +1610,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               className="w-full py-3 rounded-2xl text-xs font-bold bg-brand-primary text-black hover:opacity-90 shadow-md shadow-brand-primary/20 transition-all flex items-center justify-center space-x-2 cursor-pointer"
             >
               {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              <span>Salvar Dados Cadastrais e Tema</span>
+              <span>Salvar Dados Cadastrais, Fotos e Tema</span>
             </button>
           </form>
         </div>

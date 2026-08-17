@@ -1098,6 +1098,8 @@ class UpdateTenantSettingsUseCase:
             tenant.mercadopago_pix_key = request.mercadopago_pix_key
         if request.whatsapp_custom_message is not None:
             tenant.whatsapp_custom_message = request.whatsapp_custom_message
+        if request.features is not None:
+            tenant.features = request.features
         if request.theme:
             if request.theme.primary_color:
                 tenant.theme.primary_color = request.theme.primary_color

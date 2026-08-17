@@ -356,6 +356,7 @@ class UpdateTenantSettingsDTO(BaseModel):
     mercadopago_access_token: Optional[str] = None
     mercadopago_pix_key: Optional[str] = None
     whatsapp_custom_message: Optional[str] = None
+    features: Optional[List[str]] = None
     business_hours: Optional[BusinessHoursDTO] = None
     theme: Optional[TenantThemeDTO] = None
 
