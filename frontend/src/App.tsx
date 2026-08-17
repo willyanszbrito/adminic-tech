@@ -330,8 +330,6 @@ const AppContent: React.FC = () => {
             />
           ) : (
             <RestrictedAccessView
-              moduleName="Portal do Colaborador"
-              requiredRoleName="Profissional ou Gestor Credenciado"
               onOpenLogin={() => openLoginModal('staff')}
               onGoHome={() => handleSelectView('landing')}
             />
@@ -350,8 +348,6 @@ const AppContent: React.FC = () => {
             />
           ) : (
             <RestrictedAccessView
-              moduleName="Gestão do Estabelecimento Parceiro"
-              requiredRoleName="Gestor / Administrador do Parceiro"
               onOpenLogin={() => openLoginModal('partner_admin')}
               onGoHome={() => handleSelectView('landing')}
             />
@@ -367,8 +363,6 @@ const AppContent: React.FC = () => {
             />
           ) : (
             <RestrictedAccessView
-              moduleName="Governança Global do Ecossistema"
-              requiredRoleName="Super Administrador Master"
               onOpenLogin={() => openLoginModal('super_admin')}
               onGoHome={() => handleSelectView('landing')}
             />

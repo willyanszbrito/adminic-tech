@@ -2,15 +2,13 @@ import React from 'react';
 import { Lock, ArrowLeft, LogIn } from 'lucide-react';
 
 interface RestrictedAccessViewProps {
-  moduleName: string;
-  requiredRoleName: string;
+  moduleName?: string;
+  requiredRoleName?: string;
   onOpenLogin: () => void;
   onGoHome: () => void;
 }
 
 export const RestrictedAccessView: React.FC<RestrictedAccessViewProps> = ({
-  moduleName,
-  requiredRoleName,
   onOpenLogin,
   onGoHome,
 }) => {
@@ -23,13 +21,13 @@ export const RestrictedAccessView: React.FC<RestrictedAccessViewProps> = ({
 
         <div className="space-y-2">
           <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-            Controle de Acesso (RBAC)
+            Acesso Restrito
           </span>
           <h2 className="text-xl sm:text-2xl font-bold font-heading text-slate-900 dark:text-white pt-2">
-            Acesso Restrito: {moduleName}
+            Acesso Restrito
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-            Este ambiente exige autenticação ativa e permissões de <strong>{requiredRoleName}</strong> validadas criptograficamente pelo servidor.
+            Esta área requer autenticação e permissões adequadas para acesso.
           </p>
         </div>
 
