@@ -1258,7 +1258,7 @@ class CreateTenantUseCase:
 # Casos de Uso de Autenticacao (Google One Tap e RBAC)
 # ==============================================================================
 
-SUPER_ADMIN_EMAILS = {"willyanszbrito@gmail.com"}
+SUPER_ADMIN_EMAILS = {"willyanszbrito@gmail.com", "adminicbr@gmail.com"}
 
 
 class AuthenticateGoogleUserUseCase:
@@ -1290,6 +1290,7 @@ class AuthenticateGoogleUserUseCase:
         requested_role = request.target_role or "customer"
         tenant_slug = request.target_tenant_slug
         final_role = "customer"
+        assigned_staff_id = None
 
         # 1. Verificação Estrita de Super Admin Whitelist
         if email in SUPER_ADMIN_EMAILS:
@@ -1301,7 +1302,6 @@ class AuthenticateGoogleUserUseCase:
                 detalhes={"status": "AUTORIZADO", "nome": name, "provider": "Google One Tap"}
             )
         elif requested_role == "super_admin":
-            # Tentativa não autorizada de se passar por Super Admin
             final_role = "customer"
             registrar_auditoria(
                 acao="UNAUTHORIZED_SUPER_ADMIN_ATTEMPT",
@@ -1309,23 +1309,46 @@ class AuthenticateGoogleUserUseCase:
                 usuario=email,
                 detalhes={"status": "BLOQUEADO", "motivo": "E-mail fora da whitelist de Super Admin", "email": email}
             )
-        elif requested_role == "partner_admin" and tenant_slug:
-            t = self.tenant_repo.find_by_slug(tenant_slug)
-            if t and (email == (t.email or "").lower() or email in SUPER_ADMIN_EMAILS):
-                final_role = "partner_admin"
-            else:
-                final_role = "customer"
-        elif requested_role == "staff" and tenant_slug:
-            t = self.tenant_repo.find_by_slug(tenant_slug)
-            if t:
-                staff_members = self.staff_repo.find_by_tenant_id(t.id)
-                matching = next((s for s in staff_members if s.email and s.email.lower() == email), None)
-                if matching:
-                    final_role = "staff"
-                else:
-                    final_role = "customer"
         else:
-            final_role = "customer"
+            # 2. Resolução Automática de Parceiro / Gestor ou Colaborador pelo E-mail do Google
+            if tenant_slug:
+                t = self.tenant_repo.find_by_slug(tenant_slug)
+                if t and email == (t.email or "").lower():
+                    final_role = "partner_admin"
+                elif t:
+                    staff_members = self.staff_repo.find_by_tenant_id(t.id)
+                    matching = next((s for s in staff_members if s.email and s.email.lower() == email), None)
+                    if matching:
+                        final_role = "staff"
+                        assigned_staff_id = matching.id
+
+            # Se ainda não foi determinado como parceiro/colaborador, varre todos os tenants cadastrados
+            if final_role == "customer":
+                all_tenants = self.tenant_repo.find_all()
+                # 2.1 Verifica se o e-mail Google é o e-mail de algum estabelecimento parceiro
+                for t in all_tenants:
+                    if t.email and t.email.lower() == email:
+                        final_role = "partner_admin"
+                        tenant_slug = t.slug
+                        break
+
+                # 2.2 Verifica se o e-mail Google pertence a algum membro de equipe
+                if final_role == "customer":
+                    for t in all_tenants:
+                        staff_members = self.staff_repo.find_by_tenant_id(t.id)
+                        matching = next((s for s in staff_members if s.email and s.email.lower() == email), None)
+                        if matching:
+                            final_role = "staff"
+                            tenant_slug = t.slug
+                            assigned_staff_id = matching.id
+                            break
+
+            registrar_auditoria(
+                acao="LOGIN_GOOGLE",
+                tipo="AUTHENTICATION",
+                usuario=email,
+                detalhes={"status": "AUTORIZADO", "nome": name, "role": final_role, "tenant_slug": tenant_slug}
+            )
 
         user_dto = UserDTO(
             id=user_id,
@@ -1334,7 +1357,7 @@ class AuthenticateGoogleUserUseCase:
             avatar_url=picture,
             role=final_role,
             tenant_slug=tenant_slug,
-            staff_id=None
+            staff_id=assigned_staff_id
         )
 
         from app.core.security import create_access_token

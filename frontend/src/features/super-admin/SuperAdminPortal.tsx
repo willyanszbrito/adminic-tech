@@ -519,15 +519,20 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">E-mail do Responsável *</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
+                  E-mail Google do Gestor / Responsável *
+                </label>
                 <input
                   type="email"
                   required
-                  placeholder="contato@estabelecimento.com"
+                  placeholder="gestor@gmail.com ou email corporativo Google"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 placeholder-slate-400"
                 />
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                  O parceiro utilizará este e-mail para fazer login instantâneo com 1 clique usando sua conta Google.
+                </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

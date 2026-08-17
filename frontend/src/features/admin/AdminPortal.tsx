@@ -407,10 +407,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-brand-primary/15 text-brand-primary border border-brand-primary/30">
+                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-brand-primary/15 text-brand-primary border border-brand-primary/30">
                   Painel do Gestor
                 </span>
-                <span className="text-xs font-mono text-slate-500">{tenant.slug}</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-extrabold font-heading text-slate-900 dark:text-white mt-1">
                 {name}
@@ -432,10 +431,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center space-x-2 pt-3 border-t border-black/10 dark:border-white/10 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
+        <div className="flex items-center space-x-2 pt-3 border-t border-black/10 dark:border-white/10 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none flex-nowrap">
           <button
             onClick={() => setActiveTab('metrics')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 touch-target ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 whitespace-nowrap touch-target ${
               activeTab === 'metrics'
                 ? 'bg-brand-primary text-black shadow-md shadow-brand-primary/20'
                 : 'glass-pill text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10'
@@ -447,7 +446,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
           <button
             onClick={() => setActiveTab('catalog')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 touch-target ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 whitespace-nowrap touch-target ${
               activeTab === 'catalog'
                 ? 'bg-brand-primary text-black shadow-md shadow-brand-primary/20'
                 : 'glass-pill text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10'
@@ -459,7 +458,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
           <button
             onClick={() => setActiveTab('staff')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 touch-target ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 whitespace-nowrap touch-target ${
               activeTab === 'staff'
                 ? 'bg-brand-primary text-black shadow-md shadow-brand-primary/20'
                 : 'glass-pill text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10'
@@ -471,7 +470,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
           <button
             onClick={() => setActiveTab('pix')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 touch-target ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 whitespace-nowrap touch-target ${
               activeTab === 'pix'
                 ? 'bg-brand-primary text-black shadow-md shadow-brand-primary/20'
                 : 'glass-pill text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10'
@@ -483,7 +482,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
           <button
             onClick={() => setActiveTab('settings')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 touch-target ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shrink-0 whitespace-nowrap touch-target ${
               activeTab === 'settings'
                 ? 'bg-brand-primary text-black shadow-md shadow-brand-primary/20'
                 : 'glass-pill text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10'
@@ -532,14 +531,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
             <div className="glass-panel p-5 rounded-2xl border border-black/10 dark:border-white/10 space-y-2">
               <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
-                <span className="text-xs font-semibold">Faturamento Estimado</span>
+                <span className="text-xs font-semibold">Faturamento Realizado</span>
                 <DollarSign className="w-4 h-4 text-emerald-500" />
               </div>
               <p className="text-2xl font-bold font-heading text-emerald-600 dark:text-emerald-400">
-                R$ {(metrics?.monthly_revenue ?? tenant.monthly_revenue ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                R$ {(metrics?.monthly_revenue ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
               <p className="text-[11px] text-slate-500">
-                Ticket Médio: R$ {(metrics?.average_ticket ?? 45).toFixed(2)}
+                Ticket Médio: R$ {(metrics?.average_ticket ?? 0).toFixed(2)}
               </p>
             </div>
 
@@ -549,10 +548,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 <Percent className="w-4 h-4 text-sky-500" />
               </div>
               <p className="text-2xl font-bold font-heading text-slate-900 dark:text-white">
-                {(metrics?.occupancy_rate_percent ?? 78).toFixed(1)}%
+                {(metrics?.occupancy_rate_percent ?? 0).toFixed(1)}%
               </p>
               <p className="text-[11px] text-slate-500">
-                Horários mais procurados: 16h às 19h
+                Ocupação em tempo real
               </p>
             </div>
 
@@ -598,34 +597,45 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       return (
                         <tr key={apt.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                           <td className="py-3 font-mono font-bold text-brand-primary">{apt.voucher_code}</td>
-                          <td className="py-3 font-medium text-slate-900 dark:text-white">{apt.customer_name}</td>
-                          <td className="py-3">{apt.appointment_date} às {apt.start_time}</td>
-                          <td className="py-3">{apt.service?.name || (apt as any).service_name || 'Serviço'}</td>
-                          <td className="py-3">{apt.staff?.name || (apt as any).staff_name || 'Profissional'}</td>
-                          <td className="py-3 font-semibold">R$ {apt.price.toFixed(2)}</td>
                           <td className="py-3">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              isConfirmed
-                                ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                                : 'bg-rose-500/15 text-rose-600 dark:text-rose-400'
-                            }`}>
+                            <span className="font-semibold text-slate-900 dark:text-white">{apt.customer_name}</span>
+                            <span className="block text-[11px] text-slate-500 font-mono">{apt.customer_phone || apt.customer_email || 'Sem contato'}</span>
+                          </td>
+                          <td className="py-3 text-slate-700 dark:text-slate-300">
+                            <span className="font-medium">{apt.appointment_date}</span> às <span className="font-bold">{apt.start_time}</span>
+                          </td>
+                          <td className="py-3 font-medium text-slate-900 dark:text-white">
+                            {apt.service?.name || (apt as any).service_name || 'Procedimento'}
+                          </td>
+                          <td className="py-3 text-slate-700 dark:text-slate-300">
+                            {apt.staff?.name || (apt as any).staff_name || 'Julio Sousa'}
+                          </td>
+                          <td className="py-3 font-bold text-slate-900 dark:text-white">
+                            R$ {apt.price.toFixed(2)}
+                          </td>
+                          <td className="py-3">
+                            <span
+                              className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                                isConfirmed
+                                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                                  : 'bg-rose-500/15 text-rose-600 dark:text-rose-400'
+                              }`}
+                            >
                               {isConfirmed ? 'Confirmado' : 'Cancelado'}
                             </span>
                           </td>
                           <td className="py-3 text-right">
-                            {isConfirmed ? (
+                            {isConfirmed && (
                               <button
                                 onClick={() => {
                                   setSelectedAppointmentForCancel(apt);
                                   setIsCancelModalOpen(true);
                                 }}
-                                className="px-2.5 py-1 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-[11px] font-semibold flex items-center gap-1 ml-auto cursor-pointer transition-colors"
+                                className="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-xs font-semibold flex items-center gap-1.5 ml-auto cursor-pointer transition-colors touch-target"
                               >
-                                <AlertTriangle className="w-3 h-3" />
-                                <span>Imprevisto</span>
+                                <AlertTriangle className="w-3.5 h-3.5" />
+                                <span>Imprevisto / Cancelar</span>
                               </button>
-                            ) : (
-                              <span className="text-[11px] text-slate-400 italic">Cancelado</span>
                             )}
                           </td>
                         </tr>
@@ -634,7 +644,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   ) : (
                     <tr>
                       <td colSpan={8} className="py-8 text-center text-slate-500">
-                        Nenhum agendamento registrado recentemente.
+                        Nenhum agendamento registrado até o momento.
                       </td>
                     </tr>
                   )}
@@ -646,18 +656,18 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 2: CATALOG & SERVICES */}
+      {/* TAB 2: CATALOG MANAGEMENT */}
       {/* ========================================================================= */}
       {activeTab === 'catalog' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Services Form */}
-          <div className="lg:col-span-5 glass-panel p-6 rounded-3xl space-y-4 border border-black/10 dark:border-white/10">
-            <h3 className="text-sm font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">
+          {/* Form to Add / Edit Service */}
+          <div className="lg:col-span-5 glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+            <h3 className="text-base font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">
               <Plus className="w-4 h-4 text-brand-primary" />
-              <span>{isEditingService ? 'Editar Procedimento' : 'Novo Serviço'}</span>
+              <span>{isEditingService ? 'Editar Serviço' : 'Novo Serviço'}</span>
             </h3>
 
-            <form onSubmit={handleSaveService} className="space-y-3.5">
+            <form onSubmit={handleSaveService} className="space-y-4">
               <div>
                 <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
                   Nome do Serviço *
@@ -667,8 +677,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   required
                   value={serviceName}
                   onChange={(e) => setServiceName(e.target.value)}
-                  placeholder="ex: Corte Degradê Navalhado"
-                  className="w-full glass-input px-3 py-2 rounded-xl text-xs font-semibold"
+                  placeholder="ex: Corte Degradê, Barboterapia Premium..."
+                  className="w-full glass-input px-3 py-2 rounded-xl text-xs"
                 />
               </div>
 
@@ -696,8 +706,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   </label>
                   <input
                     type="number"
-                    step="0.50"
-                    min="1"
+                    step="0.01"
+                    min="0.01"
                     required
                     value={servicePrice}
                     onChange={(e) => setServicePrice(Number(e.target.value))}
@@ -724,15 +734,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
                   URL da Imagem / Foto
                 </label>
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   <input
                     type="text"
                     value={serviceImageUrl}
                     onChange={(e) => setServiceImageUrl(e.target.value)}
                     placeholder="https://... ou faça upload"
-                    className="w-full glass-input px-3 py-2 rounded-xl text-xs"
+                    className="flex-1 glass-input px-3 py-2 rounded-xl text-xs w-full"
                   />
-                  <label className="px-3 py-2 rounded-xl glass-pill text-xs font-semibold cursor-pointer shrink-0 hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-1">
+                  <label className="w-full sm:w-auto px-3.5 py-2 rounded-xl glass-pill text-xs font-semibold cursor-pointer shrink-0 hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center space-x-1.5 touch-target">
                     <Upload className="w-3.5 h-3.5" />
                     <span>Upload</span>
                     <input

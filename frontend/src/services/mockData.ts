@@ -21,7 +21,7 @@ export const MOCK_TENANTS: Tenant[] = [
     trial_days_remaining: 30,
     trial_status: 'active',
     trial_ends_at: '2026-09-16',
-    monthly_revenue: 8900.0,
+    monthly_revenue: 0.0,
     theme: {
       primary_color: '#d4af37',
       secondary_color: '#121212',
@@ -62,7 +62,7 @@ export const MOCK_TENANTS: Tenant[] = [
     trial_days_remaining: 30,
     trial_status: 'active',
     trial_ends_at: '2026-09-16',
-    monthly_revenue: 7800.0,
+    monthly_revenue: 0.0,
     theme: {
       primary_color: '#38bdf8',
       secondary_color: '#0f172a',
@@ -233,7 +233,7 @@ export const MOCK_STAFF: Record<string, Staff[]> = {
       phone: '(92) 98489-9955',
       email: 'sofiaheufrosina@gmail.com',
       rating: 5.0,
-      total_reviews: 142,
+      total_reviews: 0,
       is_active: true,
       specialty_service_ids: [
         'srv-campelo-corte',
@@ -264,7 +264,7 @@ export const MOCK_STAFF: Record<string, Staff[]> = {
       phone: '(92) 98489-9955',
       email: 'sofiaheufrosina@gmail.com',
       rating: 5.0,
-      total_reviews: 187,
+      total_reviews: 0,
       is_active: true,
       specialty_service_ids: [
         'srv-segredos-degrade',

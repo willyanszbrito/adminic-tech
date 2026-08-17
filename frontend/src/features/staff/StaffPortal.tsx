@@ -249,43 +249,43 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center space-x-2 pt-2 border-t border-black/10 dark:border-white/10 overflow-x-auto -mx-1 px-1 scrollbar-none">
+        <div className="flex items-center space-x-2 pt-2 border-t border-black/10 dark:border-white/10 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none flex-nowrap">
           <button
             type="button"
             onClick={() => setActiveTab('appointments')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap touch-target ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap shrink-0 touch-target ${
               activeTab === 'appointments'
                 ? 'bg-brand-primary text-black shadow-md shadow-brand-primary/20'
                 : 'glass-pill text-slate-600 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10'
             }`}
           >
-            <Clock className="w-3.5 h-3.5" />
+            <Clock className="w-3.5 h-3.5 shrink-0" />
             <span>Agenda e Atendimentos ({appointments.length})</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('profile')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap touch-target ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap shrink-0 touch-target ${
               activeTab === 'profile'
                 ? 'bg-brand-primary text-black shadow-md shadow-brand-primary/20'
                 : 'glass-pill text-slate-600 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10'
             }`}
           >
-            <Award className="w-3.5 h-3.5" />
+            <Award className="w-3.5 h-3.5 shrink-0" />
             <span>Dados e Apresentação</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('schedule')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap touch-target ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer whitespace-nowrap shrink-0 touch-target ${
               activeTab === 'schedule'
                 ? 'bg-brand-primary text-black shadow-md shadow-brand-primary/20'
                 : 'glass-pill text-slate-600 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10'
             }`}
           >
-            <Calendar className="w-3.5 h-3.5" />
+            <Calendar className="w-3.5 h-3.5 shrink-0" />
             <span>Jornada e Bloqueios</span>
           </button>
         </div>

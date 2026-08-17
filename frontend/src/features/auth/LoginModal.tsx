@@ -178,7 +178,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             <div className="space-y-4">
               {/* Google Native Button Container */}
               <div className="flex flex-col items-center justify-center py-2">
-                <div ref={googleBtnRef} id="g_id_signin_slot" className="min-h-[44px] flex items-center justify-center" />
+                <div ref={googleBtnRef} id="g_id_signin_slot" className="min-h-[44px] w-full flex items-center justify-center" />
               </div>
 
               {/* Fallback Google Click Trigger */}
@@ -186,7 +186,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 type="button"
                 onClick={handleGoogleClick}
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white font-bold text-xs rounded-2xl transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white font-bold text-xs rounded-2xl transition-all shadow-sm cursor-pointer disabled:opacity-50 touch-target"
               >
                 <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -194,16 +194,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                 </svg>
-                <span>{isLoading ? 'Autenticando...' : 'Reabrir Janela de Autenticação Google'}</span>
+                <span>{isLoading ? 'Autenticando...' : 'Entrar com Conta Google'}</span>
               </button>
 
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs text-slate-600 dark:text-slate-400 space-y-1.5">
                 <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <span>Google Identity Services Oficial</span>
+                  <span>Acesso com Conta Google</span>
                 </div>
                 <p className="leading-relaxed text-[11px]">
-                  Utilize sua conta corporativa Google autorizada. Em caso de bloqueio de popups pelo navegador, utilize a aba "Chave de Acesso" ao lado.
+                  Acesse com sua conta corporativa Google autorizada. Caso a janela de login não abra automaticamente no celular, clique no botão acima ou utilize a aba "Chave de Acesso".
                 </p>
               </div>
             </div>

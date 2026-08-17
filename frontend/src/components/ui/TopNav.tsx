@@ -72,7 +72,7 @@ export const TopNav: React.FC<TopNavProps> = ({
       if (user.role === 'partner_admin' || user.role === 'super_admin') {
         items.push({ id: 'admin', label: 'Gestão', icon: LayoutDashboard });
       }
-      if (user.role === 'super_admin' && !isDedicated) {
+      if (user.role === 'super_admin') {
         items.push({ id: 'super-admin', label: 'Super Admin', icon: ShieldAlert });
       }
     }
@@ -289,12 +289,12 @@ export const TopNav: React.FC<TopNavProps> = ({
           {!isDedicated && (
             <button
               onClick={onOpenSwitcher}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold glass-pill text-slate-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/15 border border-black/10 dark:border-white/10 transition-all flex items-center space-x-1.5 cursor-pointer"
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold glass-pill text-slate-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/15 border border-black/10 dark:border-white/10 transition-all flex items-center space-x-1.5 cursor-pointer touch-target"
               title="Escolher outro estabelecimento parceiro"
             >
               <Layers className="w-3.5 h-3.5 text-brand-primary" />
               <span>Estabelecimento:</span>
-              <span className="font-mono text-brand-primary font-bold">{tenant.slug}</span>
+              <span className="font-bold text-brand-primary truncate max-w-[130px]">{tenant.name}</span>
             </button>
           )}
 
@@ -335,7 +335,7 @@ export const TopNav: React.FC<TopNavProps> = ({
                         className="w-full px-3 py-2 text-left text-xs font-medium rounded-xl hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-2 text-purple-600 dark:text-purple-400"
                       >
                         <ShieldAlert className="w-3.5 h-3.5" />
-                        <span>Painel de Controle</span>
+                        <span>Super Admin Global</span>
                       </button>
                     )}
 
