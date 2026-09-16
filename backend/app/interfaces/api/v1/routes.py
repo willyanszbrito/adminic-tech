@@ -383,6 +383,26 @@ def delete_staff(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
+@router.put(
+    "/tenants/{slug}/admin/staff/{staff_id}",
+    response_model=StaffDTO,
+    summary="Atualizar Colaborador / Barbeiro",
+    description="Atualiza os dados cadastrais de um profissional da equipe do estabelecimento."
+)
+def update_staff(
+    slug: str = Path(..., description="Slug do parceiro"),
+    staff_id: str = Path(..., description="ID do colaborador"),
+    request: UpdateStaffProfileDTO = Body(...),
+    use_case: UpdateStaffProfileUseCase = Depends(update_staff_profile_use_case)
+):
+    try:
+        return use_case.execute(slug, staff_id, request)
+    except TenantNotFoundException as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except StaffNotFoundException as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
 @router.post(
     "/tenants/{slug}/admin/categories",
     response_model=ServiceCategoryDTO,

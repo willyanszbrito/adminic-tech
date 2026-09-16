@@ -72,6 +72,16 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [staffEmail, setStaffEmail] = useState('');
   const [staffBio, setStaffBio] = useState('');
   const [staffAvatar, setStaffAvatar] = useState(tenant.logo_url || '');
+  const [isEditingStaff, setIsEditingStaff] = useState<string | null>(null);
+
+  // Modern In-App Confirmation Modal (replaces native browser alerts/confirms)
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmLabel?: string;
+    onConfirm: () => void;
+  } | null>(null);
 
   // PIX & Mercado Pago Settings State
   const [pixEnabled, setPixEnabled] = useState(tenant.pix_enabled ?? true);
@@ -230,22 +240,30 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     window.scrollTo({ top: 300, behavior: 'smooth' });
   };
 
-  const handleDeleteService = async (srvId: string, srvName: string) => {
-    if (!confirm(`Deseja realmente excluir o serviço "${srvName}"?`)) return;
-    setIsSubmitting(true);
-    setSuccessMessage(null);
-    setErrorMessage(null);
+  const handleDeleteService = (srvId: string, srvName: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Excluir Serviço',
+      message: `Deseja realmente remover o serviço "${srvName}" do catálogo?`,
+      confirmLabel: 'Excluir Serviço',
+      onConfirm: async () => {
+        setConfirmModal(null);
+        setIsSubmitting(true);
+        setSuccessMessage(null);
+        setErrorMessage(null);
 
-    try {
-      await api.deleteService(tenant.slug, srvId);
-      setSuccessMessage(`Serviço "${srvName}" excluído com sucesso!`);
-      onRefreshTenant();
-      loadMetrics();
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Erro ao excluir serviço.');
-    } finally {
-      setIsSubmitting(false);
-    }
+        try {
+          await api.deleteService(tenant.slug, srvId);
+          setSuccessMessage(`Serviço "${srvName}" excluído com sucesso!`);
+          onRefreshTenant();
+          loadMetrics();
+        } catch (err: any) {
+          setErrorMessage(err.message || 'Erro ao excluir serviço.');
+        } finally {
+          setIsSubmitting(false);
+        }
+      },
+    });
   };
 
   // Handle Add Category
@@ -269,60 +287,115 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     }
   };
 
-  const handleDeleteCategory = async (catId: string, catName: string) => {
-    if (!confirm(`Deseja realmente excluir a categoria "${catName}"?`)) return;
-    setIsSubmitting(true);
-    try {
-      await api.deleteCategory(tenant.slug, catId);
-      setSuccessMessage(`Categoria "${catName}" excluída com sucesso!`);
-      onRefreshTenant();
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Erro ao excluir categoria.');
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleDeleteCategory = (catId: string, catName: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Excluir Categoria',
+      message: `Deseja realmente excluir a categoria "${catName}"?`,
+      confirmLabel: 'Excluir Categoria',
+      onConfirm: async () => {
+        setConfirmModal(null);
+        setIsSubmitting(true);
+        try {
+          await api.deleteCategory(tenant.slug, catId);
+          setSuccessMessage(`Categoria "${catName}" excluída com sucesso!`);
+          onRefreshTenant();
+        } catch (err: any) {
+          setErrorMessage(err.message || 'Erro ao excluir categoria.');
+        } finally {
+          setIsSubmitting(false);
+        }
+      },
+    });
   };
 
-  // Handle Add Staff
-  const handleAddStaff = async (e: React.FormEvent) => {
+  // Handle Staff: Edit Click & Cancel
+  const handleEditStaffClick = (stf: Staff) => {
+    setIsEditingStaff(stf.id);
+    setStaffName(stf.name);
+    setStaffRole(stf.role);
+    setStaffPhone(stf.phone || '');
+    setStaffEmail(stf.email || '');
+    setStaffBio(stf.bio || '');
+    setStaffAvatar(stf.avatar_url || tenant.logo_url || '');
+    window.scrollTo({ top: 400, behavior: 'smooth' });
+  };
+
+  const handleCancelEditStaff = () => {
+    setIsEditingStaff(null);
+    setStaffName('');
+    setStaffRole('Barbeiro Especialista');
+    setStaffPhone('');
+    setStaffEmail('');
+    setStaffBio('');
+    setStaffAvatar(tenant.logo_url || '');
+  };
+
+  // Handle Save Staff (Create or Update)
+  const handleSaveStaff = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!staffName.trim()) return;
     setIsSubmitting(true);
     setSuccessMessage(null);
     setErrorMessage(null);
 
     try {
-      await api.createStaff(tenant.slug, {
-        name: staffName,
-        role: staffRole,
-        phone: staffPhone,
-        email: staffEmail,
-        bio: staffBio,
-        avatar_url: staffAvatar || tenant.logo_url,
-        specialty_service_ids: services.map(s => s.id),
-      });
-      setSuccessMessage(`Colaborador "${staffName}" cadastrado com sucesso!`);
-      setStaffName('');
-      setStaffBio('');
+      if (isEditingStaff) {
+        await api.updateStaff(tenant.slug, isEditingStaff, {
+          name: staffName,
+          role: staffRole,
+          phone: staffPhone,
+          email: staffEmail,
+          bio: staffBio,
+          avatar_url: staffAvatar || tenant.logo_url,
+        });
+        setSuccessMessage(`Profissional "${staffName}" atualizado com sucesso!`);
+        handleCancelEditStaff();
+      } else {
+        await api.createStaff(tenant.slug, {
+          name: staffName,
+          role: staffRole,
+          phone: staffPhone,
+          email: staffEmail,
+          bio: staffBio,
+          avatar_url: staffAvatar || tenant.logo_url,
+          specialty_service_ids: services.map(s => s.id),
+        });
+        setSuccessMessage(`Colaborador "${staffName}" cadastrado com sucesso!`);
+        setStaffName('');
+        setStaffBio('');
+      }
       onRefreshTenant();
     } catch (err: any) {
-      setErrorMessage(err.message || 'Erro ao cadastrar colaborador.');
+      setErrorMessage(err.message || 'Erro ao salvar colaborador.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDeleteStaff = async (stfId: string, stfName: string) => {
-    if (!confirm(`Deseja realmente excluir o profissional "${stfName}" da equipe?`)) return;
-    setIsSubmitting(true);
-    try {
-      await api.deleteStaff(tenant.slug, stfId);
-      setSuccessMessage(`Profissional "${stfName}" removido com sucesso.`);
-      onRefreshTenant();
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Erro ao remover colaborador.');
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleDeleteStaff = (stfId: string, stfName: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Remover Membro da Equipe',
+      message: `Deseja realmente remover o profissional "${stfName}" da equipe?`,
+      confirmLabel: 'Remover Profissional',
+      onConfirm: async () => {
+        setConfirmModal(null);
+        setIsSubmitting(true);
+        try {
+          await api.deleteStaff(tenant.slug, stfId);
+          setSuccessMessage(`Profissional "${stfName}" removido com sucesso.`);
+          if (isEditingStaff === stfId) {
+            handleCancelEditStaff();
+          }
+          onRefreshTenant();
+        } catch (err: any) {
+          setErrorMessage(err.message || 'Erro ao remover colaborador.');
+        } finally {
+          setIsSubmitting(false);
+        }
+      },
+    });
   };
 
   // Handle Save PIX Settings
@@ -932,12 +1005,23 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       {activeTab === 'staff' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-5 glass-panel p-6 rounded-3xl space-y-4 border border-black/10 dark:border-white/10">
-            <h3 className="text-sm font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">
-              <Plus className="w-4 h-4 text-brand-primary" />
-              <span>Cadastrar Profissional / Barbeiro</span>
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold font-heading text-slate-900 dark:text-white flex items-center space-x-2">
+                {isEditingStaff ? <Edit3 className="w-4 h-4 text-brand-primary" /> : <Plus className="w-4 h-4 text-brand-primary" />}
+                <span>{isEditingStaff ? 'Editar Profissional da Equipe' : 'Cadastrar Profissional / Barbeiro'}</span>
+              </h3>
+              {isEditingStaff && (
+                <button
+                  type="button"
+                  onClick={handleCancelEditStaff}
+                  className="text-[11px] font-bold text-rose-500 hover:text-rose-400 px-2 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 transition-all cursor-pointer"
+                >
+                  Cancelar Edição
+                </button>
+              )}
+            </div>
 
-            <form onSubmit={handleAddStaff} className="space-y-3.5">
+            <form onSubmit={handleSaveStaff} className="space-y-3.5">
               <div>
                 <label className="block text-[11px] text-slate-600 dark:text-slate-400 font-semibold mb-1">
                   Nome Completo *
@@ -1031,14 +1115,25 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-2.5 rounded-xl text-xs font-bold bg-brand-primary text-black hover:opacity-90 transition-opacity flex items-center justify-center space-x-1.5 cursor-pointer shadow-md shadow-brand-primary/20"
-              >
-                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                <span>Adicionar Profissional à Equipe</span>
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-brand-primary text-black hover:opacity-90 transition-opacity flex items-center justify-center space-x-1.5 cursor-pointer shadow-md shadow-brand-primary/20"
+                >
+                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span>{isEditingStaff ? 'Salvar Alterações' : 'Adicionar Profissional à Equipe'}</span>
+                </button>
+                {isEditingStaff && (
+                  <button
+                    type="button"
+                    onClick={handleCancelEditStaff}
+                    className="px-3 py-2.5 rounded-xl text-xs font-semibold glass-pill text-slate-600 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                )}
+              </div>
             </form>
           </div>
 
@@ -1051,7 +1146,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               {staffList.map((stf) => (
                 <div
                   key={stf.id}
-                  className="glass-panel p-4 rounded-2xl border border-black/10 dark:border-white/10 space-y-3 hover:border-brand-primary/40 transition-all flex flex-col justify-between"
+                  className={`glass-panel p-4 rounded-2xl border space-y-3 transition-all flex flex-col justify-between ${
+                    isEditingStaff === stf.id
+                      ? 'border-brand-primary ring-2 ring-brand-primary/30 bg-brand-primary/[0.03]'
+                      : 'border-black/10 dark:border-white/10 hover:border-brand-primary/40'
+                  }`}
                 >
                   <div className="flex items-start space-x-3">
                     <img
@@ -1060,9 +1159,16 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       className="w-12 h-12 rounded-xl object-cover shrink-0 border border-black/10 dark:border-white/10"
                     />
                     <div className="min-w-0">
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                        {stf.name}
-                      </h4>
+                      <div className="flex items-center space-x-1.5">
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                          {stf.name}
+                        </h4>
+                        {isEditingStaff === stf.id && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-brand-primary text-black">
+                            Editando
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[11px] text-brand-primary font-semibold truncate">
                         {stf.role}
                       </p>
@@ -1076,13 +1182,26 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     <span className="text-[10px] text-slate-500 flex items-center gap-1">
                       ⭐ {stf.rating?.toFixed(1) || '5.0'} ({stf.total_reviews || 0} avaliações)
                     </span>
-                    <button
-                      onClick={() => handleDeleteStaff(stf.id, stf.name)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
-                      title="Excluir"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex items-center space-x-1">
+                      <button
+                        onClick={() => handleEditStaffClick(stf)}
+                        className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                          isEditingStaff === stf.id
+                            ? 'bg-brand-primary text-black'
+                            : 'text-slate-400 hover:text-brand-primary hover:bg-brand-primary/10'
+                        }`}
+                        title="Editar profissional"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteStaff(stf.id, stf.name)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                        title="Excluir"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1728,6 +1847,48 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         staffName={selectedAppointmentForCancel?.staff?.name || selectedAppointmentForCancel?.staff_name || 'Profissional'}
         onConfirmCancel={handleConfirmCancelAppointment}
       />
+
+      {/* Modern In-App Confirmation Modal */}
+      {confirmModal && confirmModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in">
+          <div className="relative w-full max-w-md bg-white dark:bg-[#121215] border border-slate-200 dark:border-white/10 rounded-3xl p-6 shadow-2xl space-y-4 animate-in zoom-in-95">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-2xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 border border-rose-500/30">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-bold font-heading text-slate-900 dark:text-white truncate">
+                  {confirmModal.title}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Confirmação de segurança
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+              {confirmModal.message}
+            </p>
+
+            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100 dark:border-white/10">
+              <button
+                type="button"
+                onClick={() => setConfirmModal(null)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={confirmModal.onConfirm}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition-colors shadow-md shadow-rose-600/25 cursor-pointer"
+              >
+                {confirmModal.confirmLabel || 'Confirmar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -80,11 +80,17 @@ export const TopNav: React.FC<TopNavProps> = ({
     return items;
   }, [isAuthenticated, user, tenant.name, isDedicated]);
 
-  const getRoleLabel = (_role?: string) => {
+  const getRoleLabel = (role?: string) => {
+    if (role === 'super_admin') return 'Super Admin';
+    if (role === 'partner_admin') return 'Gestor';
+    if (role === 'staff') return 'Profissional';
     return 'Conectado';
   };
 
-  const getRoleBadgeColor = (_role?: string) => {
+  const getRoleBadgeColor = (role?: string) => {
+    if (role === 'super_admin') return 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30';
+    if (role === 'partner_admin') return 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30';
+    if (role === 'staff') return 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30';
     return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
   };
 
@@ -294,7 +300,7 @@ export const TopNav: React.FC<TopNavProps> = ({
             >
               <Layers className="w-3.5 h-3.5 text-brand-primary" />
               <span>Estabelecimento:</span>
-              <span className="font-bold text-brand-primary truncate max-w-[130px]">{tenant.name}</span>
+              <span className="font-bold text-brand-primary truncate max-w-[180px] sm:max-w-[220px]" title={tenant.name}>{tenant.name}</span>
             </button>
           )}
 
@@ -310,11 +316,11 @@ export const TopNav: React.FC<TopNavProps> = ({
                   alt={user.name}
                   className="w-5 h-5 rounded-md object-cover border border-brand-primary/40"
                 />
-                <span className="font-medium max-w-[100px] truncate">{user.name}</span>
-                <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold border ${getRoleBadgeColor(user.role)}`}>
+                <span className="font-semibold text-slate-800 dark:text-slate-100 max-w-[180px] lg:max-w-[240px] truncate" title={user.name}>{user.name}</span>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border shrink-0 ${getRoleBadgeColor(user.role)}`}>
                   {getRoleLabel(user.role)}
                 </span>
-                <ChevronDown className="w-3 h-3 text-slate-400" />
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               </button>
 
               {/* User Dropdown Menu */}

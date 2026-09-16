@@ -12,7 +12,9 @@ import {
   AuthResponse,
   PixPayment,
   PaymentStatusResponse,
-  TimeSlot
+  TimeSlot,
+  DailyQueueResponse,
+  QueueCustomerItem
 } from '../types';
 import { MOCK_TENANTS, MOCK_CATALOGS, MOCK_STAFF } from './mockData';
 
@@ -24,7 +26,7 @@ const isLocalhost = isBrowser && (window.location.hostname === 'localhost' || wi
 const getApiBaseUrl = (): string => {
   if (!isBrowser) return 'https://api.adminic.com.br/api/v1';
   if (isLocalhost) return 'http://localhost:8000/api/v1';
-  return 'https://adminic-tech.onrender.com/api/v1';
+  return 'https://api.adminic.com.br/api/v1';
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -316,6 +318,26 @@ export const api = {
     });
   },
 
+  async updateStaff(
+    slug: string,
+    staffId: string,
+    payload: {
+      name?: string;
+      role?: string;
+      bio?: string;
+      avatar_url?: string;
+      specialty_service_ids?: string[];
+      phone?: string;
+      email?: string;
+      is_active?: boolean;
+    }
+  ): Promise<Staff> {
+    return fetchJSON<Staff>(`/tenants/${slug}/admin/staff/${staffId}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  },
+
   async updateTenantSettings(slug: string, payload: Partial<Tenant>): Promise<Tenant> {
     return fetchJSON<Tenant>(`/tenants/${slug}/admin/settings`, {
       method: 'PUT',
@@ -443,7 +465,79 @@ export const api = {
   },
 
   // ============================================================================
-  // 8. Configurações Públicas de Integração (Zero-Config Frontend)
+  // 8. Fila do Dia em Tempo Real (Estilo tonafila.app)
+  // ============================================================================
+  async getDailyQueue(slug: string, dateStr?: string): Promise<DailyQueueResponse> {
+    const today = dateStr || new Date().toISOString().split('T')[0];
+    try {
+      return await fetchJSON<DailyQueueResponse>(`/tenants/${slug}/queue/today?date=${today}`);
+    } catch {
+      const tenant = MOCK_TENANTS.find(t => t.slug === slug) || MOCK_TENANTS[0];
+      const now = new Date();
+      const currentHour = now.getHours();
+
+      return {
+        tenant_name: tenant.name,
+        tenant_slug: slug,
+        date: today,
+        barber_status: currentHour >= 12 && currentHour < 13 ? 'Em Intervalo de Almoço' : 'Atendendo no Momento',
+        current_serving: {
+          id: 'queue-current-1',
+          voucher_code: 'ADM-941A',
+          customer_display_name: 'Marcos V.',
+          service_name: 'Corte Degradê Navalhado',
+          staff_name: 'Julio Sousa',
+          start_time: '14:30',
+          end_time: '15:00',
+          status: 'in_service',
+          position: 1,
+          estimated_wait_minutes: 10
+        },
+        queue: [
+          {
+            id: 'queue-item-2',
+            voucher_code: 'ADM-283B',
+            customer_display_name: 'Felipe A.',
+            service_name: 'Corte + Barba Alinhada',
+            staff_name: 'Julio Sousa',
+            start_time: '15:00',
+            end_time: '15:45',
+            status: 'next',
+            position: 2,
+            estimated_wait_minutes: 25
+          },
+          {
+            id: 'queue-item-3',
+            voucher_code: 'ADM-719C',
+            customer_display_name: 'Carlos S.',
+            service_name: 'Barba e Pigmentação',
+            staff_name: 'Julio Sousa',
+            start_time: '15:45',
+            end_time: '16:15',
+            status: 'waiting',
+            position: 3,
+            estimated_wait_minutes: 55
+          },
+          {
+            id: 'queue-item-4',
+            voucher_code: 'ADM-550D',
+            customer_display_name: 'Lucas M.',
+            service_name: 'Corte Completo + Hidratação',
+            staff_name: 'Julio Sousa',
+            start_time: '16:15',
+            end_time: '17:00',
+            status: 'waiting',
+            position: 4,
+            estimated_wait_minutes: 85
+          }
+        ],
+        total_waiting: 3
+      };
+    }
+  },
+
+  // ============================================================================
+  // 9. Configurações Públicas de Integração (Zero-Config Frontend)
   // ============================================================================
   async getPublicConfig(): Promise<{ google_client_id: string; app_domain: string; api_domain: string; environment: string }> {
     try {

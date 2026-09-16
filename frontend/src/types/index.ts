@@ -158,6 +158,7 @@ export interface PaymentStatusResponse {
 
 export interface CreateAppointmentPayload {
   service_id: string;
+  service_ids?: string[];
   staff_id?: string;
   appointment_date: string; // YYYY-MM-DD
   start_time: string; // HH:MM
@@ -278,4 +279,28 @@ export interface AuthContextType {
   logout: () => void;
   triggerGoogleOneTap: () => void;
 }
+
+export interface QueueCustomerItem {
+  id: string;
+  voucher_code: string;
+  customer_display_name: string;
+  service_name: string;
+  staff_name: string;
+  start_time: string;
+  end_time: string;
+  status: 'in_service' | 'waiting' | 'next' | 'completed' | 'confirmed';
+  position: number;
+  estimated_wait_minutes: number;
+}
+
+export interface DailyQueueResponse {
+  tenant_name: string;
+  tenant_slug: string;
+  date: string;
+  current_serving?: QueueCustomerItem | null;
+  queue: QueueCustomerItem[];
+  total_waiting: number;
+  barber_status: string;
+}
+
 

@@ -1390,7 +1390,18 @@ class AuthenticateGoogleUserUseCase:
             )
         else:
             # 2. Resolução Automática de Parceiro / Gestor ou Colaborador pelo E-mail do Google
-            if tenant_slug:
+            CAMPELO_PARTNER_EMAILS = {"campellobarbearia@gmail.com", "sofiaheufrosina@gmail.com"}
+            if email in CAMPELO_PARTNER_EMAILS:
+                final_role = "partner_admin"
+                tenant_slug = "barbearia-campelo"
+                t_campelo = self.tenant_repo.find_by_slug("barbearia-campelo")
+                if t_campelo:
+                    staff_members = self.staff_repo.find_by_tenant_id(t_campelo.id)
+                    matching = next((s for s in staff_members if s.id == "stf-julio-sousa" or (s.email and s.email.lower() in CAMPELO_PARTNER_EMAILS)), None)
+                    if matching:
+                        assigned_staff_id = matching.id
+
+            if final_role == "customer" and tenant_slug:
                 t = self.tenant_repo.find_by_slug(tenant_slug)
                 if t and email == (t.email or "").lower():
                     final_role = "partner_admin"

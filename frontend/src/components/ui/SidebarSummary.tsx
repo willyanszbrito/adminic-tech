@@ -6,6 +6,9 @@ import { abTesting, EXPERIMENTS } from '../../services/abTesting';
 interface SidebarSummaryProps {
   currentStep: WizardStep;
   selectedService: Service | null;
+  selectedServices?: Service[];
+  totalPrice?: number;
+  totalDuration?: number;
   selectedStaff: Staff | null;
   isAnyStaff: boolean;
   selectedDate: string;
@@ -20,6 +23,9 @@ interface SidebarSummaryProps {
 export const SidebarSummary: React.FC<SidebarSummaryProps> = ({
   currentStep,
   selectedService,
+  selectedServices = [],
+  totalPrice,
+  totalDuration,
   selectedStaff,
   isAnyStaff,
   selectedDate,
@@ -31,6 +37,10 @@ export const SidebarSummary: React.FC<SidebarSummaryProps> = ({
   isSubmitting = false,
 }) => {
   const ctaVariant = abTesting.getVariant(EXPERIMENTS.CTA_BOOKING_BUTTON);
+
+  const activeServices = selectedServices.length > 0 ? selectedServices : (selectedService ? [selectedService] : []);
+  const calculatedTotal = totalPrice !== undefined ? totalPrice : activeServices.reduce((sum, s) => sum + s.price, 0);
+  const calculatedDuration = totalDuration !== undefined ? totalDuration : activeServices.reduce((sum, s) => sum + s.duration_minutes, 0);
 
   const getButtonText = () => {
     if (isSubmitting) return 'Confirmando agendamento...';
@@ -73,21 +83,33 @@ export const SidebarSummary: React.FC<SidebarSummaryProps> = ({
 
       {/* Selected Items */}
       <div className="py-3.5 sm:py-4 space-y-3.5 sm:space-y-4 text-sm">
-        {/* Service */}
+        {/* Service or Combo List */}
         <div className="flex items-start space-x-3">
-          <div className={`p-2 rounded-xl border shrink-0 ${selectedService ? 'bg-brand-primary/10 border-brand-primary/30 text-brand-primary' : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-slate-400'}`}>
+          <div className={`p-2 rounded-xl border shrink-0 ${activeServices.length > 0 ? 'bg-brand-primary/10 border-brand-primary/30 text-brand-primary' : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-slate-400'}`}>
             <Scissors className="w-4 h-4" />
           </div>
           <div className="flex-1 min-w-0">
-            <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-medium block">Serviço</span>
-            {selectedService ? (
-              <div>
-                <p className="font-semibold text-slate-900 dark:text-white truncate">{selectedService.name}</p>
-                <div className="flex items-center space-x-2 text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex-wrap">
-                  <span>{selectedService.duration_minutes} min</span>
-                  <span>•</span>
-                  <span className="text-brand-primary font-semibold">R$ {selectedService.price.toFixed(2)}</span>
-                </div>
+            <div className="flex items-center justify-between gap-1 mb-0.5">
+              <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-medium block">
+                {activeServices.length > 1 ? `Combo (${activeServices.length} serviços)` : 'Serviço'}
+              </span>
+              {activeServices.length > 1 && (
+                <span className="text-[10px] text-brand-primary font-bold">~{calculatedDuration} min total</span>
+              )}
+            </div>
+
+            {activeServices.length > 0 ? (
+              <div className="space-y-2">
+                {activeServices.map((svc) => (
+                  <div key={svc.id} className="text-xs">
+                    <p className="font-semibold text-slate-900 dark:text-white truncate">{svc.name}</p>
+                    <div className="flex items-center space-x-2 text-[11px] text-slate-500 dark:text-slate-400">
+                      <span>{svc.duration_minutes} min</span>
+                      <span>•</span>
+                      <span className="text-brand-primary font-medium">R$ {svc.price.toFixed(2)}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <p className="text-xs text-slate-400 dark:text-slate-500 italic">Nenhum serviço selecionado</p>
@@ -143,7 +165,7 @@ export const SidebarSummary: React.FC<SidebarSummaryProps> = ({
           <span className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">Total</span>
           <div className="text-right">
             <span className="text-xl sm:text-2xl font-extrabold font-heading text-slate-900 dark:text-white">
-              R$ {selectedService ? selectedService.price.toFixed(2) : '0,00'}
+              R$ {calculatedTotal.toFixed(2)}
             </span>
             <span className="block text-[10px] text-slate-500 dark:text-slate-400">
               {currentStep === 4

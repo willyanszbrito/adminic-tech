@@ -98,7 +98,12 @@ export function useBookingWizard() {
   // Booking Flow State
   const [currentStep, setCurrentStep] = useState<WizardStep>(1);
   const [maxStepReached, setMaxStepReached] = useState<number>(1);
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedServices, setSelectedServices] = useState<Service[]>([]);
+  const selectedService = selectedServices[0] || null;
+
+  const totalPrice = selectedServices.reduce((sum, s) => sum + s.price, 0);
+  const totalDuration = selectedServices.reduce((sum, s) => sum + s.duration_minutes, 0);
+
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   const [isAnyStaff, setIsAnyStaff] = useState<boolean>(true);
   
@@ -141,7 +146,7 @@ export function useBookingWizard() {
       const staffData = await api.getStaff(targetSlug);
       setStaffList(staffData);
 
-      setSelectedService(null);
+      setSelectedServices([]);
       setSelectedStaff(null);
       setIsAnyStaff(true);
       setSelectedSlot('');
@@ -199,9 +204,25 @@ export function useBookingWizard() {
     }
   }, [currentStep, selectedDate, selectedStaff, isAnyStaff, selectedService, loadAvailability]);
 
-  // Step 1 Navigation
+  // Step 1 Navigation & Multi-Service Selection
+  const handleToggleService = (service: Service) => {
+    setSelectedServices((prev) => {
+      const exists = prev.some((s) => s.id === service.id);
+      if (exists) {
+        return prev.filter((s) => s.id !== service.id);
+      } else {
+        return [...prev, service];
+      }
+    });
+    setSelectedSlot('');
+    setSlotEndTime('');
+  };
+
   const handleSelectService = (service: Service) => {
-    setSelectedService(service);
+    setSelectedServices((prev) => {
+      if (prev.some((s) => s.id === service.id)) return prev;
+      return [...prev, service];
+    });
     setSelectedSlot('');
     setSlotEndTime('');
     setCurrentStep(2);
@@ -239,21 +260,30 @@ export function useBookingWizard() {
   // Step 4 Submit Booking
   const handleSubmitBooking = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!tenant || !selectedService || !selectedSlot) return;
+    if (!tenant || selectedServices.length === 0 || !selectedSlot) return;
 
     setIsSubmitting(true);
     setError(null);
 
     try {
+      const primaryService = selectedServices[0];
+      const serviceIds = selectedServices.map((s) => s.id);
+      const comboNote =
+        selectedServices.length > 1
+          ? `[COMBO SELECIONADO: ${selectedServices.map((s) => `${s.name} (R$ ${s.price.toFixed(2)})`).join(' + ')} | Total: R$ ${totalPrice.toFixed(2)} | Duração Est.: ${totalDuration} min]`
+          : '';
+      const finalNotes = [notes, comboNote].filter(Boolean).join('\n');
+
       const appointment = await api.createAppointment(tenant.slug, {
-        service_id: selectedService.id,
+        service_id: primaryService.id,
+        service_ids: serviceIds,
         staff_id: isAnyStaff ? undefined : selectedStaff?.id,
         appointment_date: selectedDate,
         start_time: selectedSlot,
         customer_name: customerName,
         customer_phone: customerPhone,
         customer_email: customerEmail,
-        notes: notes || undefined,
+        notes: finalNotes || undefined,
         payment_method: paymentMethod,
       });
 
@@ -289,7 +319,7 @@ export function useBookingWizard() {
 
   // Reset to initial booking state
   const handleNewBooking = () => {
-    setSelectedService(null);
+    setSelectedServices([]);
     setSelectedStaff(null);
     setIsAnyStaff(true);
     setSelectedDate(getTomorrowDate());
@@ -307,7 +337,7 @@ export function useBookingWizard() {
   };
 
   const canProceed = () => {
-    if (currentStep === 1) return !!selectedService;
+    if (currentStep === 1) return selectedServices.length > 0;
     if (currentStep === 2) return isAnyStaff || !!selectedStaff;
     if (currentStep === 3) return !!selectedSlot;
     if (currentStep === 4)
@@ -322,10 +352,20 @@ export function useBookingWizard() {
   };
 
   const handleProceed = () => {
-    if (currentStep === 1 && selectedService) setCurrentStep(2);
-    else if (currentStep === 2) setCurrentStep(3);
-    else if (currentStep === 3 && selectedSlot) handleProceedToCustomerForm();
-    else if (currentStep === 4) handleSubmitBooking({ preventDefault: () => {} } as any);
+    if (currentStep === 1 && selectedServices.length > 0) {
+      setCurrentStep(2);
+      setMaxStepReached((prev) => Math.max(prev, 2));
+    }
+    else if (currentStep === 2) {
+      setCurrentStep(3);
+      setMaxStepReached((prev) => Math.max(prev, 3));
+    }
+    else if (currentStep === 3 && selectedSlot) {
+      handleProceedToCustomerForm();
+    }
+    else if (currentStep === 4) {
+      handleSubmitBooking({ preventDefault: () => {} } as any);
+    }
   };
 
   return {
@@ -344,6 +384,9 @@ export function useBookingWizard() {
     currentStep,
     maxStepReached,
     selectedService,
+    selectedServices,
+    totalPrice,
+    totalDuration,
     selectedStaff,
     isAnyStaff,
     selectedDate,
@@ -364,6 +407,7 @@ export function useBookingWizard() {
     confirmedAppointment,
     setConfirmedAppointment,
     handleSelectService,
+    handleToggleService,
     handleSelectStaff,
     handleSelectDate,
     handleSelectSlot,

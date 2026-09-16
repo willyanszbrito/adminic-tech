@@ -13,8 +13,12 @@ import {
   ShieldCheck,
   AlertCircle,
   Loader2,
-  XCircle
+  XCircle,
+  Radio,
+  ListOrdered
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { LiveQueueView } from '../../components/booking/LiveQueueView';
 
 export interface CustomerPortalProps {
   tenant: Tenant;
@@ -25,12 +29,21 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
   tenant,
   onNavigateToBooking,
 }) => {
-  const [emailInput, setEmailInput] = useState('');
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'queue' | 'appointments'>('queue');
+  const [emailInput, setEmailInput] = useState(user?.email || '');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Auto-search if user has email
+  React.useEffect(() => {
+    if (user?.email && !hasSearched) {
+      setEmailInput(user.email);
+    }
+  }, [user]);
 
   // Reschedule state
   const [reschedulingCode, setReschedulingCode] = useState<string | null>(null);
@@ -60,8 +73,12 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
     }
   };
 
-  const handleCancel = async (code: string) => {
-    if (!window.confirm(`Deseja realmente cancelar o agendamento ${code}?`)) return;
+  const [confirmCancelCode, setConfirmCancelCode] = useState<string | null>(null);
+
+  const handleConfirmCancel = async () => {
+    if (!confirmCancelCode) return;
+    const code = confirmCancelCode;
+    setConfirmCancelCode(null);
 
     try {
       await api.cancelAppointment(tenant.slug, code);
@@ -98,36 +115,73 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
-      {/* Header Banner */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brand-primary/15 text-brand-primary border border-brand-primary/30">
-                Portal de Autoatendimento
-              </span>
-              <span className="text-xs text-slate-500">• {tenant.name}</span>
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
+      {/* Top Segmented Tab Switcher */}
+      <div className="flex items-center space-x-2 bg-black/5 dark:bg-white/5 p-1.5 rounded-2xl max-w-md mx-auto sm:mx-0 border border-black/5 dark:border-white/10 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setActiveTab('queue')}
+          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-2 cursor-pointer touch-target ${
+            activeTab === 'queue'
+              ? 'bg-brand-primary text-black shadow-md shadow-brand-primary/20'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          <Radio className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+          <span>Fila ao Vivo 💈</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('appointments')}
+          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-2 cursor-pointer touch-target ${
+            activeTab === 'appointments'
+              ? 'bg-brand-primary text-black shadow-md shadow-brand-primary/20'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          <ListOrdered className="w-3.5 h-3.5" />
+          <span>Meus Agendamentos 📅</span>
+        </button>
+      </div>
+
+      {/* TAB 1: Live Queue of the Day */}
+      {activeTab === 'queue' && (
+        <LiveQueueView tenant={tenant} onNavigateToBooking={onNavigateToBooking} />
+      )}
+
+      {/* TAB 2: Customer Appointments History & Search */}
+      {activeTab === 'appointments' && (
+        <div className="space-y-6 sm:space-y-8">
+          {/* Header Banner */}
+          <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center space-x-2">
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brand-primary/15 text-brand-primary border border-brand-primary/30">
+                    Portal de Autoatendimento
+                  </span>
+                  <span className="text-xs text-slate-500">• {tenant.name}</span>
+                </div>
+                <h2 className="text-2xl font-extrabold font-heading text-slate-900 dark:text-white mt-1">
+                  Meus Agendamentos e Reservas
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
+                  Consulte seu histórico, acompanhe confirmações, altere horários ou cancele reservas com total autonomia.
+                </p>
+              </div>
+
+              <button
+                onClick={onNavigateToBooking}
+                className="px-5 py-2.5 rounded-2xl text-xs font-bold bg-brand-primary text-black hover:opacity-90 shadow-md shadow-brand-primary/20 transition-all cursor-pointer whitespace-nowrap self-start md:self-auto"
+              >
+                + Agendar Novo Horário
+              </button>
             </div>
-            <h2 className="text-2xl font-extrabold font-heading text-slate-900 dark:text-white mt-1">
-              Meus Agendamentos e Reservas
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
-              Consulte seu histórico, acompanhe confirmações, altere horários ou cancele reservas com total autonomia.
-            </p>
-          </div>
 
-          <button
-            onClick={onNavigateToBooking}
-            className="px-5 py-2.5 rounded-2xl text-xs font-bold bg-brand-primary text-black hover:opacity-90 shadow-md shadow-brand-primary/20 transition-all cursor-pointer whitespace-nowrap self-start md:self-auto"
-          >
-            + Agendar Novo Horário
-          </button>
-        </div>
-
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="pt-4 border-t border-black/10 dark:border-white/10">
-          <div className="flex flex-col sm:flex-row items-stretch gap-3">
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="pt-4 border-t border-black/10 dark:border-white/10">
+              <div className="flex flex-col sm:flex-row items-stretch gap-3">
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -349,7 +403,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
 
                       <button
                         type="button"
-                        onClick={() => handleCancel(appt.voucher_code)}
+                        onClick={() => setConfirmCancelCode(appt.voucher_code)}
                         className="flex-1 sm:flex-none inline-flex items-center justify-center space-x-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 hover:bg-rose-500/25 transition-all cursor-pointer touch-target"
                       >
                         <XCircle className="w-3.5 h-3.5 shrink-0" />
@@ -363,6 +417,8 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
           })}
         </div>
       )}
+      </div>
+      )}
 
       {/* Security footer */}
       <div className="glass-panel rounded-2xl p-4 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
@@ -371,6 +427,48 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
           <span>Privacidade assegurada. Seus dados cadastrais estão protegidos em conformidade com a LGPD.</span>
         </div>
       </div>
+
+      {/* In-App Cancel Confirmation Modal */}
+      {confirmCancelCode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in">
+          <div className="relative w-full max-w-md bg-white dark:bg-[#121215] border border-slate-200 dark:border-white/10 rounded-3xl p-6 shadow-2xl space-y-4 animate-in zoom-in-95">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-2xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 border border-rose-500/30">
+                <XCircle className="w-5 h-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-bold font-heading text-slate-900 dark:text-white truncate">
+                  Cancelar Agendamento
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Voucher: <span className="font-mono font-bold text-brand-primary">{confirmCancelCode}</span>
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+              Deseja realmente cancelar este agendamento? O horário será liberado para outros clientes da barbearia.
+            </p>
+
+            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100 dark:border-white/10">
+              <button
+                type="button"
+                onClick={() => setConfirmCancelCode(null)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+              >
+                Voltar
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCancel}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition-colors shadow-md shadow-rose-600/25 cursor-pointer"
+              >
+                Confirmar Cancelamento
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

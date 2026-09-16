@@ -461,7 +461,7 @@ TENANT_CAMPELO = Tenant(
     banner_url="https://placehold.co/1200x400/121212/d4af37?text=Barbearia+Campelo",
     phone="(92) 98489-9955",
     whatsapp="5592984899955",
-    email="sofiaheufrosina@gmail.com",
+    email="campellobarbearia@gmail.com",
     address="Av. Cosme Ferreira, 6340 - Zumbi dos Palmares, Manaus - AM",
     instagram="@campelobarbearia_",
     features=["Ambiente Climatizado", "Wi-Fi Gratuito", "Música Ambiente", "Atendimento Personalizado"],
@@ -579,7 +579,7 @@ STAFF_CAMPELO = [
         bio="Profissional experiente e dedicado, especialista em visagismo, degradês e acabamentos na navalha na Barbearia Campelo.",
         avatar_url="/logos/logo_campelo.jpg",
         phone="(92) 98489-9955",
-        email="sofiaheufrosina@gmail.com",
+        email="campellobarbearia@gmail.com",
         rating=5.0,
         total_reviews=0,
         specialty_service_ids=[

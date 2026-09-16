@@ -250,7 +250,12 @@ const AppContent: React.FC = () => {
                       categories={wizard.catalog?.categories || []}
                       services={wizard.catalog?.services || []}
                       selectedService={wizard.selectedService}
+                      selectedServices={wizard.selectedServices}
                       onSelectService={wizard.handleSelectService}
+                      onToggleService={wizard.handleToggleService}
+                      onProceed={wizard.handleProceed}
+                      totalPrice={wizard.totalPrice}
+                      totalDuration={wizard.totalDuration}
                     />
                   )}
 
@@ -299,6 +304,9 @@ const AppContent: React.FC = () => {
                   <SidebarSummary
                     currentStep={wizard.currentStep}
                     selectedService={wizard.selectedService}
+                    selectedServices={wizard.selectedServices}
+                    totalPrice={wizard.totalPrice}
+                    totalDuration={wizard.totalDuration}
                     selectedStaff={wizard.selectedStaff}
                     isAnyStaff={wizard.isAnyStaff}
                     selectedDate={wizard.selectedDate}
@@ -315,10 +323,17 @@ const AppContent: React.FC = () => {
                 <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-t border-black/10 dark:border-white/15 z-30 shadow-2xl flex items-center justify-between gap-3 animate-in slide-in-from-bottom duration-300">
                   <div className="min-w-0 flex-1">
                     <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block truncate">
-                      {wizard.selectedService ? wizard.selectedService.name : `Etapa ${wizard.currentStep} de 4`}
+                      {wizard.selectedServices.length > 1
+                        ? `Combo (${wizard.selectedServices.length} serviços)`
+                        : (wizard.selectedService ? wizard.selectedService.name : `Etapa ${wizard.currentStep} de 4`)}
                     </span>
                     <span className="text-sm sm:text-base font-extrabold font-heading text-slate-900 dark:text-white">
-                      R$ {wizard.selectedService ? wizard.selectedService.price.toFixed(2) : '0,00'}
+                      R$ {wizard.totalPrice > 0 ? wizard.totalPrice.toFixed(2) : (wizard.selectedService ? wizard.selectedService.price.toFixed(2) : '0,00')}
+                      {wizard.totalDuration > 0 && (
+                        <span className="text-xs font-normal text-slate-500 dark:text-slate-400 ml-1.5">
+                          ({wizard.totalDuration} min)
+                        </span>
+                      )}
                     </span>
                   </div>
 
