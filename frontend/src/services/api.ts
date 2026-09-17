@@ -13,8 +13,7 @@ import {
   PixPayment,
   PaymentStatusResponse,
   TimeSlot,
-  DailyQueueResponse,
-  QueueCustomerItem
+  DailyQueueResponse
 } from '../types';
 import { MOCK_TENANTS, MOCK_CATALOGS, MOCK_STAFF } from './mockData';
 
