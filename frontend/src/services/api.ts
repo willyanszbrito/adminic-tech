@@ -417,7 +417,7 @@ export const api = {
   async authenticateGoogle(credential: string, role: string = 'customer', tenantSlug?: string): Promise<AuthResponse> {
     return fetchJSON<AuthResponse>('/auth/google', {
       method: 'POST',
-      body: JSON.stringify({ credential, role, tenant_slug: tenantSlug }),
+      body: JSON.stringify({ credential, target_role: role, target_tenant_slug: tenantSlug }),
     });
   },
 

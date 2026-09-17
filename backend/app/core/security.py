@@ -17,7 +17,7 @@ from app.domain.entities import UserRole
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 JWT_ISSUER = "adminic.com.br"
-SUPER_ADMIN_WHITELIST = {"willyanszbrito@gmail.com"}
+SUPER_ADMIN_WHITELIST = {"willyanszbrito@gmail.com", "adminicbr@gmail.com"}
 
 security_bearer = HTTPBearer(auto_error=False)
 

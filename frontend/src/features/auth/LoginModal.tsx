@@ -71,7 +71,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
 
     const emailTrimmed = partnerEmail.trim().toLowerCase();
-    const assignedRole = targetRole || (emailTrimmed.includes('gestao') || emailTrimmed.includes('admin') ? 'partner_admin' : 'staff');
+    const assignedRole = targetRole || 'partner_admin';
     
     const success = await loginDemo(
       emailTrimmed,
@@ -84,7 +84,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     if (success) {
       onClose();
     } else {
-      setErrorMessage('Não foi possível autenticar. Verifique o e-mail informado e tente novamente.');
+      setErrorMessage('E-mail não autorizado para acesso restrito. Verifique o e-mail informado ou utilize a conta Google cadastrada.');
     }
   };
 
@@ -200,10 +200,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs text-slate-600 dark:text-slate-400 space-y-1.5">
                 <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <span>Acesso com Conta Google</span>
+                  <span>Identificação Segura</span>
                 </div>
                 <p className="leading-relaxed text-[11px]">
-                  Acesse com sua conta corporativa Google autorizada. Caso a janela de login não abra automaticamente no celular, clique no botão acima ou utilize a aba "Chave de Acesso".
+                  <strong>Clientes:</strong> Faça login com seu Google para consultar seus agendamentos.<br />
+                  <strong>Gestores e Colaboradores:</strong> Utilize o e-mail Google cadastrado no estabelecimento para liberar o painel de gestão.
                 </p>
               </div>
             </div>

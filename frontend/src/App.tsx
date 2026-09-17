@@ -37,7 +37,7 @@ const AppContent: React.FC = () => {
   };
 
   const [themeMode, setThemeMode] = useState<'dark' | 'light'>(getInitialTheme);
-  const { user, isAuthenticated, isLoginModalOpen, openLoginModal, closeLoginModal, targetRoleForLogin } = useAuth();
+  const { user, isAuthenticated, isLoginModalOpen, openLoginModal, closeLoginModal, targetRoleForLogin, logout } = useAuth();
   const isDedicated = isDedicatedSubdomain();
 
   // Listen to OS theme changes
@@ -135,6 +135,35 @@ const AppContent: React.FC = () => {
     wizard.handleSwitchTenant(targetSlug);
     handleSelectView('booking');
   };
+
+  // Redirecionamento inteligente e seguro baseado em RBAC após autenticação
+  const prevUserRef = React.useRef<string | null>(null);
+  useEffect(() => {
+    const currentUserId = user ? `${user.id}-${user.role}` : null;
+    if (user && currentUserId !== prevUserRef.current) {
+      prevUserRef.current = currentUserId;
+
+      if (user.role === 'customer') {
+        if (currentView === 'landing' || currentView === 'admin' || currentView === 'staff' || currentView === 'super-admin') {
+          handleSelectView('customer');
+        }
+      } else if (user.role === 'partner_admin') {
+        if (currentView === 'landing' || currentView === 'booking') {
+          handleSelectView('admin');
+        }
+      } else if (user.role === 'staff') {
+        if (currentView === 'landing' || currentView === 'booking') {
+          handleSelectView('staff');
+        }
+      } else if (user.role === 'super_admin') {
+        if (targetRoleForLogin === 'super_admin' && currentView !== 'super-admin') {
+          handleSelectView('super-admin');
+        }
+      }
+    } else if (!user) {
+      prevUserRef.current = null;
+    }
+  }, [user, currentView, targetRoleForLogin]);
 
   // Render Loading Spinner while tenant data is loading
   if (wizard.isLoading && !wizard.tenant) {
@@ -390,8 +419,16 @@ const AppContent: React.FC = () => {
             />
           ) : (
             <RestrictedAccessView
+              moduleName="Painel do Colaborador"
+              requiredRoleName="Colaborador ou Gestor"
+              userRole={user?.role}
+              userEmail={user?.email}
+              userName={user?.name}
+              tenantName={tenant.name}
               onOpenLogin={() => openLoginModal('staff')}
               onGoHome={() => handleSelectView('landing')}
+              onNavigateCustomer={() => handleSelectView('customer')}
+              onLogout={() => { logout(); handleSelectView('landing'); }}
             />
           )
         )}
@@ -408,8 +445,16 @@ const AppContent: React.FC = () => {
             />
           ) : (
             <RestrictedAccessView
+              moduleName="Painel de Gestão Administrativa"
+              requiredRoleName="Gestor Homologado"
+              userRole={user?.role}
+              userEmail={user?.email}
+              userName={user?.name}
+              tenantName={tenant.name}
               onOpenLogin={() => openLoginModal('partner_admin')}
               onGoHome={() => handleSelectView('landing')}
+              onNavigateCustomer={() => handleSelectView('customer')}
+              onLogout={() => { logout(); handleSelectView('landing'); }}
             />
           )
         )}
@@ -423,8 +468,16 @@ const AppContent: React.FC = () => {
             />
           ) : (
             <RestrictedAccessView
+              moduleName="Painel Super Admin Global"
+              requiredRoleName="Super Administrador"
+              userRole={user?.role}
+              userEmail={user?.email}
+              userName={user?.name}
+              tenantName={tenant.name}
               onOpenLogin={() => openLoginModal('super_admin')}
               onGoHome={() => handleSelectView('landing')}
+              onNavigateCustomer={() => handleSelectView('customer')}
+              onLogout={() => { logout(); handleSelectView('landing'); }}
             />
           )
         )}

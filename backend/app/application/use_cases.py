@@ -1457,13 +1457,21 @@ class AuthenticateGoogleUserUseCase:
             role=final_role,
             name=name,
             tenant_slug=tenant_slug,
-            staff_id=None
+            staff_id=assigned_staff_id
         )
+
+        role_display = {
+            "super_admin": "Super Administrador",
+            "partner_admin": "Gestor",
+            "staff": "Profissional",
+            "customer": "Cliente"
+        }.get(final_role, "Cliente")
+
         return AuthResponseDTO(
             access_token=token_secure,
             token_type="bearer",
             user=user_dto,
-            message=f"Bem-vindo(a), {name}! Autenticado com sucesso."
+            message=f"Bem-vindo(a), {name}! Conectado como {role_display}."
         )
 
 
@@ -1479,9 +1487,12 @@ class DemoLoginUseCase:
         from app.core.security import create_access_token
 
         email_clean = str(request.email).lower().strip()
-        final_role = request.role
+        requested_role = request.role or "customer"
+        final_role = "customer"
+        tenant_slug = request.tenant_slug or "barbearia-campelo"
+        assigned_staff_id = request.staff_id
 
-        # Se for o e-mail oficial do Super Admin, concede permissão de super_admin
+        # 1. Super Admin Whitelist
         if email_clean in SUPER_ADMIN_EMAILS:
             final_role = "super_admin"
             registrar_auditoria(
@@ -1490,15 +1501,73 @@ class DemoLoginUseCase:
                 usuario=email_clean,
                 detalhes={"status": "AUTORIZADO", "role": "super_admin"}
             )
-        elif request.role == "super_admin":
-            # Tentativa de pedir super_admin com outro e-mail não autorizado
+        elif requested_role == "super_admin":
             registrar_auditoria(
                 acao="UNAUTHORIZED_SUPER_ADMIN_ATTEMPT",
                 tipo="SECURITY_ALERT",
                 usuario=email_clean,
                 detalhes={"status": "BLOQUEADO", "motivo": "E-mail fora da whitelist"}
             )
-            raise DomainException("Acesso não autorizado.")
+            raise DomainException("Acesso restrito: E-mail não autorizado para o painel de Super Admin.")
+        elif requested_role == "partner_admin":
+            CAMPELO_PARTNER_EMAILS = {"campellobarbearia@gmail.com", "sofiaheufrosina@gmail.com"}
+            is_authorized_partner = (
+                email_clean in CAMPELO_PARTNER_EMAILS
+                or email_clean in SUPER_ADMIN_EMAILS
+            )
+            if not is_authorized_partner and tenant_slug:
+                t = self.tenant_repo.find_by_slug(tenant_slug)
+                if t and email_clean == (t.email or "").lower():
+                    is_authorized_partner = True
+            if not is_authorized_partner:
+                for t in self.tenant_repo.find_all():
+                    if t.email and t.email.lower() == email_clean:
+                        is_authorized_partner = True
+                        tenant_slug = t.slug
+                        break
+
+            if is_authorized_partner:
+                final_role = "partner_admin"
+            else:
+                registrar_auditoria(
+                    acao="UNAUTHORIZED_PARTNER_ATTEMPT",
+                    tipo="SECURITY_ALERT",
+                    usuario=email_clean,
+                    detalhes={"status": "BLOQUEADO", "motivo": "E-mail não pertence aos gestores cadastrados"}
+                )
+                raise DomainException("Acesso restrito: Este e-mail não possui autorização de Gestor neste estabelecimento.")
+        elif requested_role == "staff":
+            is_authorized_staff = email_clean in SUPER_ADMIN_EMAILS
+            if not is_authorized_staff and tenant_slug:
+                t = self.tenant_repo.find_by_slug(tenant_slug)
+                if t:
+                    staff_members = self.staff_repo.find_by_tenant_id(t.id)
+                    matching = next((s for s in staff_members if (s.email and s.email.lower() == email_clean) or (s.id == assigned_staff_id)), None)
+                    if matching:
+                        is_authorized_staff = True
+                        assigned_staff_id = matching.id
+            if not is_authorized_staff:
+                for t in self.tenant_repo.find_all():
+                    staff_members = self.staff_repo.find_by_tenant_id(t.id)
+                    matching = next((s for s in staff_members if s.email and s.email.lower() == email_clean), None)
+                    if matching:
+                        is_authorized_staff = True
+                        assigned_staff_id = matching.id
+                        tenant_slug = t.slug
+                        break
+
+            if is_authorized_staff:
+                final_role = "staff"
+            else:
+                registrar_auditoria(
+                    acao="UNAUTHORIZED_STAFF_ATTEMPT",
+                    tipo="SECURITY_ALERT",
+                    usuario=email_clean,
+                    detalhes={"status": "BLOQUEADO", "motivo": "E-mail não consta na equipe de colaboradores"}
+                )
+                raise DomainException("Acesso restrito: Este e-mail não consta na equipe de colaboradores autorizados.")
+        else:
+            final_role = "customer"
 
         name = request.name or email_clean.split("@")[0].replace(".", " ").title()
         avatar = f"https://placehold.co/100x100/18181b/f59e0b?text={name[:2].upper()}"
@@ -1510,8 +1579,8 @@ class DemoLoginUseCase:
             name=name,
             avatar_url=avatar,
             role=final_role,
-            tenant_slug=request.tenant_slug or "barbearia-campelo",
-            staff_id=request.staff_id
+            tenant_slug=tenant_slug,
+            staff_id=assigned_staff_id
         )
 
         jwt_token = create_access_token(
@@ -1519,8 +1588,8 @@ class DemoLoginUseCase:
             email=email_clean,
             role=final_role,
             name=name,
-            tenant_slug=request.tenant_slug or "barbearia-campelo",
-            staff_id=request.staff_id
+            tenant_slug=tenant_slug,
+            staff_id=assigned_staff_id
         )
         return AuthResponseDTO(
             access_token=jwt_token,
