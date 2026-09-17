@@ -175,7 +175,9 @@ class AvailabilityResponseDTO(BaseModel):
 # ==============================================================================
 
 class CreateAppointmentRequestDTO(BaseModel):
-    service_id: str = Field(..., description="ID do serviço selecionado")
+    service_id: str = Field(..., description="ID do serviço principal selecionado")
+    service_ids: Optional[List[str]] = Field(None, description="Lista opcional de IDs de serviços em combo")
+    total_price: Optional[float] = Field(None, description="Preço total calculado no frontend")
     staff_id: Optional[str] = Field(None, description="ID do colaborador ou nulo para Qualquer Especialista")
     appointment_date: str = Field(..., description="Data do agendamento (YYYY-MM-DD)", examples=["2026-08-17"])
     start_time: str = Field(..., description="Horário de início (HH:MM)", examples=["14:30"])
@@ -183,7 +185,7 @@ class CreateAppointmentRequestDTO(BaseModel):
     customer_phone: str = Field(..., min_length=8, description="Telefone de contato", examples=["(92) 98489-9955"])
     customer_email: EmailStr = Field(..., description="E-mail obrigatório", examples=["cliente@exemplo.com"])
     notes: Optional[str] = Field(None, description="Observações especiais")
-    payment_method: Optional[str] = Field("venue", description="Forma de pagamento: 'pix' para pagamento online instantâneo ou 'venue' para pagar no local")
+    payment_method: Optional[str] = Field("pix", description="Forma de pagamento: 'pix' para pagamento online instantâneo ou 'venue' para pagar no local")
 
 
 class PixPaymentResponseDTO(BaseModel):

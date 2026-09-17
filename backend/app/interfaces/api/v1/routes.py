@@ -212,8 +212,9 @@ def get_daily_queue(
     c_repo: ICatalogRepository = Depends(get_catalog_repo),
     s_repo: IStaffRepository = Depends(get_staff_repo)
 ):
-    from datetime import datetime, timezone
-    today_str = date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    from datetime import datetime, timezone, timedelta
+    local_tz = timezone(timedelta(hours=-4))
+    today_str = date or datetime.now(local_tz).strftime("%Y-%m-%d")
     tenant = t_repo.get_by_slug(slug)
     if not tenant:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Estabelecimento '{slug}' não encontrado.")
@@ -226,7 +227,7 @@ def get_daily_queue(
 
     current_serving = None
     queue_items = []
-    now_time = datetime.now(timezone.utc).strftime("%H:%M")
+    now_time = datetime.now(local_tz).strftime("%H:%M")
 
     for idx, a in enumerate(appts):
         srv = c_repo.get_service_by_id(tenant.id, a.service_id)
@@ -717,6 +718,12 @@ def get_payment_status(
     response_model=PaymentStatusResponseDTO,
     summary="Simular / Confirmar Pagamento Instantâneo (Ambiente de Teste / Webhook)",
     description="Aprova imediatamente o pagamento PIX, atualiza o agendamento para pago/confirmado e dispara os e-mails e alertas de WhatsApp."
+)
+@router.post(
+    "/tenants/{slug}/payments/{payment_id}/confirm",
+    response_model=PaymentStatusResponseDTO,
+    summary="Confirmar Pagamento Instantâneo PIX",
+    description="Aprova o pagamento PIX, atualiza o agendamento para pago/confirmado e dispara os e-mails e alertas de WhatsApp."
 )
 def simulate_confirm_payment(
     slug: str = Path(...),

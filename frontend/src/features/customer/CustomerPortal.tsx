@@ -128,7 +128,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
           }`}
         >
           <Radio className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
-          <span>Fila ao Vivo 💈</span>
+          <span>Fila ao Vivo</span>
         </button>
 
         <button
@@ -141,7 +141,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
           }`}
         >
           <ListOrdered className="w-3.5 h-3.5" />
-          <span>Meus Agendamentos 📅</span>
+          <span>Meus Agendamentos</span>
         </button>
       </div>
 

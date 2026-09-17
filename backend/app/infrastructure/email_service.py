@@ -256,7 +256,7 @@ class GmailSmtpEmailService(IEmailService):
         if not recipient:
             return True
 
-        subject = f"🔔 Novo Agendamento: {service.name} com {appointment.customer_name} [{appointment.appointment_date} {appointment.start_time}]"
+        subject = f"Novo Agendamento: {service.name} com {appointment.customer_name} [{appointment.appointment_date} {appointment.start_time}]"
 
         html_content = f"""
         <!DOCTYPE html>

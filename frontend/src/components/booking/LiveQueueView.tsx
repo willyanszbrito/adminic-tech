@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Tenant, DailyQueueResponse, QueueCustomerItem } from '../../types';
 import { api } from '../../services/api';
 import { 
   Users, Clock, Scissors, Search, CheckCircle, 
-  Sparkles, RefreshCw, AlertCircle
+  Sparkles, RefreshCw, AlertCircle, MessageCircle, Calendar
 } from 'lucide-react';
 
 interface LiveQueueViewProps {
@@ -12,17 +12,31 @@ interface LiveQueueViewProps {
 }
 
 export const LiveQueueView: React.FC<LiveQueueViewProps> = ({ tenant, onNavigateToBooking }) => {
+  const getLocalDateString = (offsetDays = 0) => {
+    const d = new Date();
+    if (offsetDays !== 0) d.setDate(d.getDate() + offsetDays);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
+  const todayStr = getLocalDateString(0);
+  const tomorrowStr = getLocalDateString(1);
+
+  const [selectedDate, setSelectedDate] = useState<string>(todayStr);
   const [queueData, setQueueData] = useState<DailyQueueResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [myQueueItem, setMyQueueItem] = useState<QueueCustomerItem | null>(null);
+  const [otherDateNotice, setOtherDateNotice] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
 
-  const loadQueue = async () => {
+  const loadQueue = useCallback(async (targetDate = selectedDate) => {
     setIsLoading(true);
     try {
-      const data = await api.getDailyQueue(tenant.slug);
+      const data = await api.getDailyQueue(tenant.slug, targetDate);
       setQueueData(data);
       setLastRefreshed(new Date());
     } catch {
@@ -30,27 +44,59 @@ export const LiveQueueView: React.FC<LiveQueueViewProps> = ({ tenant, onNavigate
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [tenant.slug, selectedDate]);
 
   useEffect(() => {
-    loadQueue();
+    loadQueue(selectedDate);
     const interval = setInterval(() => {
-      loadQueue();
+      loadQueue(selectedDate);
     }, 30000);
     return () => clearInterval(interval);
-  }, [tenant.slug]);
+  }, [tenant.slug, selectedDate, loadQueue]);
 
-  const handleSearchMyTurn = (e: React.FormEvent) => {
+  const handleSelectDate = (date: string) => {
+    setSelectedDate(date);
+    setOtherDateNotice(null);
+    setHasSearched(false);
+    setMyQueueItem(null);
+    loadQueue(date);
+  };
+
+  const handleSearchMyTurn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!queueData || !searchQuery.trim()) return;
+    if (!searchQuery.trim()) return;
 
+    setOtherDateNotice(null);
     const query = searchQuery.trim().toUpperCase();
-    const found = queueData.queue.find(
+    const found = queueData?.queue.find(
       item => item.voucher_code.toUpperCase().includes(query) || 
               item.customer_display_name.toUpperCase().includes(query)
-    ) || (queueData.current_serving?.voucher_code.toUpperCase().includes(query) ? queueData.current_serving : null);
+    ) || (queueData?.current_serving?.voucher_code.toUpperCase().includes(query) ? queueData.current_serving : null);
 
-    setMyQueueItem(found || null);
+    if (found) {
+      setMyQueueItem(found);
+      setHasSearched(true);
+      return;
+    }
+
+    // Busca detalhada caso o voucher pertença a outro dia (ex: amanhã)
+    try {
+      const appt = await api.getAppointment(tenant.slug, query);
+      if (appt) {
+        if (appt.appointment_date !== selectedDate) {
+          const isTmrw = appt.appointment_date === tomorrowStr;
+          const isTdy = appt.appointment_date === todayStr;
+          const dayLabel = isTmrw ? 'amanhã' : isTdy ? 'hoje' : `no dia ${appt.appointment_date}`;
+          setOtherDateNotice(
+            `Voucher ${appt.voucher_code} localizado! Seu horário é para ${dayLabel} às ${appt.start_time} com ${appt.staff.name}.`
+          );
+        }
+      }
+    } catch {
+      // voucher não encontrado na API
+    }
+
+    setMyQueueItem(null);
     setHasSearched(true);
   };
 
@@ -72,7 +118,7 @@ export const LiveQueueView: React.FC<LiveQueueViewProps> = ({ tenant, onNavigate
                 <span className="text-xs text-slate-500 dark:text-slate-400">• {tenant.name}</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-extrabold font-heading text-slate-900 dark:text-white mt-1">
-                Fila de Atendimento do Dia
+                Fila de Atendimento ({selectedDate === todayStr ? 'Hoje' : selectedDate === tomorrowStr ? 'Amanhã' : selectedDate})
               </h2>
               <p className="text-xs text-slate-600 dark:text-slate-300">
                 Acompanhe quem está na cadeira e a sua previsão exata de ser chamado.
@@ -80,15 +126,41 @@ export const LiveQueueView: React.FC<LiveQueueViewProps> = ({ tenant, onNavigate
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 self-start sm:self-auto">
+          <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+            {/* Date Switcher */}
+            <div className="flex items-center p-1 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-xs">
+              <button
+                type="button"
+                onClick={() => handleSelectDate(todayStr)}
+                className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                  selectedDate === todayStr
+                    ? 'bg-brand-primary text-black shadow-sm font-bold'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white'
+                }`}
+              >
+                Hoje
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSelectDate(tomorrowStr)}
+                className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                  selectedDate === tomorrowStr
+                    ? 'bg-brand-primary text-black shadow-sm font-bold'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white'
+                }`}
+              >
+                Amanhã
+              </button>
+            </div>
+
             <button
-              onClick={loadQueue}
+              onClick={() => loadQueue(selectedDate)}
               disabled={isLoading}
               className="p-2.5 rounded-xl glass-pill text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-black/5 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 flex items-center space-x-1.5 transition-all cursor-pointer touch-target"
               title="Atualizar fila agora"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-              <span className="text-[11px]">Atualizar</span>
+              <span className="text-[11px] hidden min-[380px]:inline">Atualizar</span>
             </button>
 
             {onNavigateToBooking && (
@@ -181,17 +253,34 @@ export const LiveQueueView: React.FC<LiveQueueViewProps> = ({ tenant, onNavigate
                 <Clock className="w-3.5 h-3.5 text-brand-primary" />
                 <span>Previsão de Atendimento: <strong>{myQueueItem.start_time}</strong> (~{myQueueItem.estimated_wait_minutes} min)</span>
               </span>
-              <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-[11px]">
-                💬 O barbeiro te avisará no WhatsApp quando faltar 10 minutos!
+              <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-[11px] flex items-center">
+                <MessageCircle className="w-3.5 h-3.5 text-emerald-500 inline mr-1.5" />
+                <span>O barbeiro te avisará no WhatsApp quando faltar 10 minutos!</span>
               </span>
             </div>
           </div>
         )}
 
-        {hasSearched && !myQueueItem && (
+        {otherDateNotice && (
+          <div className="mt-4 p-4 rounded-2xl bg-brand-primary/10 border-2 border-brand-primary/40 text-slate-900 dark:text-white text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center space-x-2">
+              <Calendar className="w-4 h-4 text-brand-primary shrink-0" />
+              <span>{otherDateNotice}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleSelectDate(tomorrowStr)}
+              className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-brand-primary text-black hover:brightness-110 transition-all cursor-pointer whitespace-nowrap shadow-sm"
+            >
+              Ver Fila de Amanhã
+            </button>
+          </div>
+        )}
+
+        {hasSearched && !myQueueItem && !otherDateNotice && (
           <div className="mt-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs flex items-center space-x-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>Nenhum agendamento ativo com esse código encontrado na fila de hoje. Verifique o voucher ou faça um novo agendamento.</span>
+            <span>Nenhum agendamento ativo com esse código encontrado na fila selecionada. Verifique o voucher ou faça um novo agendamento.</span>
           </div>
         )}
       </div>
@@ -209,8 +298,9 @@ export const LiveQueueView: React.FC<LiveQueueViewProps> = ({ tenant, onNavigate
             {queueData?.current_serving ? (
               <>
                 <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-brand-primary text-black uppercase tracking-wider animate-pulse">
-                    ✂️ Em Atendimento
+                  <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-brand-primary text-black uppercase tracking-wider animate-pulse flex items-center">
+                    <Scissors className="w-3 h-3 mr-1" />
+                    <span>Em Atendimento</span>
                   </span>
                   <span className="text-xs font-mono font-bold text-brand-primary">
                     Voucher: {queueData.current_serving.voucher_code}
@@ -249,11 +339,11 @@ export const LiveQueueView: React.FC<LiveQueueViewProps> = ({ tenant, onNavigate
           {/* Dica da Barbearia */}
           <div className="p-4 rounded-2xl glass-panel text-xs text-slate-600 dark:text-slate-300 space-y-1.5 border border-black/10 dark:border-white/10">
             <span className="font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
-              <span>☕</span>
+              <Sparkles className="w-3.5 h-3.5 text-brand-primary" />
               <span>Dica Barbearia Campelo</span>
             </span>
             <p>
-              Aproveite nosso ambiente climatizado com Wi-Fi gratuito e café cortesia enquanto aguarda a sua vez.
+              Aproveite nosso ambiente climatizado e atendimento com hora marcada enquanto aguarda a sua vez.
             </p>
           </div>
         </div>

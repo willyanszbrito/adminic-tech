@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Phone, Mail, MessageSquare, ShieldCheck, CheckSquare, Square, QrCode, Store, Sparkles } from 'lucide-react';
+import { User, Phone, Mail, MessageSquare, ShieldCheck, CheckSquare, Square, QrCode } from 'lucide-react';
 
 interface Step4CustomerFormProps {
   customerName: string;
@@ -125,15 +125,11 @@ export const Step4CustomerForm: React.FC<Step4CustomerFormProps> = ({
             <span>Forma de Pagamento *</span>
           </label>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* PIX Instantâneo Online */}
+          <div>
+            {/* PIX Instantâneo Online (Único método habilitado) */}
             <div
               onClick={() => setPaymentMethod('pix')}
-              className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                paymentMethod === 'pix'
-                  ? 'bg-amber-500/10 border-amber-500 ring-2 ring-amber-500/20'
-                  : 'bg-black/[0.02] dark:bg-white/[0.02] border-slate-200 dark:border-white/10 hover:border-amber-500/40'
-              }`}
+              className="p-4 rounded-2xl border bg-amber-500/10 border-amber-500 ring-2 ring-amber-500/20 cursor-pointer transition-all"
             >
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center space-x-2">
@@ -141,39 +137,15 @@ export const Step4CustomerForm: React.FC<Step4CustomerFormProps> = ({
                     PIX
                   </div>
                   <span className="text-xs font-bold text-slate-900 dark:text-white">
-                    PIX Instantâneo
+                    PIX Oficial (Confirmação Automática)
                   </span>
                 </div>
                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                  Aprovação Automática
+                  Aprovação Imediata
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Gera QR Code e chave Copia e Cola para pagamento imediato com confirmação automática.
-              </p>
-            </div>
-
-            {/* Pagar no Estabelecimento */}
-            <div
-              onClick={() => setPaymentMethod('venue')}
-              className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                paymentMethod === 'venue'
-                  ? 'bg-amber-500/10 border-amber-500 ring-2 ring-amber-500/20'
-                  : 'bg-black/[0.02] dark:bg-white/[0.02] border-slate-200 dark:border-white/10 hover:border-amber-500/40'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center space-x-2">
-                  <div className="w-7 h-7 rounded-lg bg-slate-200 dark:bg-white/10 flex items-center justify-center text-slate-700 dark:text-slate-300">
-                    <Store className="w-4 h-4" />
-                  </div>
-                  <span className="text-xs font-bold text-slate-900 dark:text-white">
-                    Pagar no Local
-                  </span>
-                </div>
-              </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Efetue o pagamento na recepção com dinheiro, cartão de débito/crédito ou PIX da loja.
+                Gera QR Code e chave Copia e Cola. O agendamento é confirmado automaticamente após o pagamento.
               </p>
             </div>
           </div>
@@ -217,10 +189,6 @@ export const Step4CustomerForm: React.FC<Step4CustomerFormProps> = ({
         <div className="flex items-center space-x-2">
           <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span>Seus dados cadastrais estão protegidos em conformidade com a LGPD.</span>
-        </div>
-        <div className="flex items-center space-x-1 text-amber-600 dark:text-amber-400 font-medium shrink-0">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Disparo Instantâneo</span>
         </div>
       </div>
     </div>

@@ -125,7 +125,7 @@ export const ProductLandingPage: React.FC<ProductLandingPageProps> = ({
               </div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">Notificações WhatsApp e Agenda</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                Disparo instantâneo de comprovante com QR Code e link direto para adicionar ao Google Calendar do cliente.
+                Envio automático de comprovante com QR Code e link direto para adicionar ao Google Calendar do cliente.
               </p>
               <ul className="space-y-2 pt-2 text-xs text-slate-600 dark:text-slate-300">
                 <li className="flex items-center space-x-2">

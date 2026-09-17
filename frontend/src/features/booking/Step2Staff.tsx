@@ -102,10 +102,12 @@ export const Step2Staff: React.FC<Step2StaffProps> = ({
                         }}
                       />
                     </div>
-                    <div className="absolute -bottom-1.5 -right-1 px-1.5 py-0.5 rounded-md bg-white dark:bg-zinc-950 border border-black/10 dark:border-white/10 text-[10px] font-bold text-amber-500 flex items-center space-x-0.5 shadow-md">
-                      <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
-                      <span>{staff.rating.toFixed(1)}</span>
-                    </div>
+                    {staff.total_reviews > 0 && (
+                      <div className="absolute -bottom-1.5 -right-1 px-1.5 py-0.5 rounded-md bg-white dark:bg-zinc-950 border border-black/10 dark:border-white/10 text-[10px] font-bold text-amber-500 flex items-center space-x-0.5 shadow-md">
+                        <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+                        <span>{staff.rating.toFixed(1)}</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Staff Info */}
@@ -127,7 +129,7 @@ export const Step2Staff: React.FC<Step2StaffProps> = ({
               {/* Card Footer */}
               <div className="flex items-center justify-between pt-3.5 sm:pt-4 mt-3 sm:mt-4 border-t border-black/10 dark:border-white/10">
                 <span className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
-                  {staff.total_reviews} avaliações
+                  {staff.total_reviews > 0 ? `${staff.total_reviews} avaliações` : 'Sem avaliações'}
                 </span>
 
                 <div

@@ -200,8 +200,8 @@ class MetaWhatsAppService(IWhatsAppService):
         # 2. Fallback: Mensagem de Texto Direta Formatada
         logger.info(f"[WhatsApp] Executando fallback de texto para {target_phone}")
         message = (
-            f"Olá, {appointment.customer_name}! ✅ Seu agendamento na *{tenant.name}* foi confirmado!\n\n"
-            f"📋 *Detalhes da Reserva:*\n"
+            f"Olá, {appointment.customer_name}! Seu agendamento na *{tenant.name}* foi confirmado!\n\n"
+            f"*Detalhes da Reserva:*\n"
             f"• *Serviço:* {service.name}\n"
             f"• *Profissional:* {staff.name}\n"
             f"• *Data:* {appointment.appointment_date}\n"
@@ -209,9 +209,9 @@ class MetaWhatsAppService(IWhatsAppService):
             f"• *Voucher:* `{appointment.voucher_code}`\n"
             f"• *Valor:* R$ {appointment.price:.2f}\n"
             f"• *Endereço:* {tenant.address}\n\n"
-            f"📱 Consulte seu agendamento em:\n"
+            f"Consulte seu agendamento em:\n"
             f"https://{app_domain}/meus-agendamentos?code={appointment.voucher_code}\n\n"
-            f"Agradecemos a sua preferência! 💈"
+            f"Agradecemos a sua preferência!"
         )
         return self._send_text(target_phone, message)
 
@@ -259,12 +259,12 @@ class MetaWhatsAppService(IWhatsAppService):
 
         # 2. Fallback de Texto Direto
         message = (
-            f"🔔 *Novo Agendamento - {tenant.name}*\n\n"
+            f"*Novo Agendamento - {tenant.name}*\n\n"
             f"• *Colaborador:* {staff.name}\n"
             f"• *Cliente:* {appointment.customer_name} ({appointment.customer_phone})\n"
             f"• *Serviço:* {service.name} (R$ {appointment.price:.2f})\n"
             f"• *Data:* {appointment.appointment_date} às {appointment.start_time}\n"
             f"• *Voucher:* `{appointment.voucher_code}`\n\n"
-            f"📋 Acesse sua agenda: https://{app_domain}/colaborador"
+            f"Acesse sua agenda: https://{app_domain}/colaborador"
         )
         return self._send_text(target_phone, message)

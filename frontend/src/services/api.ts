@@ -471,14 +471,21 @@ export const api = {
   // 8. Fila do Dia em Tempo Real (Estilo tonafila.app)
   // ============================================================================
   async getDailyQueue(slug: string, dateStr?: string): Promise<DailyQueueResponse> {
-    const today = dateStr || new Date().toISOString().split('T')[0];
+    let targetDate = dateStr;
+    if (!targetDate) {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      targetDate = `${y}-${m}-${d}`;
+    }
     try {
-      return await fetchJSON<DailyQueueResponse>(`/tenants/${slug}/queue/today?date=${today}`);
+      return await fetchJSON<DailyQueueResponse>(`/tenants/${slug}/queue/today?date=${targetDate}`);
     } catch {
       return {
         tenant_name: slug,
         tenant_slug: slug,
-        date: today,
+        date: targetDate,
         barber_status: 'Disponível',
         current_serving: null,
         queue: [],

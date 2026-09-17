@@ -159,6 +159,7 @@ export interface PaymentStatusResponse {
 export interface CreateAppointmentPayload {
   service_id: string;
   service_ids?: string[];
+  total_price?: number;
   staff_id?: string;
   appointment_date: string; // YYYY-MM-DD
   start_time: string; // HH:MM

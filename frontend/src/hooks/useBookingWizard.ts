@@ -107,13 +107,16 @@ export function useBookingWizard() {
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   const [isAnyStaff, setIsAnyStaff] = useState<boolean>(true);
   
-  const getTomorrowDate = () => {
+  const getLocalDateString = (offsetDays = 0) => {
     const d = new Date();
-    d.setDate(d.getDate() + 1);
-    return d.toISOString().split('T')[0];
+    if (offsetDays !== 0) d.setDate(d.getDate() + offsetDays);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
   };
 
-  const [selectedDate, setSelectedDate] = useState<string>(getTomorrowDate());
+  const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString(0));
   const [selectedSlot, setSelectedSlot] = useState<string>('');
   const [slotEndTime, setSlotEndTime] = useState<string>('');
 
@@ -123,7 +126,7 @@ export function useBookingWizard() {
   const [customerEmail, setCustomerEmail] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<'pix' | 'venue'>('pix');
-  const [agreeTerms, setAgreeTerms] = useState<boolean>(true);
+  const [agreeTerms, setAgreeTerms] = useState<boolean>(false);
 
   // Result
   const [confirmedAppointment, setConfirmedAppointment] = useState<Appointment | null>(null);
@@ -277,6 +280,7 @@ export function useBookingWizard() {
       const appointment = await api.createAppointment(tenant.slug, {
         service_id: primaryService.id,
         service_ids: serviceIds,
+        total_price: totalPrice,
         staff_id: isAnyStaff ? undefined : selectedStaff?.id,
         appointment_date: selectedDate,
         start_time: selectedSlot,
@@ -322,7 +326,7 @@ export function useBookingWizard() {
     setSelectedServices([]);
     setSelectedStaff(null);
     setIsAnyStaff(true);
-    setSelectedDate(getTomorrowDate());
+    setSelectedDate(getLocalDateString(0));
     setSelectedSlot('');
     setSlotEndTime('');
     setCustomerName('');

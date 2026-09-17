@@ -23,6 +23,7 @@ interface Step5SuccessProps {
   tenant: Tenant;
   onNewBooking: () => void;
   onAppointmentUpdated?: (updated: Appointment) => void;
+  onViewLiveQueue?: () => void;
 }
 
 export const Step5Success: React.FC<Step5SuccessProps> = ({
@@ -30,6 +31,7 @@ export const Step5Success: React.FC<Step5SuccessProps> = ({
   tenant,
   onNewBooking,
   onAppointmentUpdated,
+  onViewLiveQueue,
 }) => {
   const [appointment, setAppointment] = useState<Appointment>(initialAppointment);
   const [copiedVoucher, setCopiedVoucher] = useState(false);
@@ -123,20 +125,37 @@ export const Step5Success: React.FC<Step5SuccessProps> = ({
   return (
     <div className="space-y-8 animate-in fade-in zoom-in-95 duration-400">
       {/* Header Banner */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-8 text-center space-y-3 relative overflow-hidden border border-emerald-500/30">
-        <div className="w-16 h-16 rounded-3xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/20">
-          <CheckCircle2 className="w-8 h-8" />
+      {isPix && !isPaid ? (
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 text-center space-y-3 relative overflow-hidden border border-amber-500/40 bg-amber-500/[0.04]">
+          <div className="w-16 h-16 rounded-3xl bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/40 flex items-center justify-center mx-auto shadow-xl shadow-amber-500/20 animate-pulse">
+            <Clock className="w-8 h-8" />
+          </div>
+          <span className="text-xs uppercase tracking-widest text-amber-600 dark:text-amber-400 font-bold block">
+            Aguardando Pagamento PIX
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold font-heading text-slate-900 dark:text-white">
+            Pré-reserva registrada para {appointment.customer_name}
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
+            Efetue o pagamento PIX abaixo para confirmar seu horário. Seu horário está reservado por 15 minutos e a confirmação definitiva será emitida automaticamente após o recebimento.
+          </p>
         </div>
-        <span className="text-xs uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-bold block">
-          Agendamento Confirmado com Sucesso
-        </span>
-        <h2 className="text-2xl sm:text-3xl font-extrabold font-heading text-slate-900 dark:text-white">
-          Agendamento registrado para {appointment.customer_name}
-        </h2>
-        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
-          O comprovante e voucher digital foram gerados. Enviamos as confirmações completas para o e-mail <strong>{appointment.customer_email}</strong> e via WhatsApp.
-        </p>
-      </div>
+      ) : (
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 text-center space-y-3 relative overflow-hidden border border-emerald-500/30">
+          <div className="w-16 h-16 rounded-3xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/20">
+            <CheckCircle2 className="w-8 h-8" />
+          </div>
+          <span className="text-xs uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-bold block">
+            Agendamento Confirmado com Sucesso
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold font-heading text-slate-900 dark:text-white">
+            Agendamento confirmado para {appointment.customer_name}
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-lg mx-auto leading-relaxed">
+            O comprovante e voucher digital foram gerados. Enviamos as confirmações completas para o e-mail <strong>{appointment.customer_email}</strong> e via WhatsApp.
+          </p>
+        </div>
+      )}
 
       {/* PIX Payment Section (If PIX method chosen) */}
       {isPix && (
@@ -372,6 +391,17 @@ export const Step5Success: React.FC<Step5SuccessProps> = ({
 
         {/* Action Shortcuts */}
         <div className="p-4 sm:p-6 bg-black/[0.01] dark:bg-white/[0.02] flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-2.5 sm:gap-3">
+          {onViewLiveQueue && (
+            <button
+              type="button"
+              onClick={onViewLiveQueue}
+              className="inline-flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 rounded-xl text-xs font-bold bg-brand-primary text-black hover:brightness-110 transition-all shadow-md touch-target"
+            >
+              <Clock className="w-4 h-4 shrink-0" />
+              <span>Acompanhar Fila ao Vivo</span>
+            </button>
+          )}
+
           <a
             href={appointment.whatsapp_direct_link}
             target="_blank"

@@ -31,7 +31,8 @@ import {
   Image as ImageIcon,
   X,
   Tag,
-  AlertTriangle
+  AlertTriangle,
+  Star
 } from 'lucide-react';
 
 export interface AdminPortalProps {
@@ -317,7 +318,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     setStaffPhone(stf.phone || '');
     setStaffEmail(stf.email || '');
     setStaffBio(stf.bio || '');
-    setStaffAvatar(stf.avatar_url || tenant.logo_url || '');
+    setStaffAvatar(stf.avatar_url || '');
     window.scrollTo({ top: 400, behavior: 'smooth' });
   };
 
@@ -328,7 +329,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     setStaffPhone('');
     setStaffEmail('');
     setStaffBio('');
-    setStaffAvatar(tenant.logo_url || '');
+    setStaffAvatar('');
   };
 
   // Handle Save Staff (Create or Update)
@@ -347,7 +348,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           phone: staffPhone,
           email: staffEmail,
           bio: staffBio,
-          avatar_url: staffAvatar || tenant.logo_url,
+          avatar_url: staffAvatar || '',
         });
         setSuccessMessage(`Profissional "${staffName}" atualizado com sucesso!`);
         handleCancelEditStaff();
@@ -358,7 +359,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           phone: staffPhone,
           email: staffEmail,
           bio: staffBio,
-          avatar_url: staffAvatar || tenant.logo_url,
+          avatar_url: staffAvatar || '',
           specialty_service_ids: services.map(s => s.id),
         });
         setSuccessMessage(`Colaborador "${staffName}" cadastrado com sucesso!`);
@@ -1179,9 +1180,16 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   </div>
 
                   <div className="flex items-center justify-between pt-2 border-t border-black/5 dark:border-white/5">
-                    <span className="text-[10px] text-slate-500 flex items-center gap-1">
-                      ⭐ {stf.rating?.toFixed(1) || '5.0'} ({stf.total_reviews || 0} avaliações)
-                    </span>
+                    {stf.total_reviews && stf.total_reviews > 0 ? (
+                      <span className="text-[10px] text-amber-500 font-semibold flex items-center gap-1">
+                        <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                        {stf.rating?.toFixed(1)} ({stf.total_reviews} avaliações)
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-slate-400">
+                        Sem avaliações
+                      </span>
+                    )}
                     <div className="flex items-center space-x-1">
                       <button
                         onClick={() => handleEditStaffClick(stf)}

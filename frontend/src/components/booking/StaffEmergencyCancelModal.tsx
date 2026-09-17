@@ -44,16 +44,16 @@ export const StaffEmergencyCancelModal: React.FC<StaffEmergencyCancelModalProps>
   const barberShopPhone = tenant.phone || tenant.whatsapp || '(92) 98489-9955';
 
   // Template WhatsApp Oficial
-  const whatsappTemplate = `Olá, ${clientName}! Aqui é o ${staffName} da ${tenant.name}. 💈
+  const whatsappTemplate = `Olá, ${clientName}! Aqui é o ${staffName} da ${tenant.name}.
 
 Escrevo para lhe pedir sinceras desculpas, pois infelizmente tive um imprevisto de força maior (${cancelReason}) e não conseguirei realizar seu atendimento agendado para *${dateFormatted} às ${timeFormatted}* (Voucher: *${voucherCode}*).
 
 Para garantir que você não seja prejudicado, você tem duas opções imediatas:
 
-1️⃣ *Devolução Integral (100% do Valor):* Realizamos o estorno imediato via PIX na sua chave informada.
-2️⃣ *Reagendamento Prioritário:* Podemos remarcar para o próximo melhor horário da sua preferência ou transferir seu atendimento para outro barbeiro de confiança da nossa equipe hoje mesmo.
+1. *Devolução Integral (100% do Valor):* Realizamos o estorno imediato via PIX na sua chave informada.
+2. *Reagendamento Prioritário:* Podemos remarcar para o próximo melhor horário da sua preferência ou transferir seu atendimento para outro barbeiro de confiança da nossa equipe hoje mesmo.
 
-Como você prefere prosseguir? Me responda por aqui para resolvermos agora! Obrigado pela compreensão e desculpe o transtorno. 🙏`;
+Como você prefere prosseguir? Me responda por aqui para resolvermos agora! Obrigado pela compreensão e desculpe o transtorno.`;
 
   // Template E-mail Oficial
   const emailSubject = `Comunicado Importante: Seu agendamento na ${tenant.name} (Voucher ${voucherCode})`;

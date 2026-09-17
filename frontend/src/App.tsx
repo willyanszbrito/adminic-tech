@@ -394,6 +394,7 @@ const AppContent: React.FC = () => {
                   tenant={tenant}
                   onNewBooking={wizard.handleNewBooking}
                   onAppointmentUpdated={wizard.setConfirmedAppointment}
+                  onViewLiveQueue={() => handleSelectView('customer')}
                 />
               )
             )}

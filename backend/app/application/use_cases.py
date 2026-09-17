@@ -402,8 +402,22 @@ class CreateAppointmentUseCase:
                 raise StaffNotFoundException("Nenhum profissional habilitado para este serviço.")
             selected_staff = candidates[0]
 
+        # Multi-service combo resolution
+        all_requested_services = []
+        if request.service_ids and len(request.service_ids) > 0:
+            for sid in request.service_ids:
+                s_obj = self.catalog_repo.get_service_by_id(tenant.id, sid)
+                if s_obj:
+                    all_requested_services.append(s_obj)
+
+        if not all_requested_services:
+            all_requested_services = [service]
+
+        total_price = request.total_price if request.total_price is not None else sum(s.price for s in all_requested_services)
+        total_duration = sum(s.duration_minutes for s in all_requested_services)
+
         start_time_obj = datetime.strptime(request.start_time, "%H:%M")
-        end_time_obj = start_time_obj + timedelta(minutes=service.duration_minutes)
+        end_time_obj = start_time_obj + timedelta(minutes=total_duration)
         end_time_str = end_time_obj.strftime("%H:%M")
 
         existing_appts = self.appointment_repo.get_appointments_for_staff_and_date(
@@ -415,13 +429,15 @@ class CreateAppointmentUseCase:
 
         voucher = f"ADM-{uuid.uuid4().hex[:6].upper()}"
         appt_id = f"apt-{uuid.uuid4().hex[:8]}"
-        payment_method = request.payment_method or "venue"
+        payment_method = request.payment_method or "pix"
 
         from app.core.security import sanitize_input_string, sanitize_phone_number
         clean_name = sanitize_input_string(request.customer_name)
         clean_phone = sanitize_phone_number(request.customer_phone)
         clean_email = sanitize_input_string(str(request.customer_email)).lower()
         clean_notes = sanitize_input_string(request.notes) if request.notes else None
+
+        initial_status = "pending_payment" if payment_method == "pix" else "confirmed"
 
         appointment = Appointment(
             id=appt_id,
@@ -436,8 +452,8 @@ class CreateAppointmentUseCase:
             customer_phone=clean_phone,
             customer_email=clean_email,
             notes=clean_notes,
-            status="confirmed",
-            price=service.price,
+            status=initial_status,
+            price=total_price,
             payment_method=payment_method,
             payment_status="pending" if payment_method == "pix" else "venue",
             created_at=datetime.now(timezone.utc)
@@ -473,20 +489,21 @@ class CreateAppointmentUseCase:
                 import logging
                 logging.getLogger(__name__).warning(f"[PIX Gateway Warning] {str(e)}")
 
-        # Disparo de Mensageria Corporativa e Notificações (Assíncrono e Não-Bloqueante)
-        if self.email_service:
-            try:
-                self.email_service.send_booking_voucher_email(tenant, saved, service, selected_staff)
-                self.email_service.send_staff_booking_alert_email(tenant, saved, service, selected_staff)
-            except Exception:
-                pass
+        # Disparo de Mensageria Corporativa e Notificações (Apenas após confirmação efetiva do agendamento)
+        if initial_status == "confirmed":
+            if self.email_service:
+                try:
+                    self.email_service.send_booking_voucher_email(tenant, saved, service, selected_staff)
+                    self.email_service.send_staff_booking_alert_email(tenant, saved, service, selected_staff)
+                except Exception:
+                    pass
 
-        if self.whatsapp_service:
-            try:
-                self.whatsapp_service.send_customer_booking_confirmation(tenant, saved, service, selected_staff)
-                self.whatsapp_service.send_staff_booking_alert(tenant, saved, service, selected_staff)
-            except Exception:
-                pass
+            if self.whatsapp_service:
+                try:
+                    self.whatsapp_service.send_customer_booking_confirmation(tenant, saved, service, selected_staff)
+                    self.whatsapp_service.send_staff_booking_alert(tenant, saved, service, selected_staff)
+                except Exception:
+                    pass
 
         return self._build_dto(saved, tenant, service, selected_staff, pix_dto)
 

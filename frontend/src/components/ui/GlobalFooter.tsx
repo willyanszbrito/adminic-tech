@@ -13,7 +13,7 @@ export const GlobalFooter: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div className="flex items-center justify-center sm:justify-start gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-medium text-slate-700 dark:text-slate-300">© 2026 Adminic Tecnologia • Plataforma de Agendamento Inteligente</span>
+            <span className="font-medium text-slate-700 dark:text-slate-300">© {new Date().getFullYear()} Adminic Serviços • Plataforma de Agendamento</span>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-slate-500 dark:text-slate-400">
