@@ -88,8 +88,7 @@ export const api = {
   async getTenants(): Promise<Tenant[]> {
     try {
       return await fetchJSON<Tenant[]>('/tenants');
-    } catch (e) {
-      console.warn('[API] Falha ao listar estabelecimentos:', e);
+    } catch {
       return [];
     }
   },
@@ -98,8 +97,7 @@ export const api = {
     const slug = normalizeTenantSlug(rawSlug);
     try {
       return await fetchJSON<Tenant>(`/tenants/${slug}`);
-    } catch (e) {
-      console.warn(`[API] Perfil dinâmico gerado para ${slug}:`, e);
+    } catch {
       const titleName = slug
         .split('-')
         .map(w => w.charAt(0).toUpperCase() + w.slice(1))
@@ -153,8 +151,7 @@ export const api = {
     const slug = normalizeTenantSlug(rawSlug);
     try {
       return await fetchJSON<CatalogResponse>(`/tenants/${slug}/services`);
-    } catch (e) {
-      console.warn(`[API] Catálogo não disponível para ${slug}:`, e);
+    } catch {
       return { tenant_slug: slug, categories: [], services: [], total_services: 0 };
     }
   },
@@ -164,8 +161,7 @@ export const api = {
     try {
       const query = serviceId ? `?service_id=${encodeURIComponent(serviceId)}` : '';
       return await fetchJSON<Staff[]>(`/tenants/${slug}/staff${query}`);
-    } catch (e) {
-      console.warn(`[API] Nenhum colaborador retornado para ${slug}:`, e);
+    } catch {
       return [];
     }
   },
@@ -182,8 +178,7 @@ export const api = {
       if (serviceId) params.append('service_id', serviceId);
 
       return await fetchJSON<AvailabilityResponse>(`/tenants/${slug}/availability?${params.toString()}`);
-    } catch (e) {
-      console.warn(`[API Fallback] Gerando slots para ${date} offline:`, e);
+    } catch {
       const times = [
         '10:00', '10:30', '11:00', '11:30', '12:00',
         '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00'

@@ -1508,7 +1508,7 @@ class DemoLoginUseCase:
                 usuario=email_clean,
                 detalhes={"status": "BLOQUEADO", "motivo": "E-mail fora da whitelist"}
             )
-            raise DomainException("Acesso restrito: E-mail não autorizado para o painel de Super Admin.")
+            raise DomainException("Credenciais inválidas ou acesso não autorizado.")
         elif requested_role == "partner_admin":
             CAMPELO_PARTNER_EMAILS = {"campellobarbearia@gmail.com", "sofiaheufrosina@gmail.com"}
             is_authorized_partner = (
@@ -1535,7 +1535,7 @@ class DemoLoginUseCase:
                     usuario=email_clean,
                     detalhes={"status": "BLOQUEADO", "motivo": "E-mail não pertence aos gestores cadastrados"}
                 )
-                raise DomainException("Acesso restrito: Este e-mail não possui autorização de Gestor neste estabelecimento.")
+                raise DomainException("Credenciais inválidas ou acesso não autorizado.")
         elif requested_role == "staff":
             is_authorized_staff = email_clean in SUPER_ADMIN_EMAILS
             if not is_authorized_staff and tenant_slug:
@@ -1565,7 +1565,7 @@ class DemoLoginUseCase:
                     usuario=email_clean,
                     detalhes={"status": "BLOQUEADO", "motivo": "E-mail não consta na equipe de colaboradores"}
                 )
-                raise DomainException("Acesso restrito: Este e-mail não consta na equipe de colaboradores autorizados.")
+                raise DomainException("Credenciais inválidas ou acesso não autorizado.")
         else:
             final_role = "customer"
 

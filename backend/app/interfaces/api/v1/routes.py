@@ -618,8 +618,8 @@ def send_partner_welcome_email(
         return {"success": success, "message": f"E-mail de acesso enviado com sucesso para o parceiro '{slug}'."}
     except TenantNotFoundException as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Não foi possível enviar o e-mail no momento. Tente novamente mais tarde.")
 
 
 # ==============================================================================

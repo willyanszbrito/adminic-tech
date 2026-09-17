@@ -143,5 +143,14 @@ def root():
 async def domain_exception_handler(request: Request, exc: DomainException):
     return JSONResponse(
         status_code=400,
-        content={"detail": str(exc), "type": exc.__class__.__name__}
+        content={"detail": str(exc)}
+    )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    import logging
+    logging.getLogger("AdminicAPI").error(f"Erro interno não tratado: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Não foi possível processar a solicitação no momento. Tente novamente mais tarde."}
     )

@@ -419,12 +419,7 @@ const AppContent: React.FC = () => {
             />
           ) : (
             <RestrictedAccessView
-              moduleName="Painel do Colaborador"
-              requiredRoleName="Colaborador ou Gestor"
               userRole={user?.role}
-              userEmail={user?.email}
-              userName={user?.name}
-              tenantName={tenant.name}
               onOpenLogin={() => openLoginModal('staff')}
               onGoHome={() => handleSelectView('landing')}
               onNavigateCustomer={() => handleSelectView('customer')}
@@ -445,12 +440,7 @@ const AppContent: React.FC = () => {
             />
           ) : (
             <RestrictedAccessView
-              moduleName="Painel de Gestão Administrativa"
-              requiredRoleName="Gestor Homologado"
               userRole={user?.role}
-              userEmail={user?.email}
-              userName={user?.name}
-              tenantName={tenant.name}
               onOpenLogin={() => openLoginModal('partner_admin')}
               onGoHome={() => handleSelectView('landing')}
               onNavigateCustomer={() => handleSelectView('customer')}
@@ -468,12 +458,7 @@ const AppContent: React.FC = () => {
             />
           ) : (
             <RestrictedAccessView
-              moduleName="Painel Super Admin Global"
-              requiredRoleName="Super Administrador"
               userRole={user?.role}
-              userEmail={user?.email}
-              userName={user?.name}
-              tenantName={tenant.name}
               onOpenLogin={() => openLoginModal('super_admin')}
               onGoHome={() => handleSelectView('landing')}
               onNavigateCustomer={() => handleSelectView('customer')}
