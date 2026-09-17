@@ -1390,14 +1390,14 @@ class AuthenticateGoogleUserUseCase:
             )
         else:
             # 2. Resolução Automática de Parceiro / Gestor ou Colaborador pelo E-mail do Google
-            CAMPELO_PARTNER_EMAILS = {"campellobarbearia@gmail.com", "sofiaheufrosina@gmail.com"}
-            if email in CAMPELO_PARTNER_EMAILS:
+            CAMPELO_PARTNER_EMAILS = {"campellobarbearia@gmail.com", "sofiaheufrosina@gmail.com", "juliobarao@gmail.com"}
+            if email in CAMPELO_PARTNER_EMAILS or "juliobarao" in email:
                 final_role = "partner_admin"
                 tenant_slug = "barbearia-campelo"
                 t_campelo = self.tenant_repo.find_by_slug("barbearia-campelo")
                 if t_campelo:
                     staff_members = self.staff_repo.find_by_tenant_id(t_campelo.id)
-                    matching = next((s for s in staff_members if s.id == "stf-julio-sousa" or (s.email and s.email.lower() in CAMPELO_PARTNER_EMAILS)), None)
+                    matching = next((s for s in staff_members if s.id == "stf-julio-sousa" or (s.email and (s.email.lower() in CAMPELO_PARTNER_EMAILS or "juliobarao" in s.email.lower()))), None)
                     if matching:
                         assigned_staff_id = matching.id
 
@@ -1510,9 +1510,10 @@ class DemoLoginUseCase:
             )
             raise DomainException("Credenciais inválidas ou acesso não autorizado.")
         elif requested_role == "partner_admin":
-            CAMPELO_PARTNER_EMAILS = {"campellobarbearia@gmail.com", "sofiaheufrosina@gmail.com"}
+            CAMPELO_PARTNER_EMAILS = {"campellobarbearia@gmail.com", "sofiaheufrosina@gmail.com", "juliobarao@gmail.com"}
             is_authorized_partner = (
                 email_clean in CAMPELO_PARTNER_EMAILS
+                or "juliobarao" in email_clean
                 or email_clean in SUPER_ADMIN_EMAILS
             )
             if not is_authorized_partner and tenant_slug:
