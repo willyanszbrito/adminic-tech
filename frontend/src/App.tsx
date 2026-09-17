@@ -405,7 +405,17 @@ const AppContent: React.FC = () => {
         {currentView === 'customer' && (
           <CustomerPortal
             tenant={tenant}
+            staffList={wizard.staffList}
+            services={wizard.catalog?.services || []}
             onNavigateToBooking={() => handleSelectView('booking')}
+            onSelectService={(service) => {
+              wizard.handleSelectService(service);
+              handleSelectView('booking');
+            }}
+            onSelectStaff={(staff) => {
+              wizard.handleSelectStaff(staff, false);
+              handleSelectView('booking');
+            }}
           />
         )}
 

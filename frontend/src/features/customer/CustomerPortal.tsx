@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Tenant, Appointment } from '../../types';
+import { Tenant, Appointment, Staff, Service } from '../../types';
 import { api } from '../../services/api';
 import {
   Calendar,
@@ -22,12 +22,20 @@ import { LiveQueueView } from '../../components/booking/LiveQueueView';
 
 export interface CustomerPortalProps {
   tenant: Tenant;
+  staffList?: Staff[];
+  services?: Service[];
   onNavigateToBooking: () => void;
+  onSelectService?: (service: Service) => void;
+  onSelectStaff?: (staff: Staff) => void;
 }
 
 export const CustomerPortal: React.FC<CustomerPortalProps> = ({
   tenant,
+  staffList,
+  services,
   onNavigateToBooking,
+  onSelectService,
+  onSelectStaff,
 }) => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'queue' | 'appointments'>('queue');
@@ -147,7 +155,14 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
 
       {/* TAB 1: Live Queue of the Day */}
       {activeTab === 'queue' && (
-        <LiveQueueView tenant={tenant} onNavigateToBooking={onNavigateToBooking} />
+        <LiveQueueView 
+          tenant={tenant} 
+          staffList={staffList}
+          services={services}
+          onNavigateToBooking={onNavigateToBooking}
+          onSelectService={onSelectService}
+          onSelectStaff={onSelectStaff}
+        />
       )}
 
       {/* TAB 2: Customer Appointments History & Search */}
