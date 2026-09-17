@@ -21,7 +21,6 @@ import { AdminPortal } from './features/admin/AdminPortal';
 import { SuperAdminPortal } from './features/super-admin/SuperAdminPortal';
 import { LoginModal } from './features/auth/LoginModal';
 import { GlobalFooter } from './components/ui/GlobalFooter';
-import { MOCK_TENANTS } from './services/mockData';
 import { PortalView } from './types';
 import { Shield, ArrowLeft, ArrowRight } from 'lucide-react';
 import { isDedicatedSubdomain } from './services/domainHelper';
@@ -176,9 +175,7 @@ const AppContent: React.FC = () => {
   const targetSlug = wizard.slug;
   const fallbackTenant = 
     wizard.allTenants.find(t => t.slug === targetSlug) || 
-    MOCK_TENANTS.find(t => t.slug === targetSlug) || 
-    wizard.allTenants[0] || 
-    MOCK_TENANTS[0];
+    wizard.allTenants[0];
 
   const tenant = wizard.tenant || fallbackTenant;
 
@@ -203,7 +200,7 @@ const AppContent: React.FC = () => {
         {/* VIEW 0: INSTITUTIONAL & COMMERCIAL PRODUCT LANDING PAGE */}
         {currentView === 'landing' && (
           <ProductLandingPage
-            tenants={wizard.allTenants.length > 0 ? wizard.allTenants : MOCK_TENANTS}
+            tenants={wizard.allTenants}
             onSelectTenant={(selectedSlug) => {
               wizard.handleSwitchTenant(selectedSlug);
               handleSelectView('booking');

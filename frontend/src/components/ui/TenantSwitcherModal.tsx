@@ -56,64 +56,76 @@ export const TenantSwitcherModal: React.FC<TenantSwitcherModalProps> = ({
 
         {/* Partners Grid */}
         <div className="py-4 space-y-2.5 relative z-10 overflow-y-auto pr-1 flex-1">
-          {tenants.map((t) => {
-            const isSelected = t.slug === currentSlug;
-            return (
-              <div
-                key={t.id}
-                onClick={() => {
-                  onSelectTenant(t.slug);
-                  onClose();
-                }}
-                className={`flex items-center justify-between p-3.5 rounded-2xl cursor-pointer transition-all border ${
-                  isSelected
-                    ? 'bg-brand-primary/10 border-brand-primary shadow-md ring-1 ring-brand-primary/40'
-                    : 'bg-black/[0.02] dark:bg-white/[0.03] border-black/10 dark:border-white/10 hover:bg-black/[0.04] dark:hover:bg-white/[0.08]'
-                }`}
-              >
-                <div className="flex items-center space-x-3.5">
-                  <div
-                    className="w-12 h-12 rounded-xl overflow-hidden border border-black/10 dark:border-white/10 p-0.5"
-                    style={{ backgroundColor: t.theme.secondary_color }}
-                  >
-                    <img
-                      src={t.logo_url}
-                      alt={t.name}
-                      className="w-full h-full object-cover rounded-lg"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://placehold.co/100x100/${t.theme.secondary_color.replace('#', '')}/${t.theme.primary_color.replace('#', '')}?text=${t.name.charAt(0)}`;
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <h4 className="text-sm font-semibold text-slate-900 dark:text-white">{t.name}</h4>
-                      <span
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: t.theme.primary_color }}
-                        title={`Cor Primaria: ${t.theme.primary_color}`}
-                      />
+          {tenants.length === 0 ? (
+            <div className="p-6 text-center text-slate-500 dark:text-slate-400 text-xs">
+              Nenhum outro estabelecimento carregado. Digite o slug abaixo para alternar diretamente.
+            </div>
+          ) : (
+            tenants.map((t) => {
+              const isSelected = t.slug === currentSlug;
+              return (
+                <div
+                  key={t.id}
+                  onClick={() => {
+                    onSelectTenant(t.slug);
+                    onClose();
+                  }}
+                  className={`flex items-center justify-between p-3.5 rounded-2xl cursor-pointer transition-all border ${
+                    isSelected
+                      ? 'bg-brand-primary/10 border-brand-primary shadow-md ring-1 ring-brand-primary/40'
+                      : 'bg-black/[0.02] dark:bg-white/[0.03] border-black/10 dark:border-white/10 hover:bg-black/[0.04] dark:hover:bg-white/[0.08]'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3.5">
+                    <div
+                      className="w-12 h-12 rounded-xl overflow-hidden border border-black/10 dark:border-white/10 p-0.5 flex items-center justify-center"
+                      style={{ backgroundColor: t.theme.secondary_color }}
+                    >
+                      {t.logo_url ? (
+                        <img
+                          src={t.logo_url}
+                          alt={t.name}
+                          className="w-full h-full object-cover rounded-lg"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full rounded-lg bg-brand-primary/20 text-brand-primary font-black text-base flex items-center justify-center select-none">
+                          {t.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{t.slogan}</p>
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ia.adminic.com.br/{t.slug}</span>
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <h4 className="text-sm font-semibold text-slate-900 dark:text-white">{t.name}</h4>
+                        <span
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: t.theme.primary_color }}
+                          title={`Cor Primaria: ${t.theme.primary_color}`}
+                        />
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{t.slogan}</p>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">ia.adminic.com.br/{t.slug}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    {isSelected ? (
+                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-primary text-black flex items-center space-x-1">
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                        <span>Ativo</span>
+                      </span>
+                    ) : (
+                      <span className="p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                        <ArrowRight className="w-4 h-4" />
+                      </span>
+                    )}
                   </div>
                 </div>
-
-                <div className="flex items-center space-x-2">
-                  {isSelected ? (
-                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-primary text-black flex items-center space-x-1">
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
-                      <span>Ativo</span>
-                    </span>
-                  ) : (
-                    <span className="p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white">
-                      <ArrowRight className="w-4 h-4" />
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
 
         {/* Custom Slug Input */}

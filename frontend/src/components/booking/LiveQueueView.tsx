@@ -129,7 +129,7 @@ export const LiveQueueView: React.FC<LiveQueueViewProps> = ({ tenant, onNavigate
           </h3>
         </div>
         <p className="text-xs text-slate-600 dark:text-slate-300 mb-4">
-          Digite seu código de voucher (ex: <span className="font-mono text-brand-primary font-semibold">ADM-283B</span>) ou seu nome para ver quantos clientes faltam para o seu corte.
+          Digite o código do voucher ou seu nome para consultar sua posição e tempo estimado.
         </p>
 
         <form onSubmit={handleSearchMyTurn} className="flex flex-col sm:flex-row items-stretch gap-2.5">
@@ -139,7 +139,7 @@ export const LiveQueueView: React.FC<LiveQueueViewProps> = ({ tenant, onNavigate
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Digite seu voucher (ex: ADM-283B) ou nome"
+              placeholder="Digite o código do voucher ou seu nome"
               className="w-full glass-input pl-10 pr-4 py-3 rounded-2xl text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none"
             />
           </div>

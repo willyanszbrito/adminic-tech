@@ -48,6 +48,12 @@ from app.core.security import (
     get_current_user_optional, get_current_user_required,
     require_roles, require_super_admin, sanitize_input_string
 )
+from app.domain.interfaces import (
+    ITenantRepository, IAppointmentRepository, ICatalogRepository, IStaffRepository
+)
+from app.infrastructure.repositories import (
+    get_tenant_repo, get_appointment_repo, get_catalog_repo, get_staff_repo
+)
 
 router = APIRouter()
 
@@ -191,6 +197,80 @@ def cancel_appointment(
         return use_case.execute(slug, code)
     except (TenantNotFoundException, AppointmentNotFoundException) as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.get(
+    "/tenants/{slug}/queue/today",
+    summary="Fila de Atendimento do Dia em Tempo Real",
+    description="Retorna o atendimento atual e os agendamentos confirmados do dia em ordem cronológica de atendimento real."
+)
+def get_daily_queue(
+    slug: str = Path(..., description="Slug do parceiro", examples=["barbearia-campelo"]),
+    date: Optional[str] = Query(None, description="Data no formato YYYY-MM-DD (padrão: hoje)"),
+    t_repo: ITenantRepository = Depends(get_tenant_repo),
+    a_repo: IAppointmentRepository = Depends(get_appointment_repo),
+    c_repo: ICatalogRepository = Depends(get_catalog_repo),
+    s_repo: IStaffRepository = Depends(get_staff_repo)
+):
+    from datetime import datetime, timezone
+    today_str = date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    tenant = t_repo.get_by_slug(slug)
+    if not tenant:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Estabelecimento '{slug}' não encontrado.")
+    
+    appts = [
+        a for a in a_repo.get_appointments_by_tenant(tenant.id)
+        if a.appointment_date == today_str and a.status == "confirmed"
+    ]
+    appts.sort(key=lambda x: x.start_time)
+
+    current_serving = None
+    queue_items = []
+    now_time = datetime.now(timezone.utc).strftime("%H:%M")
+
+    for idx, a in enumerate(appts):
+        srv = c_repo.get_service_by_id(tenant.id, a.service_id)
+        stf = s_repo.get_staff_by_id(tenant.id, a.staff_id)
+        srv_name = srv.name if srv else "Atendimento"
+        stf_name = stf.name if stf else "Profissional"
+        
+        parts = a.customer_name.strip().split()
+        if len(parts) > 1:
+            display_name = f"{parts[0]} {parts[-1][0]}."
+        else:
+            display_name = parts[0] if parts else "Cliente"
+
+        item = {
+            "id": a.id,
+            "voucher_code": a.voucher_code,
+            "customer_display_name": display_name,
+            "service_name": srv_name,
+            "staff_name": stf_name,
+            "start_time": a.start_time,
+            "end_time": a.end_time,
+            "status": "waiting",
+            "position": idx + 1,
+            "estimated_wait_minutes": max(0, idx * (srv.duration_minutes if srv else 30))
+        }
+
+        if not current_serving and a.start_time <= now_time <= a.end_time:
+            item["status"] = "in_service"
+            item["position"] = 1
+            current_serving = item
+        else:
+            if idx == 0 and not current_serving:
+                item["status"] = "next"
+            queue_items.append(item)
+
+    return {
+        "tenant_name": tenant.name,
+        "tenant_slug": tenant.slug,
+        "date": today_str,
+        "barber_status": "Em Atendimento" if current_serving else "Disponível",
+        "current_serving": current_serving,
+        "queue": queue_items,
+        "total_waiting": len(queue_items)
+    }
 
 
 # ==============================================================================

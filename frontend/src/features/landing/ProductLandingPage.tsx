@@ -178,43 +178,66 @@ export const ProductLandingPage: React.FC<ProductLandingPageProps> = ({
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tenants.map((t) => (
-              <div
-                key={t.id}
-                onClick={() => handlePartnerClick(t.slug)}
-                className="group glass-panel rounded-3xl overflow-hidden border border-black/10 dark:border-white/10 hover:border-amber-500/50 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-amber-500/10 flex flex-col justify-between"
-              >
-                <div>
-                  {/* Banner / Cover */}
-                  <div className="h-36 relative overflow-hidden bg-zinc-900">
-                    <img
-                      src={t.banner_url}
-                      alt={t.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://placehold.co/600x200/${t.theme.secondary_color.replace('#', '')}/${t.theme.primary_color.replace('#', '')}?text=${t.name}`;
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                    
-                    {/* Logo & Category Badge */}
-                    <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
-                      <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-white/20 shadow-md bg-zinc-950 p-0.5">
+          {tenants.length === 0 ? (
+            <div className="glass-panel rounded-3xl p-12 text-center space-y-3 border border-black/10 dark:border-white/10 max-w-lg mx-auto">
+              <Building2 className="w-10 h-10 text-amber-500/60 mx-auto" />
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Nenhum parceiro público listado</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Os estabelecimentos parceiros atendem em seus subdomínios dedicados exclusivos (ex: <span className="font-mono text-amber-500">campelo.adminic.com.br</span>).
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {tenants.map((t) => (
+                <div
+                  key={t.id}
+                  onClick={() => handlePartnerClick(t.slug)}
+                  className="group glass-panel rounded-3xl overflow-hidden border border-black/10 dark:border-white/10 hover:border-amber-500/50 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-amber-500/10 flex flex-col justify-between"
+                >
+                  <div>
+                    {/* Banner / Cover */}
+                    <div className="h-36 relative overflow-hidden bg-gradient-to-r from-zinc-900 to-zinc-950">
+                      {t.banner_url ? (
                         <img
-                          src={t.logo_url}
+                          src={t.banner_url}
                           alt={t.name}
-                          className="w-full h-full object-cover rounded-lg"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = `https://placehold.co/100x100/${t.theme.secondary_color.replace('#', '')}/${t.theme.primary_color.replace('#', '')}?text=${t.name.charAt(0)}`;
+                            (e.target as HTMLImageElement).style.display = 'none';
                           }}
                         />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-500/10 via-black/40 to-transparent">
+                          <span className="text-white/10 font-bold text-xl uppercase tracking-wider select-none">
+                            {t.name}
+                          </span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                      
+                      {/* Logo & Category Badge */}
+                      <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
+                        <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-white/20 shadow-md bg-zinc-950 p-0.5 flex items-center justify-center">
+                          {t.logo_url ? (
+                            <img
+                              src={t.logo_url}
+                              alt={t.name}
+                              className="w-full h-full object-cover rounded-lg"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full rounded-lg bg-amber-500/20 text-amber-400 font-black text-lg flex items-center justify-center select-none">
+                              {t.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-amber-400 border border-white/10 capitalize">
+                          {t.category}
+                        </span>
                       </div>
-                      <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-amber-400 border border-white/10 capitalize">
-                        {t.category}
-                      </span>
                     </div>
-                  </div>
 
                   {/* Body Content */}
                   <div className="p-5 space-y-3">

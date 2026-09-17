@@ -500,7 +500,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                 <input
                   type="text"
                   required
-                  placeholder="Ex: Barbearia Imperial"
+                  placeholder="Nome do estabelecimento parceiro"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 placeholder-slate-400"
@@ -512,7 +512,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                 <input
                   type="text"
                   required
-                  placeholder="barbearia-imperial"
+                  placeholder="slug-do-estabelecimento"
                   value={newSlug}
                   onChange={(e) => setNewSlug(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 font-mono placeholder-slate-400"
@@ -538,7 +538,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   <input
                     type="text"
                     required
-                    placeholder="92984899955"
+                    placeholder="(00) 00000-0000"
                     value={newWhatsapp}
                     onChange={(e) => setNewWhatsapp(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 placeholder-slate-400"
@@ -553,7 +553,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                 <input
                   type="email"
                   required
-                  placeholder="gestor@gmail.com ou email corporativo Google"
+                  placeholder="gestor@empresa.com ou e-mail Google"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-amber-500 placeholder-slate-400"

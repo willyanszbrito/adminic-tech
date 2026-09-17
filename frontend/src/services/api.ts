@@ -15,7 +15,6 @@ import {
   TimeSlot,
   DailyQueueResponse
 } from '../types';
-import { MOCK_TENANTS, MOCK_CATALOGS, MOCK_STAFF } from './mockData';
 
 import { normalizeTenantSlug } from './domainHelper';
 
@@ -90,8 +89,8 @@ export const api = {
     try {
       return await fetchJSON<Tenant[]>('/tenants');
     } catch (e) {
-      console.warn('[API Fallback] Carregando lista de estabelecimentos offline:', e);
-      return MOCK_TENANTS;
+      console.warn('[API] Falha ao listar estabelecimentos:', e);
+      return [];
     }
   },
 
@@ -100,10 +99,53 @@ export const api = {
     try {
       return await fetchJSON<Tenant>(`/tenants/${slug}`);
     } catch (e) {
-      console.warn(`[API Fallback] Carregando dados do tenant ${slug} offline:`, e);
-      const found = MOCK_TENANTS.find((t) => t.slug === slug);
-      if (found) return found;
-      return MOCK_TENANTS[0]; // Barbearia Campelo
+      console.warn(`[API] Perfil dinâmico gerado para ${slug}:`, e);
+      const titleName = slug
+        .split('-')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+
+      return {
+        id: `tnt-${slug}`,
+        slug,
+        name: titleName,
+        slogan: 'Agendamento Online e Gestão Inteligente',
+        description: 'Estabelecimento cadastrado na plataforma Adminic.',
+        category: 'barbearia',
+        logo_url: '',
+        banner_url: '',
+        phone: '',
+        whatsapp: '',
+        email: '',
+        address: '',
+        instagram: '',
+        is_active: true,
+        features: ['Agendamento Online 24h'],
+        plan_name: 'Plano Enterprise Pro',
+        trial_days_remaining: 30,
+        trial_status: 'active',
+        trial_ends_at: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+        monthly_revenue: 0.0,
+        theme: {
+          primary_color: '#d4af37',
+          secondary_color: '#121212',
+          accent_color: '#b8860b',
+          background_mode: 'dark',
+          surface_glass_opacity: 0.7,
+          glow_color: 'rgba(212, 175, 55, 0.25)',
+          font_heading: 'Outfit',
+          font_body: 'Inter',
+          badge_text: 'Estabelecimento Oficial'
+        },
+        business_hours: {
+          days_open: [0, 1, 2, 3, 4, 5],
+          open_time: '09:00',
+          close_time: '20:00',
+          slot_interval_minutes: 30,
+          lunch_break_start: '12:00',
+          lunch_break_end: '13:00'
+        }
+      };
     }
   },
 
@@ -112,8 +154,8 @@ export const api = {
     try {
       return await fetchJSON<CatalogResponse>(`/tenants/${slug}/services`);
     } catch (e) {
-      console.warn(`[API Fallback] Carregando catálogo de ${slug} offline:`, e);
-      return MOCK_CATALOGS[slug] || MOCK_CATALOGS['barbearia-campelo'] || { tenant_slug: slug, categories: [], services: [], total_services: 0 };
+      console.warn(`[API] Catálogo não disponível para ${slug}:`, e);
+      return { tenant_slug: slug, categories: [], services: [], total_services: 0 };
     }
   },
 
@@ -123,12 +165,8 @@ export const api = {
       const query = serviceId ? `?service_id=${encodeURIComponent(serviceId)}` : '';
       return await fetchJSON<Staff[]>(`/tenants/${slug}/staff${query}`);
     } catch (e) {
-      console.warn(`[API Fallback] Carregando colaboradores de ${slug} offline:`, e);
-      const list = MOCK_STAFF[slug] || MOCK_STAFF['barbearia-campelo'] || [];
-      if (serviceId) {
-        return list.filter((s) => s.specialty_service_ids.includes(serviceId));
-      }
-      return list;
+      console.warn(`[API] Nenhum colaborador retornado para ${slug}:`, e);
+      return [];
     }
   },
 
@@ -171,39 +209,10 @@ export const api = {
   },
 
   async createAppointment(slug: string, payload: CreateAppointmentPayload): Promise<Appointment> {
-    try {
-      return await fetchJSON<Appointment>(`/tenants/${slug}/appointments`, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
-    } catch (e) {
-      const code = `ADM-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-      const defaultTenant = MOCK_TENANTS[0];
-      const defaultService = MOCK_CATALOGS['barbearia-campelo'].services[0];
-      const defaultStaff = MOCK_STAFF['barbearia-campelo'][0];
-
-      return {
-        id: `appt-${Date.now()}`,
-        tenant_slug: slug || 'barbearia-campelo',
-        service: defaultService,
-        staff: defaultStaff,
-        appointment_date: payload.appointment_date,
-        start_time: payload.start_time,
-        end_time: '14:30',
-        customer_name: payload.customer_name,
-        customer_phone: payload.customer_phone,
-        customer_email: payload.customer_email,
-        price: 30.0,
-        voucher_code: code,
-        status: 'confirmed',
-        payment_method: payload.payment_method || 'pix',
-        payment_status: 'pending',
-        notes: payload.notes,
-        created_at: new Date().toISOString(),
-        google_calendar_url: `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Corte+-+Barbearia+Campelo`,
-        whatsapp_direct_link: `https://wa.me/${defaultTenant.whatsapp}?text=Ola+meu+voucher+e+${code}`
-      };
-    }
+    return fetchJSON<Appointment>(`/tenants/${slug}/appointments`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   },
 
   async getAppointment(slug: string, code: string): Promise<Appointment> {
@@ -471,66 +480,14 @@ export const api = {
     try {
       return await fetchJSON<DailyQueueResponse>(`/tenants/${slug}/queue/today?date=${today}`);
     } catch {
-      const tenant = MOCK_TENANTS.find(t => t.slug === slug) || MOCK_TENANTS[0];
-      const now = new Date();
-      const currentHour = now.getHours();
-
       return {
-        tenant_name: tenant.name,
+        tenant_name: slug,
         tenant_slug: slug,
         date: today,
-        barber_status: currentHour >= 12 && currentHour < 13 ? 'Em Intervalo de Almoço' : 'Atendendo no Momento',
-        current_serving: {
-          id: 'queue-current-1',
-          voucher_code: 'ADM-941A',
-          customer_display_name: 'Marcos V.',
-          service_name: 'Corte Degradê Navalhado',
-          staff_name: 'Julio Sousa',
-          start_time: '14:30',
-          end_time: '15:00',
-          status: 'in_service',
-          position: 1,
-          estimated_wait_minutes: 10
-        },
-        queue: [
-          {
-            id: 'queue-item-2',
-            voucher_code: 'ADM-283B',
-            customer_display_name: 'Felipe A.',
-            service_name: 'Corte + Barba Alinhada',
-            staff_name: 'Julio Sousa',
-            start_time: '15:00',
-            end_time: '15:45',
-            status: 'next',
-            position: 2,
-            estimated_wait_minutes: 25
-          },
-          {
-            id: 'queue-item-3',
-            voucher_code: 'ADM-719C',
-            customer_display_name: 'Carlos S.',
-            service_name: 'Barba e Pigmentação',
-            staff_name: 'Julio Sousa',
-            start_time: '15:45',
-            end_time: '16:15',
-            status: 'waiting',
-            position: 3,
-            estimated_wait_minutes: 55
-          },
-          {
-            id: 'queue-item-4',
-            voucher_code: 'ADM-550D',
-            customer_display_name: 'Lucas M.',
-            service_name: 'Corte Completo + Hidratação',
-            staff_name: 'Julio Sousa',
-            start_time: '16:15',
-            end_time: '17:00',
-            status: 'waiting',
-            position: 4,
-            estimated_wait_minutes: 85
-          }
-        ],
-        total_waiting: 3
+        barber_status: 'Disponível',
+        current_serving: null,
+        queue: [],
+        total_waiting: 0
       };
     }
   },

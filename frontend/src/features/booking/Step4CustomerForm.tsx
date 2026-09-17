@@ -91,7 +91,7 @@ export const Step4CustomerForm: React.FC<Step4CustomerFormProps> = ({
             required
             value={customerPhone}
             onChange={handlePhoneChange}
-            placeholder="(11) 98765-4321"
+            placeholder="(00) 00000-0000"
             className="w-full glass-input px-4 py-3 rounded-2xl text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none"
           />
           <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">

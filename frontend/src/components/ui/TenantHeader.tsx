@@ -19,15 +19,23 @@ export const TenantHeader: React.FC<TenantHeaderProps> = ({ tenant, onOpenSwitch
   return (
     <header className="relative w-full rounded-3xl overflow-hidden glass-panel mb-6 sm:mb-8 border border-black/10 dark:border-white/10">
       {/* Dynamic Cover Banner with Gradient Overlay */}
-      <div className="relative h-36 sm:h-52 md:h-64 w-full overflow-hidden bg-slate-200 dark:bg-zinc-900">
-        <img
-          src={tenant.banner_url || `https://placehold.co/1200x400/18181b/${tenant.theme.primary_color.replace('#', '')}?text=${encodeURIComponent(tenant.name)}`}
-          alt={tenant.name}
-          className="w-full h-full object-cover object-center opacity-85 dark:opacity-60 filter brightness-100 dark:brightness-90 transition-transform duration-700 hover:scale-105"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = `https://placehold.co/1200x400/18181b/${tenant.theme.primary_color.replace('#', '')}?text=${encodeURIComponent(tenant.name)}`;
-          }}
-        />
+      <div className="relative h-36 sm:h-52 md:h-64 w-full overflow-hidden bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-950">
+        {tenant.banner_url ? (
+          <img
+            src={tenant.banner_url}
+            alt={tenant.name}
+            className="w-full h-full object-cover object-center opacity-85 dark:opacity-60 filter brightness-100 dark:brightness-90 transition-transform duration-700 hover:scale-105"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-primary/15 via-black/40 to-transparent">
+            <span className="text-white/10 font-extrabold text-3xl sm:text-5xl uppercase tracking-widest select-none">
+              {tenant.name}
+            </span>
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-50 via-slate-50/70 to-transparent dark:from-[#08080a] dark:via-[#08080a]/60" />
         
         {/* Floating Top Bar: Only on central portal */}
@@ -52,15 +60,21 @@ export const TenantHeader: React.FC<TenantHeaderProps> = ({ tenant, onOpenSwitch
           {/* Logo and Business Info */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3.5 sm:gap-5 w-full md:w-auto">
             <div className="relative group shrink-0">
-              <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-black/10 dark:border-white/20 shadow-2xl bg-white dark:bg-zinc-950 p-1 ring-4 ring-brand-glow">
-                <img
-                  src={tenant.logo_url || `https://placehold.co/200x200/18181b/${tenant.theme.primary_color.replace('#', '')}?text=${encodeURIComponent(tenant.name)}`}
-                  alt={tenant.name}
-                  className="w-full h-full object-cover rounded-xl"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = `https://placehold.co/200x200/18181b/${tenant.theme.primary_color.replace('#', '')}?text=${encodeURIComponent(tenant.name)}`;
-                  }}
-                />
+              <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-black/10 dark:border-white/20 shadow-2xl bg-white dark:bg-zinc-950 p-1 ring-4 ring-brand-glow flex items-center justify-center">
+                {tenant.logo_url ? (
+                  <img
+                    src={tenant.logo_url}
+                    alt={tenant.name}
+                    className="w-full h-full object-cover rounded-xl"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full rounded-xl bg-brand-primary/20 text-brand-primary font-black text-2xl sm:text-4xl flex items-center justify-center select-none">
+                    {tenant.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
               </div>
             </div>
 

@@ -504,7 +504,7 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
                     type="text"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="(11) 99999-8888"
+                    placeholder="(00) 00000-0000"
                     className="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs"
                   />
                 </div>
@@ -516,7 +516,7 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="barbeiro@empresa.com"
+                    placeholder="profissional@empresa.com"
                     className="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs"
                   />
                 </div>

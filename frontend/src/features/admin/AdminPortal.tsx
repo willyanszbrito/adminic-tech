@@ -750,7 +750,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   required
                   value={serviceName}
                   onChange={(e) => setServiceName(e.target.value)}
-                  placeholder="ex: Corte Degradê, Barboterapia Premium..."
+                  placeholder="Nome do serviço (ex: Corte, Barba, Tratamento...)"
                   className="w-full glass-input px-3 py-2 rounded-xl text-xs"
                 />
               </div>
@@ -892,7 +892,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               <form onSubmit={handleAddCategory} className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
-                  placeholder="Nova categoria (ex: Barboterapia, Barba...)"
+                  placeholder="Nome da categoria (ex: Cabelo, Barba, Combos...)"
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
                   className="flex-1 glass-input px-3.5 py-2.5 rounded-xl text-xs w-full"
@@ -1031,7 +1031,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   required
                   value={staffName}
                   onChange={(e) => setStaffName(e.target.value)}
-                  placeholder="ex: Julio Sousa"
+                  placeholder="Nome do profissional"
                   className="w-full glass-input px-3 py-2 rounded-xl text-xs font-semibold"
                 />
               </div>
@@ -1045,7 +1045,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   required
                   value={staffRole}
                   onChange={(e) => setStaffRole(e.target.value)}
-                  placeholder="ex: Master Barber e Barboterapia"
+                  placeholder="Especialidade ou cargo"
                   className="w-full glass-input px-3 py-2 rounded-xl text-xs"
                 />
               </div>
@@ -1059,7 +1059,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     type="text"
                     value={staffPhone}
                     onChange={(e) => setStaffPhone(e.target.value)}
-                    placeholder="(92) 98489-9955"
+                    placeholder="(00) 00000-0000"
                     className="w-full glass-input px-3 py-2 rounded-xl text-xs"
                   />
                 </div>
@@ -1071,7 +1071,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     type="email"
                     value={staffEmail}
                     onChange={(e) => setStaffEmail(e.target.value)}
-                    placeholder="julio@barbearia.com"
+                    placeholder="profissional@empresa.com"
                     className="w-full glass-input px-3 py-2 rounded-xl text-xs"
                   />
                 </div>
@@ -1355,7 +1355,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   type="text"
                   value={mpPixKey}
                   onChange={(e) => setMpPixKey(e.target.value)}
-                  placeholder="ex: 92991044930 ou contato@campelobarbearia.com.br"
+                  placeholder="Chave Pix (Telefone, E-mail, CPF/CNPJ ou Aleatória)"
                   className="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs"
                 />
               </div>
@@ -1493,7 +1493,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     type="text"
                     value={logoUrl}
                     onChange={(e) => setLogoUrl(e.target.value)}
-                    placeholder="/logos/logo_campelo.jpg ou https://..."
+                    placeholder="URL ou caminho da imagem (ex: https://...)"
                     className="w-full glass-input px-3 py-2 rounded-xl text-xs font-mono"
                   />
                 </div>
@@ -1665,7 +1665,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   required
                   value={slogan}
                   onChange={(e) => setSlogan(e.target.value)}
-                  placeholder="ex: A Arte do Degradê e Barboterapia de Alto Nível"
+                  placeholder="Slogan ou frase de impacto do seu negócio"
                   className="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs"
                 />
               </div>
@@ -1720,7 +1720,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   type="text"
                   value={instagram}
                   onChange={(e) => setInstagram(e.target.value)}
-                  placeholder="@campelobarbearia_"
+                  placeholder="@usuario_instagram"
                   className="w-full glass-input px-3 py-2 rounded-xl text-xs"
                 />
               </div>
@@ -1733,7 +1733,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Av. Cosme Ferreira, 6340 - Manaus - AM"
+                  placeholder="Endereço completo (Rua, Número, Bairro, Cidade - UF)"
                   className="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs"
                 />
               </div>
