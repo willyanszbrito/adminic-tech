@@ -43,7 +43,7 @@ export const SidebarSummary: React.FC<SidebarSummaryProps> = ({
   const calculatedDuration = totalDuration !== undefined ? totalDuration : activeServices.reduce((sum, s) => sum + s.duration_minutes, 0);
 
   const getButtonText = () => {
-    if (isSubmitting) return 'Confirmando agendamento...';
+    if (isSubmitting) return 'Confirmando agendamento';
     switch (currentStep) {
       case 1:
         return 'Continuar para Profissional';

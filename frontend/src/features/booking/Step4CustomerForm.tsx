@@ -161,7 +161,7 @@ export const Step4CustomerForm: React.FC<Step4CustomerFormProps> = ({
             rows={2}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Exemplo: preferência por atendimento pontual, restrições específicas..."
+            placeholder="Observações adicionais para o atendimento"
             className="w-full glass-input px-4 py-3 rounded-2xl text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none resize-none"
           />
         </div>

@@ -239,7 +239,7 @@ Telefone / WhatsApp: ${barberShopPhone}`;
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Cancelando...</span>
+                <span>Cancelando</span>
               </>
             ) : (
               <>

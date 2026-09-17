@@ -95,7 +95,7 @@ export const Step1Services: React.FC<Step1ServicesProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar por serviço (ex: corte, barba, hidratação...)"
+            placeholder="Buscar por serviço"
             className="w-full glass-input pl-10 pr-16 py-2.5 sm:py-3 rounded-xl text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none"
           />
           {searchQuery && (

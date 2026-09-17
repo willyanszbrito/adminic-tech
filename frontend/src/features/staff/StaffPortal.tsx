@@ -372,14 +372,14 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
                 disabled={isLoadingAppointments}
                 className="px-3.5 py-2 rounded-xl text-xs font-semibold glass-pill text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer self-start sm:self-auto touch-target"
               >
-                {isLoadingAppointments ? 'Atualizando...' : 'Atualizar Agenda'}
+                {isLoadingAppointments ? 'Atualizando' : 'Atualizar Agenda'}
               </button>
             </div>
 
             {isLoadingAppointments ? (
               <div className="py-12 flex items-center justify-center text-slate-500">
                 <Loader2 className="w-6 h-6 animate-spin text-brand-primary mr-2" />
-                <span className="text-xs">Carregando agendamentos do profissional...</span>
+                <span className="text-xs">Carregando agendamentos</span>
               </div>
             ) : appointments.length === 0 ? (
               <div className="py-12 text-center text-slate-500 space-y-3">
@@ -542,7 +542,7 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
                   rows={3}
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  placeholder="Conte um pouco sobre sua técnica, tempo de experiência e especialidades..."
+                  placeholder="Biografia e especialidades do profissional"
                   className="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs resize-none"
                 />
               </div>
@@ -756,7 +756,7 @@ export const StaffPortal: React.FC<StaffPortalProps> = ({
                   required
                   value={blockReason}
                   onChange={(e) => setBlockReason(e.target.value)}
-                  placeholder="Ex: Consulta médica, treinamento..."
+                  placeholder="Motivo do bloqueio de horário"
                   className="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs"
                 />
               </div>

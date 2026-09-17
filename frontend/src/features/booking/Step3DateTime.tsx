@@ -181,7 +181,7 @@ export const Step3DateTime: React.FC<Step3DateTimeProps> = ({
         {isLoadingAvailability ? (
           <div className="py-16 text-center text-slate-400 space-y-3">
             <Loader2 className="w-8 h-8 animate-spin text-brand-primary mx-auto" />
-            <p className="text-xs font-medium">Calculando disponibilidade em tempo real...</p>
+            <p className="text-xs font-medium">Verificando horários disponíveis</p>
           </div>
         ) : !availability || availability.slots.length === 0 ? (
           <div className="py-12 text-center text-slate-500 dark:text-slate-400 space-y-3">

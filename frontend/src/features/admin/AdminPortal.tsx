@@ -751,7 +751,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   required
                   value={serviceName}
                   onChange={(e) => setServiceName(e.target.value)}
-                  placeholder="Nome do serviço (ex: Corte, Barba, Tratamento...)"
+                  placeholder="Nome do serviço"
                   className="w-full glass-input px-3 py-2 rounded-xl text-xs"
                 />
               </div>
@@ -813,7 +813,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     type="text"
                     value={serviceImageUrl}
                     onChange={(e) => setServiceImageUrl(e.target.value)}
-                    placeholder="https://... ou faça upload"
+                    placeholder="URL da imagem ou faça upload"
                     className="flex-1 glass-input px-3 py-2 rounded-xl text-xs w-full"
                   />
                   <label className="w-full sm:w-auto px-3.5 py-2 rounded-xl glass-pill text-xs font-semibold cursor-pointer shrink-0 hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center space-x-1.5 touch-target">
@@ -837,7 +837,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   rows={2}
                   value={serviceDescription}
                   onChange={(e) => setServiceDescription(e.target.value)}
-                  placeholder="Explique o que está incluído no procedimento..."
+                  placeholder="Descrição detalhada do procedimento"
                   className="w-full glass-input px-3 py-2 rounded-xl text-xs resize-none"
                 />
               </div>
@@ -893,7 +893,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               <form onSubmit={handleAddCategory} className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
-                  placeholder="Nome da categoria (ex: Cabelo, Barba, Combos...)"
+                  placeholder="Nome da categoria"
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
                   className="flex-1 glass-input px-3.5 py-2.5 rounded-xl text-xs w-full"
@@ -1087,7 +1087,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     type="text"
                     value={staffAvatar}
                     onChange={(e) => setStaffAvatar(e.target.value)}
-                    placeholder="https://... ou faça upload"
+                    placeholder="URL da foto ou faça upload"
                     className="w-full glass-input px-3 py-2 rounded-xl text-xs"
                   />
                   <label className="px-3 py-2 rounded-xl glass-pill text-xs font-semibold cursor-pointer shrink-0 hover:bg-black/5 dark:hover:bg-white/10 flex items-center space-x-1">
@@ -1111,7 +1111,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   rows={2}
                   value={staffBio}
                   onChange={(e) => setStaffBio(e.target.value)}
-                  placeholder="Mais de 10 anos de experiência em cortes clássicos e modernos..."
+                  placeholder="Biografia e especialidades do profissional"
                   className="w-full glass-input px-3 py-2 rounded-xl text-xs resize-none"
                 />
               </div>
@@ -1336,7 +1336,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     type="text"
                     value={mpPublicKey}
                     onChange={(e) => setMpPublicKey(e.target.value)}
-                    placeholder="APP_USR-..."
+                    placeholder="Chave Pública Mercado Pago"
                     className="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs font-mono"
                   />
                 </div>
@@ -1349,7 +1349,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     type="password"
                     value={mpAccessToken}
                     onChange={(e) => setMpAccessToken(e.target.value)}
-                    placeholder="APP_USR-..."
+                    placeholder="Access Token Mercado Pago"
                     className="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs font-mono"
                   />
                 </div>
@@ -1376,7 +1376,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   rows={2}
                   value={whatsappMsg}
                   onChange={(e) => setWhatsappMsg(e.target.value)}
-                  placeholder="Olá {cliente}! Seu agendamento foi confirmado..."
+                  placeholder="Olá {cliente}! Seu agendamento foi confirmado"
                   className="w-full glass-input px-3.5 py-2.5 rounded-xl text-xs resize-none"
                 />
               </div>
@@ -1452,7 +1452,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   type="text"
                   value={bannerUrl}
                   onChange={(e) => setBannerUrl(e.target.value)}
-                  placeholder="https://... ou caminho local"
+                  placeholder="URL ou caminho do banner"
                   className="w-full glass-input px-3 py-2 rounded-xl text-xs font-mono"
                 />
               </div>
@@ -1501,7 +1501,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     type="text"
                     value={logoUrl}
                     onChange={(e) => setLogoUrl(e.target.value)}
-                    placeholder="URL ou caminho da imagem (ex: https://...)"
+                    placeholder="URL ou caminho da imagem do logotipo"
                     className="w-full glass-input px-3 py-2 rounded-xl text-xs font-mono"
                   />
                 </div>

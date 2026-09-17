@@ -224,7 +224,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
       {isLoading ? (
         <div className="glass-panel rounded-3xl p-12 text-center text-slate-400 space-y-3">
           <Loader2 className="w-8 h-8 animate-spin text-brand-primary mx-auto" />
-          <p className="text-xs font-medium">Buscando seus agendamentos no sistema...</p>
+          <p className="text-xs font-medium">Buscando agendamentos no sistema</p>
         </div>
       ) : hasSearched && appointments.length === 0 ? (
         <div className="glass-panel rounded-3xl p-12 text-center space-y-3">
@@ -356,7 +356,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
                         onClick={() => handleRescheduleSubmit(appt.voucher_code)}
                         className="px-4 py-1.5 rounded-xl text-xs font-bold bg-brand-primary text-black hover:opacity-90"
                       >
-                        {isSubmittingReschedule ? 'Salvando...' : 'Confirmar Reagendamento'}
+                        {isSubmittingReschedule ? 'Salvando' : 'Confirmar Reagendamento'}
                       </button>
                     </div>
                   </div>

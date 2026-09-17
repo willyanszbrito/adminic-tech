@@ -360,7 +360,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                           title="Enviar e-mail com link de acesso e instruções de login Google"
                         >
                           <Mail className={`w-3.5 h-3.5 text-amber-500 ${sendingEmailSlug === t.slug ? 'animate-bounce' : ''}`} />
-                          <span className="hidden sm:inline">{sendingEmailSlug === t.slug ? 'Enviando...' : 'Enviar Acesso'}</span>
+                          <span className="hidden sm:inline">{sendingEmailSlug === t.slug ? 'Enviando' : 'Enviar Acesso'}</span>
                         </button>
                         <button
                           type="button"
@@ -399,7 +399,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="text"
-                  placeholder="Filtrar por ação, IP ou hash..."
+                  placeholder="Filtrar por ação, IP ou hash"
                   value={auditFilter}
                   onChange={(e) => setAuditFilter(e.target.value)}
                   className="pl-9 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-amber-500 w-full sm:w-64"
@@ -463,7 +463,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                         {log.ip_origem || '0.0.0.0'}
                       </td>
                       <td className="py-3 text-amber-600 dark:text-amber-400/90 font-mono text-[10px] truncate max-w-xs" title={log.hash_integridade}>
-                        {log.hash_integridade ? `${log.hash_integridade.substring(0, 16)}...` : 'N/A'}
+                        {log.hash_integridade ? log.hash_integridade.substring(0, 16) : 'N/A'}
                       </td>
                     </tr>
                   ))}
@@ -603,7 +603,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   disabled={isSubmitting}
                   className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition-all disabled:opacity-50 cursor-pointer touch-target flex items-center justify-center"
                 >
-                  {isSubmitting ? 'Cadastrando...' : 'Credenciar Parceiro'}
+                  {isSubmitting ? 'Cadastrando' : 'Credenciar Parceiro'}
                 </button>
               </div>
             </form>
