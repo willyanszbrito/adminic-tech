@@ -277,7 +277,8 @@ export const ProductLandingPage: React.FC<ProductLandingPageProps> = ({
               </div>
             ))}
           </div>
-        </section>
+        )}
+      </section>
 
         {/* Protected Area Access Prompt */}
         <section className="py-16 px-4 sm:px-6 max-w-4xl mx-auto text-center border-t border-black/5 dark:border-white/5">
